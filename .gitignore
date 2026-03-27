@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build and Production
+www/
+android/
+ios/
+Mobile_Build/
+
+# OS/System Files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor
+.vscode/
+.idea/
+
+# App Data
+MySkedul_Storage_Prod
