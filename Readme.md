@@ -1,6 +1,6 @@
 # MySkedul — Academic OS for Students 🎓
 
-> A premium mobile-first schedule manager built as a single HTML file. No installs, no servers, no accounts needed. Just open and go.
+> A mobile-first student planner for managing classes, exams, tests and assignments.
 
 ---
 
