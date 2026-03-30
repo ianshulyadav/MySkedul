@@ -1,0 +1,179 @@
+/* MySkedul — Variables, Reset & Base */
+
+:root {
+  --bg: #EAEEF2;
+  --card: #FFF;
+  --card-glass: rgba(255, 255, 255, 0.45);
+  --text: #0D0D0D;
+  --sub: #8A8F9E;
+  --border: rgba(0, 0, 0, 0.08);
+  --theme: #6C63FF;
+  --green: #00D97E;
+  --gf: rgba(0, 217, 126, .15);
+  --gb: rgba(0, 217, 126, .5);
+  --red: #FF3B30;
+  --sh: 0 12px 40px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --r: 16px;
+  --rs: 12px;
+  --blur: blur(24px);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur: 0.45s;
+}
+
+[data-theme="dark"] {
+  --bg: #16161D;
+  --card: #22222A;
+  --card-glass: rgba(28, 28, 30, 0.55);
+  --text: #F3F4F6;
+  --sub: #A1A1AA;
+  --border: rgba(255, 255, 255, 0.1);
+  --theme: #6C63FF;
+  --gf: rgba(76, 175, 80, .2);
+  --gb: rgba(76, 175, 80, .4);
+  --sh: 0 20px 50px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"]) {
+    --bg: #16161D;
+    --card: #22222A;
+    --card-glass: rgba(34, 34, 42, 0.75);
+    --text: #F3F4F6;
+    --sub: #A1A1AA;
+    --border: #353540;
+    --theme: #6C63FF;
+    --sh: 0 20px 50px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* added via JS during theme switch, removed after transition */
+.theme-transitioning,
+.theme-transitioning * {
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    backdrop-filter var(--dur) var(--ease),
+    opacity var(--dur) var(--ease) !important;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+input,
+textarea {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  padding-top: env(safe-area-inset-top);
+  transition: background 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-shadow: 0 0 100px rgba(0, 0, 0, 0.05);
+  border-left: 2px solid var(--border);
+  border-right: 2px solid var(--border);
+}
+
+@media (max-width: 480px) {
+  body {
+    border: none;
+    box-shadow: none;
+  }
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform;
+  scroll-behavior: smooth;
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* hidden by default, .active added via switchNav() */
+.page {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: 100px 1000px;
+}
+
+.page.active {
+  display: flex;
+  flex-direction: column;
+  animation: pgIn 0.45s cubic-bezier(0.3, 1.5, 0.5, 1) forwards;
+  will-change: transform, opacity;
+  content-visibility: visible;
+}
+
+.gpu {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+
+.ultra-mode .gpu {
+  will-change: transform;
+}
+
+/* staggered entry for cards */
+.cc, .sc, .tc, .gc, .si {
+  will-change: transform, opacity;
+}
+
+.cc:nth-child(2)  { animation-delay: .06s }
+.cc:nth-child(3)  { animation-delay: .12s }
+.cc:nth-child(4)  { animation-delay: .18s }
+.cc:nth-child(5)  { animation-delay: .24s }
+.cc:nth-child(6)  { animation-delay: .30s }
+.cc:nth-child(7)  { animation-delay: .36s }
+.cc:nth-child(8)  { animation-delay: .42s }
+.cc:nth-child(9)  { animation-delay: .48s }
+.cc:nth-child(10) { animation-delay: .54s }
+
+.si:nth-child(2) { animation-delay: .05s }
+.si:nth-child(3) { animation-delay: .10s }
+.si:nth-child(4) { animation-delay: .15s }
+.si:nth-child(5) { animation-delay: .20s }
+
+#h-list {
+  will-change: transform, opacity;
+}
