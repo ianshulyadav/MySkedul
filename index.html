@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="MySkedul - The Premium Academic OS for Students. 120Hz smooth schedule management with cloud sharing.">
+  <meta name="theme-color" content="#6C63FF">
+  <meta property="og:title" content="MySkedul | Academic OS">
+  <meta property="og:description" content="Liquid-smooth schedule management with 120Hz gestures and secure cloud sharing.">
+  <meta property="og:image" content="logo.png">
+  <title>MySkedul | Academic OS</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+  <!-- loading screen shown until app data is ready -->
+  <div id="loading-screen"
+    style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s ease;will-change:opacity;">
+    <div style="background:var(--text);border-radius:32px;padding:3px;box-shadow:var(--sh);animation:lp-pulse 1.2s ease infinite;overflow:hidden;">
+      <div style="width:120px;height:120px;border-radius:29px;background:white;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <img src="logo.png" style="width:100%;height:100%;object-fit:cover;border-radius:29px;" onerror="this.src='https://antigravity.google/favicon.ico'">
+      </div>
+    </div>
+    <div style="margin-top:32px;font-size:26px;font-weight:900;letter-spacing:-0.8px;color:var(--text);animation:pulse 2.5s infinite;">MySkedul</div>
+    <div style="margin-top:8px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:1.5px;">Academy OS</div>
+  </div>
+
+  <!-- onboarding — shown only on first launch -->
+  <div class="mo center" id="m-onboarding">
+    <div class="ms popup" style="padding:28px 20px;border-radius:28px;">
+      <div style="font-size:24px;font-weight:900;margin-bottom:12px;letter-spacing:-0.5px;">Welcome to MySkedul</div>
+      <p style="font-size:14px;color:var(--sub);margin-bottom:24px;line-height:1.5;">Let's get started. What should we call you?</p>
+      <div class="fi" style="background:var(--bg);"><i data-lucide="user" style="color:var(--sub)"></i><input id="ob-name" placeholder="Your Name" style="text-align:left;"></div>
+      <div class="fi" style="background:var(--bg);"><i data-lucide="mail" style="color:var(--sub)"></i><input id="ob-email" type="email" placeholder="Email Address" style="text-align:left;"></div>
+      <button class="btn-p" style="margin-top:14px;border-radius:18px;" onclick="finishOnboarding()">Continue</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="page active" id="pg-home">
+    <div class="topbar home-header" style="position:sticky;top:0;backdrop-filter:none;-webkit-backdrop-filter:none;background:transparent;">
+      <div class="h-avatar" id="h-av">A</div>
+      <div>
+        <div class="h-greeting">Good day 👋</div>
+        <div class="h-name" id="h-uname">Anshul Yadav</div>
+      </div>
+      <button class="ib" style="margin-left:auto;" onclick="openQuickActions()">
+        <i data-lucide="edit-2" style="width:18px;height:18px;"></i>
+      </button>
+    </div>
+    <div class="scroll">
+      <div class="hd" style="align-items:center;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--sub);margin-bottom:6px;" id="h-week-lbl">Week A</div>
+          <div class="hd-big" id="h-day">Thursday</div>
+          <div class="hd-sub" id="h-date">26 March</div>
+        </div>
+      </div>
+      <div class="ds-wrap">
+        <div class="month-label" id="h-month-lbl">March 2026</div>
+        <div class="ds" id="home-ds"></div>
+        <button class="btn-today" id="today-btn" onclick="scrollToToday()" title="Today">
+          <i data-lucide="calendar" style="width:20px;height:20px;"></i>
+        </button>
+      </div>
+      <div class="sr">
+        <div class="sc">
+          <div class="sl">Classes</div>
+          <div class="sv" id="st-cnt">0</div>
+        </div>
+        <div class="sc">
+          <div class="sl">Start</div>
+          <div class="sv" id="st-start">—</div>
+        </div>
+      </div>
+      <div class="sw" style="padding:0 16px 12px;">
+        <div class="sb" style="padding:8px 16px;">
+          <i data-lucide="search" style="width:14px;color:var(--sub)"></i>
+          <input id="h-srch" placeholder="Search classes" oninput="renderHome()">
+        </div>
+      </div>
+      <div id="h-list"></div>
+      <div style="height:20px"></div>
+    </div>
+    <button class="fab" onclick="openAddClass()">
+      <i data-lucide="plus" style="width:24px;height:24px"></i>
+    </button>
+  </div>
+
+  <!-- SCHEDULES -->
+  <div class="page" id="pg-scheds">
+    <div class="topbar">
+      <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left"></i></button>
+      <span class="topbar-title">Schedules</span>
+      <div style="display:flex;gap:10px;">
+        <button class="ib" style="color:var(--theme);" onclick="openModal('m-share-options')">
+          <i data-lucide="share-2" style="width:20px;height:20px;"></i>
+        </button>
+        <button class="ib" onclick="openAddOptions()">
+          <i data-lucide="plus" style="width:20px;height:20px;"></i>
+        </button>
+      </div>
+    </div>
+    <div class="wv-row">
+      <div class="wv-btn on" id="btn-list-view" onclick="setSchedView('list')">List View</div>
+      <div class="wv-btn" id="btn-week-view" onclick="setSchedView('week')">Week View</div>
+    </div>
+    <div class="scroll">
+      <div id="v-list"><div id="scheds-list"></div></div>
+      <div id="v-week" style="display:none;"><div class="timetable" id="timetable-view"></div></div>
+      <div style="height:20px"></div>
+    </div>
+  </div>
+
+  <!-- SUBJECTS -->
+  <div class="page" id="pg-subjs">
+    <div class="topbar">
+      <button class="ib" onclick="switchNav('profile')"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
+      <span class="topbar-title">Subjects</span>
+      <button class="ib" onclick="openNewSubj()"><i data-lucide="plus" style="width:20px;height:20px;"></i></button>
+    </div>
+    <div class="sw">
+      <div class="sb">
+        <i data-lucide="search" style="width:18px;color:var(--sub)"></i>
+        <input id="sj-srch" placeholder="Search subjects" oninput="renderSubjList('subjs-list','sj-srch')">
+      </div>
+    </div>
+    <div class="scroll">
+      <div id="subjs-list"></div>
+      <div style="height:20px"></div>
+    </div>
+  </div>
+
+  <!-- TASKS -->
+  <div class="page" id="pg-tasks">
+    <div class="topbar">
+      <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
+      <span class="topbar-title">Tasks</span>
+      <button class="ib" onclick="openAddTask()"><i data-lucide="plus" style="width:20px;height:20px;"></i></button>
+    </div>
+    <div class="sw" style="padding:0 16px 8px;">
+      <div class="sb" style="padding:10px 16px;">
+        <i data-lucide="search" style="width:16px;color:var(--sub)"></i>
+        <input id="t-srch" placeholder="Search tasks" oninput="renderTasks()">
+      </div>
+    </div>
+    <div class="scroll">
+      <div id="tasks-list"></div>
+      <div style="height:20px"></div>
+    </div>
+    <button class="fab" onclick="openAddTask()">
+      <i data-lucide="plus" style="width:24px;height:24px"></i>
+    </button>
+  </div>
+
+  <!-- GROUPS -->
+  <div class="page" id="pg-groups">
+    <div class="topbar">
+      <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
+      <span class="topbar-title">Groups</span>
+      <button class="ib" onclick="showToast('Coming soon!')"><i data-lucide="users" style="width:20px;height:20px;"></i></button>
+    </div>
+    <div class="coming-soon-wrap">
+      <div class="coming-soon-overlay">
+        <div class="cs-icon"><i data-lucide="users" style="width:28px;height:28px;color:var(--theme);"></i></div>
+        <div class="cs-title">Coming Soon!</div>
+        <div class="cs-sub">Study groups, shared notes, and collaborative learning — all in one place.</div>
+      </div>
+      <div class="scroll">
+        <div id="groups-list"></div>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="page" id="pg-profile">
+    <div class="scroll">
+      <div class="profile-header">
+        <div class="profile-big-av" id="p-av">A</div>
+        <div>
+          <div class="profile-name" id="p-name">Anshul Yadav</div>
+          <div class="profile-email" id="p-email">ianshulyadav@gmail.com</div>
+        </div>
+        <button class="profile-edit-btn" onclick="openEditProfile()">
+          <i data-lucide="edit-2" style="width:17px;height:17px;"></i>
+        </button>
+      </div>
+      <div class="premium" onclick="showToast('Premium UI Unlocked!')">
+        <i data-lucide="star" style="width:28px;height:28px"></i>
+        <div>
+          <div class="pt">Premium Access</div>
+          <div class="ps">Full access functionality unlocked!</div>
+        </div>
+      </div>
+      <div style="padding:10px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Account</div>
+      <div class="mi" onclick="openEditProfile()"><i data-lucide="user" style="color:var(--sub);"></i><span class="mi-lbl">Account Details</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div class="mi" onclick="switchNav('sched')"><i data-lucide="calendar" style="color:var(--sub);"></i><span class="mi-lbl">Schedules</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div class="mi" onclick="switchNav('subjs')"><i data-lucide="book" style="color:var(--sub);"></i><span class="mi-lbl">Subjects</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div style="padding:16px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Schedule Sharing</div>
+      <div class="mi" onclick="openShareID()"><i data-lucide="cloud" style="color:#9F5DFF;"></i><span class="mi-lbl">Cloud Share</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div class="mi" onclick="shareAsFile()"><i data-lucide="share-2" style="color:#FF9F0A;"></i><span class="mi-lbl">Send File</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div class="mi" onclick="openImportID()"><i data-lucide="file-digit" style="color:#00D97E;"></i><span class="mi-lbl">Import via ID</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div class="mi" onclick="backupToFile()"><i data-lucide="download" style="color:var(--sub);"></i><span class="mi-lbl">Backup to File</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div class="mi" onclick="document.getElementById('restore-input').click()"><i data-lucide="rotate-ccw" style="color:var(--sub);"></i><span class="mi-lbl">Restore from File</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div class="mi" onclick="clearAllData()"><i data-lucide="trash-2" style="color:var(--red);"></i><span class="mi-lbl" style="color:var(--red);">Clear All Data</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div style="padding:16px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Preferences</div>
+      <div class="mi" onclick="toggleDarkMode()"><i data-lucide="moon" style="color:var(--sub);"></i><span class="mi-lbl">App Theme <span id="theme-lbl" style="font-size:11px;color:var(--sub);display:block;font-weight:500;">System</span></span><div class="toggle" id="dk-tog"></div></div>
+      <div class="mi" onclick="togglePerformanceMode()"><i data-lucide="zap" style="color:var(--theme);"></i><span class="mi-lbl">Performance Mode <span id="perf-lbl" style="font-size:11px;color:var(--sub);display:block;font-weight:500;">Automatic</span></span><div class="toggle" id="perf-tog"></div></div>
+      <div class="mi" onclick="openNotifSettings()"><i data-lucide="bell" style="color:var(--sub);"></i><span class="mi-lbl">Notifications</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div class="mi" onclick="toggleSet(this,'sync')"><i data-lucide="cloud" style="color:var(--sub);"></i><span class="mi-lbl">Auto-sync</span><div class="toggle on" id="s-tog"></div></div>
+      <div style="padding:16px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">About</div>
+      <div class="mi" onclick="openTelegram()"><i data-lucide="send" style="color:var(--sub);"></i><span class="mi-lbl">Telegram Community</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div class="mi" onclick="shareApp()"><i data-lucide="share-2" style="color:var(--sub);"></i><span class="mi-lbl">Share MySkedul</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div class="mi" onclick="showToast('ianshulyaduvanshi@gmail.com')"><i data-lucide="mail" style="color:var(--sub);"></i><span class="mi-lbl">Contact Support</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
+      <div class="mi"><i data-lucide="info" style="color:var(--sub);"></i><span class="mi-lbl">App Version</span><span style="font-size:13px;color:var(--sub);font-weight:600;">v 1.5.04.57</span></div>
+      <div style="height:20px"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bnav">
+    <button class="nb active" id="bnav-home" onclick="switchNav('home')"><i data-lucide="home" class="ni"></i>Home</button>
+    <button class="nb" id="bnav-sched" onclick="switchNav('sched')"><i data-lucide="calendar-days" class="ni"></i>Schedule</button>
+    <button class="nb" id="bnav-tasks" onclick="switchNav('tasks')"><i data-lucide="check-square" class="ni"></i>Tasks</button>
+    <button class="nb" id="bnav-groups" onclick="switchNav('groups')"><i data-lucide="users" class="ni"></i>Groups</button>
+    <button class="nb" id="bnav-profile" onclick="switchNav('profile')"><i data-lucide="user" class="ni"></i>Profile</button>
+  </div>
+
+  <!-- hidden file inputs -->
+  <input type="file" id="import-input" style="display:none;" accept=".json" onchange="importSchedule(this.files[0])">
+  <input type="file" id="restore-input" style="display:none;" accept=".json" onchange="restoreFromFile(this.files[0])">
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

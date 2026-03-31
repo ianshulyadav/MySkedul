@@ -1,4 +1,4 @@
-/* MySkedul — Variables, Reset & Base */
+/* MySkedul — style.css | Part 1: Variables, Reset & Base */
 
 :root {
   --bg: #EAEEF2;
@@ -46,7 +46,7 @@
   }
 }
 
-/* added via JS during theme switch, removed after transition */
+/* added via JS during theme switch, removed after transition completes */
 .theme-transitioning,
 .theme-transitioning * {
   transition:
@@ -125,7 +125,7 @@ body {
   display: none;
 }
 
-/* hidden by default, .active added via switchNav() */
+/* hidden by default, .active toggled via switchNav() */
 .page {
   display: none;
   flex-direction: column;
@@ -154,7 +154,7 @@ body {
   will-change: transform;
 }
 
-/* staggered entry for cards */
+/* staggered card entry */
 .cc, .sc, .tc, .gc, .si {
   will-change: transform, opacity;
 }
