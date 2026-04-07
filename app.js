@@ -284,3 +284,387 @@ async function saveData() {
 
   isSaving = false;
 }
+
+async function loadData() {
+  try {
+    const db = await getDB(); if (!db) throw 'No DB';
+    const tx = db.transaction(STORES, 'readonly');
+    const [m, s, c, t, l] = await Promise.all([
+      new Promise(r => { const g = tx.objectStore('meta').get('current'); g.onsuccess = () => r(g.result); g.onerror = () => r(null); }),
+      new Promise(r => { const g = tx.objectStore('subjects').get('list'); g.onsuccess = () => r(g.result); g.onerror = () => r(null); }),
+      new Promise(r => { const g = tx.objectStore('classes').get('list'); g.onsuccess = () => r(g.result); g.onerror = () => r(null); }),
+      new Promise(r => { const g = tx.objectStore('tasks').get('list'); g.onsuccess = () => r(g.result); g.onerror = () => r(null); }),
+      new Promise(r => { const g = tx.objectStore('calendar').get('data'); g.onsuccess = () => r(g.result); g.onerror = () => r(null); })
+    ]);
+
+    if (m) {
+      globalUserName = m.globalUserName || m.pName || 'Student';
+      globalUserEmail = m.globalUserEmail || m.pEmail || '';
+    }
+    if (Array.isArray(s) && s.length) subjects = s;
+    if (Array.isArray(c)) classes = c;
+    if (Array.isArray(t)) tasks = t;
+    if (l) {
+      if (l.holidays) holidays = l.holidays;
+      if (l.examDays) examDays = l.examDays;
+      if (l.testOverrides) testOverrides = l.testOverrides;
+    }
+
+    const ns = await new Promise(r => { const g = tx.objectStore('meta').get('notifSettings'); g.onsuccess = () => r(g.result); g.onerror = () => r(null); });
+    if (ns) notifSettings = ns;
+
+
+  } catch (e) {
+    // Native file fallback
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      try {
+        const { Filesystem } = Capacitor.Plugins;
+        const { Directory, Encoding } = Capacitor;
+        const res = await Filesystem.readFile({ path: 'myskedul_internal.json', directory: Directory.Data, encoding: Encoding.UTF8 });
+        if (res.data) {
+          const d = JSON.parse(res.data);
+          if (Array.isArray(d.subjects)) subjects = d.subjects;
+          if (Array.isArray(d.classes)) classes = d.classes;
+          if (Array.isArray(d.tasks)) tasks = d.tasks;
+          if (Array.isArray(d.holidays)) holidays = d.holidays;
+          if (Array.isArray(d.examDays)) examDays = d.examDays;
+          if (Array.isArray(d.testOverrides)) testOverrides = d.testOverrides;
+          if (d.globalUserName || d.meta?.globalUserName) globalUserName = d.meta?.globalUserName || d.globalUserName;
+          return;
+        }
+      } catch (err) { }
+    }
+
+    // Final fallback to legacy browser local storage
+    let raw = localStorage.getItem('MySkedul_data') || localStorage.getItem('MySkedul_FullBackup');
+    if (raw) {
+      try {
+        const d = JSON.parse(raw);
+        if (d.subjects) subjects = d.subjects;
+        if (d.classes) classes = d.classes;
+        if (d.tasks) tasks = d.tasks;
+        if (d.globalUserName || d.pName) globalUserName = d.globalUserName || d.pName;
+        if (d.globalUserEmail || d.pEmail) globalUserEmail = d.globalUserEmail || d.pEmail;
+      } catch (err) { }
+    }
+  }
+}
+
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveData(); });
+window.addEventListener('beforeunload', saveData);
+
+// HAPTIC ENGINE
+function haptic(type = 'light') {
+  // Haptics disabled per request
+  return;
+}
+
+const sn = id => { const s = subjects.find(x => x.id === id); return s ? s.name : 'Unknown'; };
+const sc = id => { const s = subjects.find(x => x.id === id); return s ? s.color : '#0D0D0D'; };
+
+let n = new Date();
+let todayMins = n.getHours() * 60 + n.getMinutes();
+function t2m(t) { const [h, m] = t.split(':'); return parseInt(h) * 60 + parseInt(m); }
+function status(c) { const s = t2m(c.start), e = t2m(c.end); if (todayMins >= s && todayMins < e) return 'current'; if (todayMins >= e) return 'past'; return 'upcoming'; }
+
+// Exam Days: array of {date:'2026-04-05', subject:'Math', start:'09:00', end:'12:00', room:'Hall A'}
+let examDays = [];
+// Test Overrides: array of {date:'2026-03-27', classId:2, subject:'', room:'', start:'', end:''}
+let testOverrides = [];
+
+// Global Nav
+function switchNav(tab) {
+  const pages = document.querySelectorAll('.page');
+  const tabs = document.querySelectorAll('.nb');
+
+  // Capture state BEFORE clearing classes
+  const tabOrder = ['home', 'sched', 'tasks', 'groups', 'profile'];
+  const curTab = Array.from(tabs).find(t => t.classList.contains('active'))?.id?.replace('bnav-', '') || 'home';
+  const curIdx = tabOrder.indexOf(curTab);
+  const nextIdx = tabOrder.indexOf(tab);
+  const dx = nextIdx > curIdx ? 16 : -16;
+
+  pages.forEach(p => p.classList.remove('active'));
+  tabs.forEach(b => { if (b) b.classList.remove('active') });
+
+  const targetPage = document.getElementById('pg-' + (tab === 'sched' ? 'scheds' : tab));
+  const targetTab = document.getElementById('bnav-' + tab);
+
+  if (targetPage) {
+    targetPage.classList.remove('active', 'stagger-reveal');
+    void targetPage.offsetWidth; // Force reflow
+    targetPage.classList.add('active', 'stagger-reveal');
+
+    // Re-trigger Header SlideDown
+    const hdr = targetPage.querySelector('.home-header, .topbar, .profile-header');
+    if (hdr) {
+      hdr.classList.remove('slide-down');
+      void hdr.offsetWidth;
+      hdr.classList.add('slide-down');
+    }
+    setTimeout(() => targetPage.classList.remove('stagger-reveal'), 1000);
+  }
+  if (targetTab) {
+    targetTab.classList.add('active');
+    const blob = document.getElementById('bnav-blob');
+    if (blob) {
+      const idx = tabOrder.indexOf(tab);
+      blob.style.transform = `translateX(${idx * 100}%)`;
+    }
+  }
+
+  // Layered Content Rendering
+  if (tab === 'home') { renderHome(); setTimeout(scrollToSelected, 50); }
+  else if (tab === 'sched') renderSchedList();
+  else if (tab === 'tasks') renderTasks();
+  else if (tab === 'groups') renderGroups();
+  else if (tab === 'subjs') renderSubjList('subjs-list', 'sj-srch');
+  else if (tab === 'profile') updateProfUI();
+
+  // Update FAB visibility
+  const fbHome = document.getElementById('fab-home');
+  const fbTasks = document.getElementById('fab-tasks');
+  if (fbHome) fbHome.style.display = (tab === 'home' ? 'flex' : 'none');
+  if (fbTasks) fbTasks.style.display = (tab === 'tasks' ? 'flex' : 'none');
+}
+
+// Quick Actions
+function openQuickActions() {
+  const selDateStr = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+  const isToday = n.toDateString() === new Date().toDateString();
+  const dayName = isToday ? "Today" : n.toLocaleDateString('en-US', { weekday: 'long' });
+
+  const isExam = examDays.some(e => e.date === selDateStr);
+  const hasTests = testOverrides.some(t => t.date === selDateStr);
+
+  const et = document.getElementById('qa-exam-title');
+  const es = document.getElementById('qa-exam-sub');
+  const tt = document.getElementById('qa-test-title');
+  const ts = document.getElementById('qa-test-sub');
+
+  if (isExam) {
+    et.textContent = "Remove Exam Day";
+    es.textContent = "Unmark " + dayName;
+    document.getElementById('qa-exam-btn').onclick = () => { closeModal('m-quick-actions'); setTimeout(() => { removeExamDay(selDateStr); }, 200); };
+  } else {
+    et.textContent = "Exam Day";
+    es.textContent = "Mark " + dayName;
+    document.getElementById('qa-exam-btn').onclick = () => { closeModal('m-quick-actions'); setTimeout(() => { markExamDay(selDateStr); }, 200); };
+  }
+
+  if (hasTests) {
+    tt.textContent = "Remove Class Test";
+    ts.textContent = "Clear " + dayName;
+    document.getElementById('qa-test-btn').onclick = () => { closeModal('m-quick-actions'); setTimeout(() => { clearTests(selDateStr); }, 200); };
+  } else {
+    tt.textContent = "Class Test";
+    ts.textContent = "Mark " + dayName;
+    document.getElementById('qa-test-btn').onclick = () => { closeModal('m-quick-actions'); setTimeout(() => openTestPicker(selDateStr), 200); };
+  }
+
+  openModal('m-quick-actions');
+  lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
+}
+
+// Calendar Generator
+let curSelDateStr = new Date().toDateString();
+let calendarLoaded = false;
+function generateCalendar() {
+  const ds = document.getElementById('home-ds');
+  if (!ds) return;
+
+  const base = new Date();
+  base.setDate(base.getDate() - 60);
+
+  if (calendarLoaded) {
+    // Smart Update: Only update classes and dots without clearing DOM
+    const btns = ds.querySelectorAll('.db');
+    btns.forEach((btn, i) => {
+      const d = new Date(base); d.setDate(base.getDate() + i);
+      const dIso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      const isExam = examDays.some(e => e.date === dIso);
+      const isTestDay = testOverrides.some(t => t.date === dIso);
+      const isHol = holidays.includes(dIso);
+      const isTot = d.toDateString() === new Date().toDateString();
+      const dStr = d.toDateString();
+
+      let bCls = 'db' + (isTot ? ' tod' : '');
+      if (isExam) bCls += ' exam-day';
+      else if (isTestDay) bCls += ' test-day';
+      else if (isHol) bCls += ' holiday';
+      if (curSelDateStr === dStr) bCls += ' sel';
+      btn.className = bCls;
+
+      const dotCont = btn.querySelector('.dot-row');
+      if (dotCont) {
+        let dots = '';
+        if (isExam) dots = `<span class="cdot" style="background:var(--red)"></span>`;
+        else if (isTestDay) dots = `<span class="cdot" style="background:#FF9800"></span>`;
+        else if (isHol) dots = `<span class="cdot" style="background:var(--green)"></span>`;
+        else dots = `<span class="cdot" style="background:var(--sub)"></span>`;
+        if (dotCont.innerHTML !== dots) dotCont.innerHTML = dots;
+      }
+    });
+    return;
+  }
+
+  ds.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < 120; i++) {
+    const d = new Date(base); d.setDate(base.getDate() + i);
+    const dn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
+    const dm = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()];
+    const num = d.getDate();
+    const isTot = d.toDateString() === new Date().toDateString();
+    const dStr = d.toDateString();
+    const dIso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const isExam = examDays.some(e => e.date === dIso);
+    const isTestDay = testOverrides.some(t => t.date === dIso);
+    const isHol = holidays.includes(dIso);
+
+
+
+    const btn = document.createElement('div');
+    let bCls = '';
+    if (isExam) bCls = ' exam-day';
+    else if (isTestDay) bCls = ' test-day';
+    else if (isHol) bCls = ' holiday';
+
+    btn.className = 'db' + (isTot ? ' tod' : '') + bCls;
+    if (curSelDateStr === dStr) btn.classList.add('sel');
+
+    let dots = '';
+    if (isExam) dots = `<span class="cdot" style="background:var(--red)"></span>`;
+    else if (isTestDay) dots = `<span class="cdot" style="background:#FF9800"></span>`;
+    else if (isHol) dots = `<span class="cdot" style="background:var(--green)"></span>`;
+    else dots = `<span class="cdot" style="background:var(--sub)"></span>`;
+
+    btn.innerHTML = `<span class="dn${d.getDay() === 0 ? ' sun' : ''}">${dn}</span><span class="dd${d.getDay() === 0 ? ' sun' : ''}">${num}</span><span class="dm">${dm}</span><div class="dot-row">${dots}</div>`;
+    btn.onclick = () => {
+      curSelDateStr = dStr;
+      document.querySelectorAll('.db').forEach(b => { b.classList.remove('sel'); });
+      btn.classList.add('sel');
+      n = new Date(dStr);
+      updateHeader(); renderHome();
+      scrollToSelected();
+    };
+    lp(btn, () => toggleExamDay(dIso));
+    dt(btn, () => toggleHoliday(dIso));
+    frag.appendChild(btn);
+  }
+  ds.appendChild(frag);
+  calendarLoaded = true;
+}
+
+// ULTRA-SMOOTH (200FPS FEEL) SCROLL ENGINE
+// HIGH-REFRESH RATE SMOOTH SCROLL (120Hz/90Hz Optimized)
+function smoothScrollTo(el, target, duration = 450) {
+  if (!el) return;
+  const start = el.scrollLeft;
+  const change = target - start;
+  const startTime = performance.now();
+
+  function animate(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Quad-Out Velocity (Snappier initial speed for high-refresh feel)
+    const ease = progress * (2 - progress);
+
+    el.scrollLeft = start + change * ease;
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function checkTodayBtn() {
+  const ds = document.getElementById('home-ds');
+  const tb = document.getElementById('today-btn');
+  const t = ds ? ds.querySelector('.tod') : null;
+  if (!tb || !ds || !t) return;
+  const idealLeft = t.offsetLeft - ds.offsetWidth / 2 + 25;
+  if (Math.abs(ds.scrollLeft - idealLeft) > 30 || curSelDateStr !== new Date().toDateString()) {
+    tb.classList.remove('hidden');
+  } else {
+    tb.classList.add('hidden');
+  }
+}
+
+function scrollToToday(smooth = true) {
+  curSelDateStr = new Date().toDateString();
+  n = new Date();
+  // Start scrolling IMMEDIATELY for zero-latency feel
+  if (smooth) scrollToTodaySmooth();
+
+  // Defer rendering slightly to prioritize scroll animation frames
+  setTimeout(() => {
+    updateHeader();
+    generateCalendar();
+    renderHome();
+  }, 80);
+}
+
+function scrollToTodaySmooth() {
+  const ds = document.getElementById('home-ds');
+  const t = ds ? ds.querySelector('.tod') : null;
+  if (t && ds) {
+    smoothScrollTo(ds, t.offsetLeft - ds.offsetWidth / 2 + 33, 120); // Faster snap (120ms)
+  } else {
+    const sel = ds.querySelector('.ds-d.sel');
+    if (sel) smoothScrollTo(ds, sel.offsetLeft - ds.offsetWidth / 2 + 33, 120); // Faster snap (120ms)
+  }
+}
+
+
+function scrollToSelected() {
+  const ds = document.getElementById('home-ds');
+  const sel = ds ? (ds.querySelector('.sel') || ds.querySelector('.tod')) : null;
+  if (sel && ds) {
+    smoothScrollTo(ds, sel.offsetLeft - ds.offsetWidth / 2 + 33, 200);
+  }
+}
+
+function getWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+}
+
+function updateHeader() {
+  document.getElementById('h-day').textContent = n.toLocaleDateString('en-US', { weekday: 'long' });
+  document.getElementById('h-date').textContent = n.getDate() + ' ' + n.toLocaleDateString('en-US', { month: 'long' });
+  const mlbl = document.getElementById('h-month-lbl');
+  if (mlbl) { mlbl.textContent = n.toLocaleDateString('en-US', { month: 'long' }) + ' ' + n.getFullYear(); }
+  const wlbl = document.getElementById('h-week-lbl');
+  if (wlbl) { wlbl.textContent = 'Week ' + getWeekNumber(n); }
+  checkTodayBtn();
+}
+
+let navLock = false;
+function changeDate(days) {
+  if (navLock) return;
+  navLock = true;
+  setTimeout(() => { navLock = false; }, 400); // 400ms lock for smoothness
+
+  n.setDate(n.getDate() + days);
+  curSelDateStr = n.toDateString();
+  const list = document.getElementById('h-list');
+  if (list) {
+    const dist = 50; // Stable distance
+    list.style.setProperty('--slide-dx', (days > 0 ? dist : -dist) + 'px');
+    list.style.animation = 'none';
+    list.offsetHeight;
+    // Super smooth cubic-bezier for a native fluid feel
+    const dur = 0.45;
+    const ease = 'cubic-bezier(0.16, 1, 0.3, 1)';
+    list.style.animation = days > 0 ? `slideInRight ${dur}s ${ease}` : `slideInLeft ${dur}s ${ease}`;
+  }
+  updateHeader();
+  renderHome();
+  generateCalendar();
+  scrollToSelected();
+}
