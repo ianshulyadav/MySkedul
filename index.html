@@ -1,27 +1,264 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySkedul - Phase 1</title>
-    <link rel="icon" type="image/png" href="logo.png">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MySkedul</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">MySkedul</div>
-        <div id="schedule-list">
-            <!-- Basic classes will be rendered here -->
-            <div class="card">
-                <div class="card-title">Computer Science</div>
-                <div class="card-sub">Room 101 • 09:00 AM</div>
-            </div>
-            <div class="card">
-                <div class="card-title">Mathematics</div>
-                <div class="card-sub">Room 204 • 11:00 AM</div>
-            </div>
+
+  <!-- ==================== HOME ==================== -->
+  <div class="page active" id="pg-home">
+    <div class="scroll">
+      <!-- Header & greeting rendered by JS -->
+      <div class="home-header">
+        <div class="h-avatar" id="h-av">A</div>
+        <div>
+          <div class="h-greeting">Good day 👋</div>
+          <div class="h-name" id="h-uname">Student</div>
         </div>
-        <button class="btn" onclick="alert('Add feature coming in Phase 2!')">Add Class</button>
+        <button class="ib" style="margin-left:auto;" onclick="openQuickActions()">
+          <i data-lucide="edit-2" style="width:18px;height:18px;"></i>
+        </button>
+      </div>
+
+      <!-- Day / date heading -->
+      <div class="hd" style="align-items:center;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--sub);margin-bottom:6px;" id="h-week-lbl">Week A</div>
+          <div class="hd-big" id="h-day">Today</div>
+          <div class="hd-sub" id="h-date">—</div>
+        </div>
+      </div>
+
+      <!-- Date Strip -->
+      <div class="ds-wrap">
+        <div class="month-label" id="h-month-lbl"></div>
+        <div class="ds" id="home-ds"></div>
+        <button class="btn-today" id="today-btn" onclick="scrollToToday()" title="Today">
+          <i data-lucide="calendar" style="width:20px;height:20px;"></i>
+        </button>
+      </div>
+
+      <!-- Stats row -->
+      <div class="sr">
+        <div class="sc"><div class="sl">Classes</div><div class="sv" id="st-cnt">0</div></div>
+        <div class="sc"><div class="sl">Start</div><div class="sv"  id="st-start">—</div></div>
+      </div>
+
+      <!-- Search bar -->
+      <div class="sw" style="padding:0 16px 8px;">
+        <div class="sb" style="padding:10px 16px;">
+          <i data-lucide="search" style="width:16px;color:var(--sub)"></i>
+          <input id="h-srch" placeholder="Search classes" oninput="renderHome()">
+        </div>
+      </div>
+
+      <!-- Class list injected by renderHome() -->
+      <div id="h-list"></div>
+      <div style="height:20px"></div>
     </div>
+
+    <!-- FAB -->
+    <button class="fab" onclick="openAddClass()">
+      <i data-lucide="plus" style="width:24px;height:24px"></i>
+    </button>
+  </div>
+
+  <!-- ==================== SCHEDULES ==================== -->
+  <div class="page" id="pg-scheds">
+    <div class="topbar">
+      <button class="ib" onclick="switchNav('home')">
+        <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
+      </button>
+      <span class="topbar-title">Schedules</span>
+      <button class="ib" onclick="openAddClass()">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="wv-row">
+      <div class="wv-btn on" id="btn-list-view" onclick="setSchedView('list')">List View</div>
+      <div class="wv-btn"    id="btn-week-view" onclick="setSchedView('week')">Week View</div>
+    </div>
+    <div class="scroll">
+      <div id="v-list"><div id="scheds-list"></div></div>
+      <div id="v-week" style="display:none;"><div class="timetable" id="timetable-view"></div></div>
+      <div style="height:20px"></div>
+    </div>
+  </div>
+
+  <!-- ==================== SUBJECTS ==================== -->
+  <div class="page" id="pg-subjs">
+    <div class="topbar">
+      <button class="ib" onclick="switchNav('profile')">
+        <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
+      </button>
+      <span class="topbar-title">Subjects</span>
+      <button class="ib" onclick="openNewSubj()">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="sw">
+      <div class="sb">
+        <i data-lucide="search" style="width:18px;color:var(--sub)"></i>
+        <input id="sj-srch" placeholder="Search subjects" oninput="renderSubjList('subjs-list','sj-srch')">
+      </div>
+    </div>
+    <div class="scroll">
+      <div id="subjs-list"></div>
+      <div style="height:20px"></div>
+    </div>
+  </div>
+
+  <!-- ==================== TASKS ==================== -->
+  <div class="page" id="pg-tasks">
+    <div class="topbar">
+      <button class="ib" onclick="switchNav('home')">
+        <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
+      </button>
+      <span class="topbar-title">Tasks</span>
+      <button class="ib" onclick="openAddTask()">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="sw" style="padding:0 16px 8px;">
+      <div class="sb" style="padding:10px 16px;">
+        <i data-lucide="search" style="width:16px;color:var(--sub)"></i>
+        <input id="t-srch" placeholder="Search tasks" oninput="renderTasks()">
+      </div>
+    </div>
+    <div class="scroll">
+      <div id="tasks-list"></div>
+      <div style="height:20px"></div>
+    </div>
+    <button class="fab" onclick="openAddTask()">
+      <i data-lucide="plus" style="width:24px;height:24px"></i>
+    </button>
+  </div>
+
+  <!-- ==================== GROUPS ==================== -->
+  <div class="page" id="pg-groups">
+    <div class="topbar">
+      <button class="ib" onclick="switchNav('home')">
+        <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>
+      </button>
+      <span class="topbar-title">Groups</span>
+      <button class="ib" onclick="showToast('Coming soon!')">
+        <i data-lucide="users" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="coming-soon-wrap">
+      <div class="coming-soon-overlay">
+        <div class="cs-icon">
+          <i data-lucide="users" style="width:28px;height:28px;color:var(--theme);"></i>
+        </div>
+        <div class="cs-title">Coming Soon!</div>
+        <div class="cs-sub">Study groups, shared notes, and collaborative learning — all in one place.</div>
+      </div>
+      <div class="scroll">
+        <div id="groups-list"></div>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PROFILE ==================== -->
+  <div class="page" id="pg-profile">
+    <div class="scroll">
+      <div class="profile-header">
+        <div class="profile-big-av" id="p-av">A</div>
+        <div>
+          <div class="profile-name"  id="p-name">Student</div>
+          <div class="profile-email" id="p-email">—</div>
+        </div>
+        <button class="profile-edit-btn" onclick="openEditProfile()">
+          <i data-lucide="edit-2" style="width:17px;height:17px;"></i>
+        </button>
+      </div>
+
+      <div class="premium" onclick="showToast('Premium UI Unlocked!')">
+        <i data-lucide="star" style="width:28px;height:28px"></i>
+        <div>
+          <div class="pt">Premium Access</div>
+          <div class="ps">Full access functionality unlocked!</div>
+        </div>
+      </div>
+
+      <div style="padding:10px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Account</div>
+      <div class="mi" onclick="openEditProfile()">
+        <i data-lucide="user"     style="color:var(--sub);"></i>
+        <span class="mi-lbl">Account Details</span>
+        <i data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
+      <div class="mi" onclick="switchNav('sched')">
+        <i data-lucide="calendar" style="color:var(--sub);"></i>
+        <span class="mi-lbl">Schedules</span>
+        <i data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
+      <div class="mi" onclick="switchNav('subjs')">
+        <i data-lucide="book"     style="color:var(--sub);"></i>
+        <span class="mi-lbl">Subjects</span>
+        <i data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
+
+      <div style="padding:16px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Preferences</div>
+      <div class="mi" onclick="toggleDarkMode()">
+        <i data-lucide="moon"  style="color:var(--sub);"></i>
+        <span class="mi-lbl">Dark Mode</span>
+        <div class="toggle" id="dk-tog"></div>
+      </div>
+      <div class="mi" onclick="toggleSet(this,'notif')">
+        <i data-lucide="bell"  style="color:var(--sub);"></i>
+        <span class="mi-lbl">Notifications</span>
+        <div class="toggle on" id="n-tog"></div>
+      </div>
+      <div class="mi" onclick="toggleSet(this,'sync')">
+        <i data-lucide="cloud" style="color:var(--sub);"></i>
+        <span class="mi-lbl">Auto-sync</span>
+        <div class="toggle on" id="s-tog"></div>
+      </div>
+
+      <div style="padding:16px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">About</div>
+      <div class="mi" onclick="showToast('MySkedul on social media coming soon!')">
+        <i data-lucide="share-2" style="color:var(--sub);"></i>
+        <span class="mi-lbl">Share MySkedul</span>
+        <i data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
+      <div class="mi" onclick="showToast('support@myskedul.app')">
+        <i data-lucide="mail" style="color:var(--sub);"></i>
+        <span class="mi-lbl">Contact Support</span>
+        <i data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
+      <div class="mi">
+        <i data-lucide="info" style="color:var(--sub);"></i>
+        <span class="mi-lbl">App Version</span>
+        <span style="font-size:13px;color:var(--sub);font-weight:600;">v1.0.0</span>
+      </div>
+      <div style="height:20px"></div>
+    </div>
+  </div>
+
+  <!-- ==================== BOTTOM NAV ==================== -->
+  <div class="bnav">
+    <button class="nb active" id="bnav-home"    onclick="switchNav('home')">
+      <i data-lucide="home"          class="ni"></i>Home</button>
+    <button class="nb"          id="bnav-sched"   onclick="switchNav('sched')">
+      <i data-lucide="calendar-days" class="ni"></i>Schedule</button>
+    <button class="nb"          id="bnav-tasks"   onclick="switchNav('tasks')">
+      <i data-lucide="check-square"  class="ni"></i>Tasks</button>
+    <button class="nb"          id="bnav-groups"  onclick="switchNav('groups')">
+      <i data-lucide="users"         class="ni"></i>Groups</button>
+    <button class="nb"          id="bnav-profile" onclick="switchNav('profile')">
+      <i data-lucide="user"          class="ni"></i>Profile</button>
+  </div>
+
+  <!-- ==================== TOAST ==================== -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <script src="app.js"></script>
 </body>
 </html>
