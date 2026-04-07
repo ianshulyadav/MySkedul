@@ -1,190 +1,286 @@
-/* ============================================================
-   MySkedul — app.js
-   Day 1: Core Data Model, localStorage Persistence,
-          Navigation Controller, Utility Helpers, Toast
-   ============================================================ */
+// AUTO-DETECT ANDROID NAVIGATION MODE (3-Button vs Gesture)
+(function () {
+  const t = document.createElement('div');
+  t.style.paddingBottom = 'env(safe-area-inset-bottom,0px)';
+  document.documentElement.appendChild(t);
+  const s = parseInt(getComputedStyle(t).paddingBottom);
+  document.documentElement.removeChild(t);
+  // Buttons typically report >30px (around 48px), Gesture reports ~24px or less
+  document.documentElement.setAttribute('data-nav', s > 30 ? 'buttons' : 'gesture');
+})();
 
-/* ---------- Colour Palette ---------- */
-const COLS = [
-  '#3B82F6','#22C55E','#EF4444','#8B5CF6',
-  '#F97316','#EC4899','#14B8A6','#FFC107'
-];
+// ===== HARDWARE-AWARE PERFORMANCE TIER ENGINE =====
+async function updatePerformanceTier() {
+  const mem = navigator.deviceMemory || 4;
+  const cores = navigator.hardwareConcurrency || 4;
+  const androidMatch = navigator.userAgent.match(/Android (\d+)/);
+  const androidVer = androidMatch ? parseInt(androidMatch[1]) : 0;
 
-/* ---------- App State ---------- */
-let subjects = [
-  { id: 1, name: 'Mathematics',      color: '#3B82F6' },
-  { id: 2, name: 'Physics',          color: '#22C55E' },
-  { id: 3, name: 'English Lit',      color: '#EC4899' },
-  { id: 4, name: 'Computer Science', color: '#8B5CF6' }
-];
+  let tier = 'mid';
+  if (mem >= 4 && cores > 4 && androidVer >= 14) tier = 'high';
+  else if (mem <= 2 || cores <= 2 || androidVer < 9) tier = 'low';
 
-let classes = [
-  { id: 1, sj: 1, room: 'Room 101',    teacher: 'Mr. Smith',  start: '08:00', end: '09:30', days: ['Mon','Wed'] },
-  { id: 2, sj: 2, room: 'Lab 3',       teacher: 'Dr. Brown',  start: '10:00', end: '11:30', days: ['Thu'] },
-  { id: 3, sj: 3, room: '2F',          teacher: 'Mrs. White', start: '19:00', end: '19:09', days: ['Fri'] },
-  { id: 4, sj: 4, room: 'Computer Lab',teacher: 'Prof. Davis',start: '14:00', end: '15:30', days: ['Tue','Fri'] }
-];
-
-let tasks         = [];
-let holidays      = [];
-let examDays      = [];   // [{ date, subject, start, end, room }]
-let testOverrides = [];   // [{ date, classId, name, room }]
-let groups = [
-  { id: 1, name: 'CS-2024 Batch A',  mem: ['You','Arjun','Priya'], lmsg: 'Project submission deadline extended.', av: '💻' },
-  { id: 2, name: 'Math Study Group', mem: ['You','Ankit'],         lmsg: 'Sharing notes for Chapter 5.', av: '📐' }
-];
-
-let pName  = 'Student';
-let pEmail = '';
-
-/* ---------- Persistence ---------- */
-const STORAGE_KEY = 'myskedul_data';
-
-function saveData() {
-  const payload = { subjects, classes, tasks, holidays, examDays, testOverrides, pName, pEmail };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-}
-
-function loadData() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
+  // Battery Watcher
   try {
-    const d = JSON.parse(raw);
-    if (d.subjects)      subjects      = d.subjects;
-    if (d.classes)       classes       = d.classes;
-    if (d.tasks)         tasks         = d.tasks;
-    if (d.holidays)      holidays      = d.holidays;
-    if (d.examDays)      examDays      = d.examDays;
-    if (d.testOverrides) testOverrides = d.testOverrides;
-    if (d.pName)         pName         = d.pName;
-    if (d.pEmail)        pEmail        = d.pEmail;
+    if (navigator.getBattery) {
+      const battery = await navigator.getBattery();
+      if (battery.level <= 0.20 && !battery.charging) tier = 'low';
+      battery.onlevelchange = updatePerformanceTier;
+      battery.onchargingchange = updatePerformanceTier;
+    }
+  } catch (e) { }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) tier = 'low';
+
+  document.documentElement.setAttribute('data-tier', tier);
+  document.body.classList.remove('low-end', 'ultra-mode');
+  if (tier === 'low') document.body.classList.add('low-end');
+  else if (tier === 'high') document.body.classList.add('ultra-mode');
+}
+updatePerformanceTier();
+updatePerformanceTier();
+
+// ===== STATUS BAR COLOR SYNC =====
+let isStatusSyncing = false;
+async function syncStatusBar() {
+  if (isStatusSyncing) return;
+  if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+
+  isStatusSyncing = true;
+  try {
+    const isDark = document.body.getAttribute('data-theme') === 'dark' ||
+      (!document.body.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const color = isDark ? '#111116' : '#EAEEF2';
+
+    const { StatusBar } = Capacitor.Plugins;
+    if (StatusBar) {
+      await StatusBar.setBackgroundColor({ color });
+      await StatusBar.setStyle({ style: isDark ? 'DARK' : 'LIGHT' });
+    }
   } catch (e) {
-    console.warn('MySkedul: failed to parse saved data', e);
+    console.warn('StatusBar sync failed', e);
+  } finally {
+    isStatusSyncing = false;
   }
 }
 
-/* ---------- Subject Helpers ---------- */
-const sn = id => { const s = subjects.find(x => x.id === id); return s ? s.name : 'Unknown'; };
-const sc = id => { const s = subjects.find(x => x.id === id); return s ? s.color : '#0D0D0D'; };
-
-/* ---------- Time Helpers ---------- */
-let n = new Date();
-let todayMins = n.getHours() * 60 + n.getMinutes();
-
-function t2m(t) {
-  const [h, m] = t.split(':');
-  return parseInt(h) * 60 + parseInt(m);
+// ===== LIQUID BLOB NAV ANIMATION =====
+function updateBlobPosition(activeBtn) {
+  const blob = document.getElementById('bnav-blob');
+  const nav = document.getElementById('bnav-main');
+  if (!blob || !nav || !activeBtn) return;
+  const navRect = nav.getBoundingClientRect();
+  const btnRect = activeBtn.getBoundingClientRect();
+  const left = btnRect.left - navRect.left;
+  const width = btnRect.width;
+  blob.style.transform = `translateX(${left}px) translateZ(0)`;
+  blob.style.width = width + 'px';
+  blob.style.opacity = '1';
 }
 
-function status(c) {
-  const s = t2m(c.start), e = t2m(c.end);
-  if (todayMins >= s && todayMins < e) return 'current';
-  if (todayMins >= e) return 'past';
-  return 'upcoming';
-}
+// Icon init
+lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
 
-/* ---------- Navigation ---------- */
-function switchNav(tab) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nb').forEach(b => b && b.classList.remove('active'));
-
-  const pageId = tab === 'sched' ? 'pg-scheds' : 'pg-' + tab;
-  const page = document.getElementById(pageId);
-  if (page) page.classList.add('active');
-
-  const navBtn = document.getElementById('bnav-' + tab);
-  if (navBtn) navBtn.classList.add('active');
-
-  if (tab === 'home')   renderHome();
-  if (tab === 'sched')  renderSchedList();
-  if (tab === 'tasks')  renderTasks();
-  if (tab === 'groups') renderGroups();
-  if (tab === 'subjs')  renderSubjList('subjs-list', 'sj-srch');
-}
-
-/* ---------- Toast ---------- */
-let _toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-/* ---------- Modal Helpers (with Android back-gesture support) ---------- */
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-  history.pushState({ modal: id }, '');
-}
-
-function closeModal(id) {
-  const el = document.getElementById(id);
-  if (!el || !el.classList.contains('open')) return;
-  el.classList.remove('open');
-  if (history.state && history.state.modal === id) history.back();
-}
-
-function closeTopmostModal() {
-  const open = [...document.querySelectorAll('.mo.open')];
-  if (open.length > 0) {
-    open[open.length - 1].classList.remove('open');
-    return true;
+// GLOBAL SCROLL SMOTHNESS & HEADER CRYSTAL
+document.addEventListener('scroll', e => {
+  if (e.target.classList && e.target.classList.contains('scroll')) {
+    const top = e.target.scrollTop;
+    const page = e.target.parentElement;
+    const header = page.querySelector('.topbar') || page.querySelector('.home-header');
+    if (header) {
+      if (top > 12) header.classList.add('scrolled-header');
+      else header.classList.remove('scrolled-header');
+    }
   }
-  return false;
+}, true);
+
+// ANDROID NATIVE BACK BUTTON & PERSISTENCE
+if (window.Capacitor && (Capacitor.getPlatform() === 'android' || Capacitor.isNativePlatform())) {
+  const { App } = Capacitor.Plugins;
+
+  // Consume first back press to prevent immediate browser-default exit
+  history.pushState({ page: 'home' }, '');
+
+  App.addListener('backButton', ({ canGoBack }) => {
+    // 1. Close modals first
+    if (closeTopmostModal()) {
+      history.pushState({ page: 'home' }, ''); // Maintain history lock
+      return;
+    }
+
+    // 2. If not on home tab, return to home
+    const activePage = document.querySelector('.page.active');
+    if (activePage && activePage.id !== 'pg-home') {
+      switchNav('home');
+      history.pushState({ page: 'home' }, ''); // Maintain history lock
+      return;
+    }
+
+    // 3. Double tap to exit on Home
+    if (!exitTap) {
+      exitTap = true;
+      showToast("Tap again to exit");
+      setTimeout(() => exitTap = false, 2000);
+      history.pushState({ page: 'home' }, ''); // Re-push to prevent browser from leaving
+      return;
+    }
+
+    App.exitApp();
+  });
+
+  App.addListener('appStateChange', ({ isActive }) => { if (!isActive) saveData(); });
 }
 
-window.addEventListener('popstate', () => {
-  if (closeTopmostModal()) return;
-  const active = document.querySelector('.page.active');
-  if (active && active.id !== 'pg-home') {
-    switchNav('home');
-    history.pushState({ page: 'home' }, '');
-  }
-});
-
-history.replaceState({ page: 'home' }, '');
-
-/* ---------- Long-press & Double-tap ---------- */
 function lp(el, cb) {
-  let t;
-  const start = () => {
+  let t, sx, sy;
+  const start = (e) => {
+    sx = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+    sy = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
     t = setTimeout(() => {
-      if ('vibrate' in navigator) navigator.vibrate(40);
+      // No vibration
       el.classList.add('lp-active');
       cb();
-      setTimeout(() => el.classList.remove('lp-active'), 200);
+      setTimeout(() => el.classList.remove('lp-active'), 250);
       t = null;
-    }, 600);
+    }, 400);
   };
-  const cancel = () => { clearTimeout(t); t = null; el.classList.remove('lp-active'); };
+  const cancel = (e) => {
+    if (e && e.type === 'touchmove' && sx !== undefined) {
+      const dx = Math.abs(e.touches[0].clientX - sx);
+      const dy = Math.abs(e.touches[0].clientY - sy);
+      if (dx < 10 && dy < 10) return;
+    }
+    if (t) { clearTimeout(t); t = null; }
+    el.classList.remove('lp-active');
+  };
   el.addEventListener('mousedown', start);
-  el.addEventListener('touchstart', e => { if (e.cancelable) start(e); }, { passive: true });
-  el.addEventListener('mouseup',    cancel);
+  el.addEventListener('touchstart', start, { passive: true });
+  el.addEventListener('touchmove', cancel, { passive: true });
+  el.addEventListener('touchend', cancel);
+  el.addEventListener('mouseup', cancel);
   el.addEventListener('mouseleave', cancel);
-  el.addEventListener('touchend',   cancel);
   el.addEventListener('contextmenu', e => e.preventDefault());
 }
-
 function dt(el, cb) {
-  let last = 0;
-  el.addEventListener('click', () => {
-    const now = Date.now();
-    if (now - last < 300) { cb(); last = 0; } else last = now;
+  let last = 0; el.addEventListener('click', () => {
+    const now = Date.now(); if (now - last < 300) { cb(); last = 0; } else last = now;
+  });
+}
+function sw(el, cb) {
+  /* ── Touch (mobile) ── */
+  let sx, sy, st;
+  el.addEventListener('touchstart', e => {
+    // Ignore swipes that start on the date strip or other scrollable horizontal regions
+    if (e.target.closest('.ds-wrap') || e.target.closest('.wv-row')) return;
+
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+    st = Date.now();
+  }, { passive: true });
+  el.addEventListener('touchmove', e => { }, { passive: true });
+  el.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    const dt = Date.now() - st;
+    // Strict linear swipe only (must be mostly horizontal)
+    if (dt < 600 && Math.abs(dx) > 60 && Math.abs(dy) < Math.abs(dx) * 0.8) {
+      const velocity = Math.abs(dx) / dt;
+      let days = (velocity > 3.5) ? 2 : 1;
+      cb((dx > 0 ? -1 : 1) * days);
+    }
+  }, { passive: true });
+
+  /* ── Trackpad / mouse wheel (desktop) ── */
+  let wheelAccum = 0;
+  let wheelLocked = false;
+  el.addEventListener('wheel', e => {
+    if (e.target.closest('.ds-wrap') || e.target.closest('.wv-row')) return;
+    if (Math.abs(e.deltaX) < Math.abs(e.deltaY) * 0.6) return;
+    if (e.cancelable) e.preventDefault();
+    if (wheelLocked) return;
+    wheelAccum += e.deltaX;
+    if (Math.abs(wheelAccum) > 60) {
+      const dir = wheelAccum > 0 ? 1 : -1;
+      wheelAccum = 0;
+      wheelLocked = true;
+      cb(dir);
+      setTimeout(() => { wheelLocked = false; }, 400); // 400ms lock for smoothness
+    }
+  }, { passive: false });
+}
+
+const COLS = ['#0084FF', '#00D97E', '#FF3B30', '#9F5DFF', '#FF9F0A', '#FF375F', '#00D1FF', '#FFD60A'];
+let subjects = [], classes = [], tasks = [], holidays = [];
+let groups = [];
+let notifSettings = {
+  enabled: true,
+  classRemind: true,
+  testRemind: true,
+  examRemind: true,
+  taskRemind: true,
+  leadMins: 15
+};
+
+// HARDENED STRUCTURED LOCAL DATABASE (IndexedDB + Multi-Store Sync)
+const DB_NAME = 'MySkedul_Storage_Prod', STORES = ['subjects', 'classes', 'tasks', 'meta', 'calendar'];
+function getDB() {
+  return new Promise(res => {
+    const req = indexedDB.open(DB_NAME, 3);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      STORES.forEach(s => { if (!db.objectStoreNames.contains(s)) db.createObjectStore(s); });
+    };
+    req.onsuccess = e => res(e.target.result);
+    req.onerror = () => res(null);
   });
 }
 
-/* ---------- Boot ---------- */
-document.addEventListener('DOMContentLoaded', () => {
-  loadData();
-  // Dark mode restore
-  if (localStorage.getItem('dk') === '1') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    const tog = document.getElementById('dk-tog');
-    if (tog) tog.classList.add('on');
+let isSaving = false;
+async function saveData() {
+  if (isSaving) return;
+  isSaving = true;
+
+  const meta = { globalUserName, globalUserEmail, ts: Date.now() };
+  const cal = { holidays, examDays, testOverrides };
+  const settings = { notifSettings };
+
+  try {
+    localStorage.setItem('MySkedul_FullBackup', JSON.stringify({ subjects, classes, tasks, meta, cal, settings }));
+  } catch (e) { }
+
+  try {
+    const db = await getDB(); if (!db) throw 'No DB';
+    const tx = db.transaction(STORES, 'readwrite');
+    tx.objectStore('meta').put(meta, 'current');
+    tx.objectStore('subjects').put(subjects, 'list');
+    tx.objectStore('classes').put(classes, 'list');
+    tx.objectStore('tasks').put(tasks, 'list');
+    tx.objectStore('calendar').put(cal, 'data');
+    tx.objectStore('meta').put(notifSettings, 'notifSettings');
+    await new Promise((res, rej) => {
+      tx.oncomplete = res;
+      tx.onerror = rej;
+    });
+  } catch (e) { console.error('DB Save error', e); }
+
+  if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    // Internal storage fallback backup - catch errors to prevent main thread blocking
+    try {
+      const { Filesystem } = Capacitor.Plugins;
+      const { Directory, Encoding } = Capacitor;
+      if (Filesystem) {
+        await Filesystem.writeFile({
+          path: 'myskedul_internal.json',
+          data: JSON.stringify({ subjects, classes, tasks, meta, cal, settings }),
+          directory: Directory.Data,
+          encoding: Encoding.UTF8
+        });
+      }
+    } catch (e) { }
+
+    // Schedule notifications last as it is the heaviest operation
+    if (notifSettings.enabled) await scheduleAllNotifications();
   }
-  lucide.createIcons();
-  renderHome();
-  updateProfUI();
-});
+
+  isSaving = false;
+}
