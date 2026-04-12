@@ -1,0 +1,15 @@
+{
+  "version": "1.2.04",
+  "apk": {
+    "low": "https://github.com/ianshulyadav/MySkedul/releases/download/v1.2.04/MySkedul-low.apk",
+    "high": "https://github.com/ianshulyadav/MySkedul/releases/download/v1.2.04/MySkedul-high.apk"
+  },
+  "message": "New update available! 🚀 Now you can share your schedule and enjoy a smoother app.",
+  "force": false,
+  "changelog": [
+    "☁️ Share your schedule using a simple code",
+    "🔔 Improved notifications for classes",
+    "⚡ Faster and smoother performance",
+    "🐞 Bug fixes"
+  ]
+}
