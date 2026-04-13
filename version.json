@@ -1,11 +1,11 @@
 {
-  "version": "1.2.04",
+  "version": "1.2.05",
   "apk": {
     "low": "https://github.com/ianshulyadav/MySkedul/releases/download/v1.2.04/MySkedul-low.apk",
     "high": "https://drive.google.com/file/d/1XjcSR7JvDyAq8hsJbMhZo3TLcAA0qGo5/view?usp=drivesdk"
 
   },
-  "message": "New update available! 🚀 Now you can share your schedule and enjoy a smoother app.",
+  "message": "UPDATE KARLE BHADWE.",
   "force": false,
   "changelog": [
     "☁️ Share your schedule using a simple code",
