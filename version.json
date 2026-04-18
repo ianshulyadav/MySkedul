@@ -1,7 +1,7 @@
 {
   "version": "1.3.04",
   "forceUpdate": true,
-  "message": "MySkedul v1.3.04 is BIG! Experience the new Group Tab, Cloud Hub, and premium UI polish.",
+  "message": "<i data-lucide='cloud-download' style='color:#4FACFE; width:18px;'>MySkedul v1.3.04 is BIG! Experience the new Group Tab, Cloud Hub, and premium UI polish.",
   "downloadUrl": "https://github.com/ianshulyadav/MySkedul/releases/latest",
   "apk": {
     "high": "https://github.com/ianshulyadav/MySkedul/releases/download/v1.3.04/MySkedul-v1.3.04-high.apk",
