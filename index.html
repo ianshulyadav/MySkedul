@@ -4,57 +4,1589 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="MySkedul - The Premium Academic OS for Students. 120Hz smooth schedule management with cloud sharing.">
-  <meta name="theme-color" content="#6C63FF">
-  <meta property="og:title" content="MySkedul | Academic OS">
-  <meta property="og:description" content="Liquid-smooth schedule management with 120Hz gestures and secure cloud sharing.">
-  <meta property="og:image" content="logo.png">
-  <title>MySkedul | Academic OS</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="logo.png">
-  <link rel="stylesheet" href="style.css">
+  <title>Studuck MVP</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg: #EAEEF2;
+      --card: #FFF;
+      --card-glass: rgba(255, 255, 255, 0.7);
+      --text: #0D0D0D;
+      --sub: #8A8F9E;
+      --border: #E0E4EA;
+      --theme: #6C63FF;
+      /* The vibrant beautiful purple primary color */
+      --green: #2ECC71;
+      --gf: rgba(46, 204, 113, .22);
+      --gb: rgba(46, 204, 113, .55);
+      --red: #F44336;
+      --sh: 0 12px 40px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.03);
+      --r: 16px;
+      --rs: 12px;
+      --blur: blur(20px);
+    }
+
+    [data-theme="dark"] {
+      --bg: #16161D;
+      --card: #22222A;
+      --card-glass: rgba(34, 34, 42, 0.75);
+      --text: #F3F4F6;
+      --sub: #A1A1AA;
+      --border: #353540;
+      --theme: #6C63FF;
+      --gf: rgba(76, 175, 80, .2);
+      --gb: rgba(76, 175, 80, .4);
+      --sh: 0 20px 50px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 430px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .page {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .page.active {
+      display: flex;
+    }
+
+    .page.active .cc,
+    .page.active .tc,
+    .page.active .gc,
+    .page.active .si {
+      animation: fadeUp 0.3s ease both;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* STAGGER DELAY UTILITY */
+    .cc:nth-child(1) {
+      animation-delay: 0s
+    }
+
+    .cc:nth-child(2) {
+      animation-delay: .04s
+    }
+
+    .cc:nth-child(3) {
+      animation-delay: .08s
+    }
+
+    .cc:nth-child(4) {
+      animation-delay: .12s
+    }
+
+    .cc:nth-child(5) {
+      animation-delay: .16s
+    }
+
+    .cc:nth-child(6) {
+      animation-delay: .2s
+    }
+
+    .cc:nth-child(7) {
+      animation-delay: .24s
+    }
+
+    .cc:nth-child(8) {
+      animation-delay: .28s
+    }
+
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+
+    .scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* TOP BAR */
+    .topbar {
+      background: transparent;
+      padding: 14px 20px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -.4px;
+    }
+
+    .ib {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--card);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      box-shadow: var(--sh);
+      transition: all .15s;
+    }
+
+    .ib:active {
+      transform: scale(.92);
+    }
+
+    /* BOTTOM NAV */
+    .bnav {
+      background: var(--card-glass);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0 20px;
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      border-radius: 24px 24px 0 0;
+      z-index: 100;
+    }
+
+    .nb {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sub);
+      padding: 4px 16px;
+      transition: color .2s;
+    }
+
+    .nb.active {
+      color: var(--text);
+    }
+
+    .nb .ni {
+      display: block;
+    }
+
+    /* SEARCH */
+    .sw {
+      padding: 0 16px 12px;
+    }
+
+    .sb {
+      background: var(--card);
+      border-radius: 30px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--sh);
+    }
+
+    .sb input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      background: transparent;
+      color: var(--text);
+    }
+
+    .sb input::placeholder {
+      color: var(--sub);
+    }
+
+    /* CLASS CARD */
+    .cc {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%), var(--card);
+      border-radius: var(--r);
+      margin: 0 16px 12px;
+      padding: 16px 16px 16px 0;
+      display: flex;
+      align-items: center;
+      box-shadow: var(--sh);
+      cursor: pointer;
+      transition: transform .2s, background .2s;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      background-clip: padding-box;
+    }
+
+    [data-theme="dark"] .cc {
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .cc:active {
+      transform: scale(.98);
+    }
+
+    .cc.past {
+      opacity: .5;
+    }
+
+    .cc.next-up {
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .cc-bar {
+      width: 5px;
+      border-radius: 0 4px 4px 0;
+      align-self: stretch;
+      min-height: 48px;
+      flex-shrink: 0;
+      background: var(--text);
+      margin-right: 14px;
+    }
+
+    .cc-info {
+      flex: 1;
+    }
+
+    .cc-name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.2px;
+      margin-bottom: 4px;
+    }
+
+    .cc-room {
+      font-size: 13px;
+      color: var(--sub);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .cc-t {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .cc-ts {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+    }
+
+    .cc-te {
+      font-size: 13px;
+      color: var(--sub);
+      font-weight: 600;
+    }
+
+    .pb {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background: rgba(244, 67, 54, .3);
+      border-radius: 0 2px 2px 0;
+      transition: width 1s linear;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #FFF3F3;
+      color: var(--red);
+      padding: 3px 10px 3px 6px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    [data-theme="dark"] .live-badge {
+      background: rgba(244, 67, 54, .15);
+    }
+
+    .ldot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--red);
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .5;
+        transform: scale(.75)
+      }
+    }
+
+    .next-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: transparent;
+      color: var(--green);
+      padding: 0;
+      border-radius: 0;
+      font-size: 10px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .test-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 152, 0, .15);
+      color: #FF9800;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .pdiv {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      margin: 4px 0;
+    }
+
+    .pdiv::before,
+    .pdiv::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .pdiv span {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* STATS */
+    .sr {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 0 16px 8px;
+    }
+
+    .sc {
+      background: var(--card);
+      border-radius: var(--rs);
+      padding: 10px 14px;
+      box-shadow: var(--sh);
+      border: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    [data-theme="dark"] .sc {
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .sl {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--sub);
+      margin-bottom: 2px;
+    }
+
+    .sv {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    /* HEADING */
+    .hd {
+      padding: 6px 20px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .hd-big {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .hd-sub {
+      font-size: 13px;
+      color: var(--sub);
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    .btn-today {
+      background: var(--card);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--sh);
+      cursor: pointer;
+      color: var(--green);
+      border: none;
+    }
+
+    /* DATE STRIP */
+    .ds-wrap {
+      padding: 8px 0 0;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .month-label {
+      padding: 0 20px 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sub);
+      letter-spacing: -0.2px;
+    }
+
+    .ds {
+      display: flex;
+      gap: 6px;
+      padding: 0 16px 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+    }
+
+    .ds::-webkit-scrollbar {
+      display: none;
+    }
+
+    .db {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 6px;
+      border-radius: 14px;
+      cursor: pointer;
+      min-width: 52px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+      scroll-snap-align: start;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    [data-theme="dark"] .db {
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .db:active {
+      transform: scale(0.94);
+    }
+
+    .db .dn {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--sub);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .db .dd {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+
+    .db .dm {
+      font-size: 9px;
+      color: var(--sub);
+      margin-top: 3px;
+      font-weight: 600;
+    }
+
+    .db.tod .dd {
+      background: var(--theme);
+      color: white;
+      box-shadow: 0 4px 16px rgba(108, 99, 255, 0.4);
+    }
+
+    .db.tod {
+      border-color: var(--theme);
+    }
+
+    .db.sel:not(.tod) .dd {
+      background: var(--bg);
+    }
+
+    .db .sun {
+      color: var(--red) !important;
+    }
+
+    .db.tod .sun {
+      color: white !important;
+    }
+
+    .db .dot-row {
+      display: flex;
+      gap: 2px;
+      margin-top: 5px;
+      height: 5px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .db .cdot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+    }
+
+    /* EXAM DAY DATE CARD */
+    .db.exam-day {
+      border-color: var(--red);
+      background: rgba(244, 67, 54, 0.08);
+    }
+
+    [data-theme="dark"] .db.exam-day {
+      background: rgba(244, 67, 54, 0.15);
+    }
+
+    /* TEST DAY DATE CARD */
+    .db.test-day {
+      border-color: #FF9800;
+      background: rgba(255, 152, 0, 0.06);
+    }
+
+    [data-theme="dark"] .db.test-day {
+      background: rgba(255, 152, 0, 0.1);
+    }
+
+    /* HOLIDAY DATE CARD */
+    .db.holiday {
+      border-color: var(--green);
+      background: rgba(76, 175, 80, 0.06);
+    }
+
+    [data-theme="dark"] .db.holiday {
+      background: rgba(76, 175, 80, 0.1);
+    }
+
+    /* EXAM CARD */
+    .exam-card {
+      background: var(--card);
+      border-radius: var(--r);
+      margin: 0 16px 10px;
+      padding: 16px 16px 16px 0;
+      display: flex;
+      align-items: center;
+      box-shadow: var(--sh);
+      position: relative;
+      overflow: hidden;
+      border-left: 5px solid var(--red);
+      cursor: pointer;
+      transition: transform .15s;
+    }
+
+    .exam-card:active {
+      transform: scale(.985);
+    }
+
+    .exam-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(244, 67, 54, .12);
+      color: var(--red);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    /* QUICK ACTIONS MENU */
+    .qa-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: background .15s;
+      border-radius: var(--rs);
+    }
+
+    .qa-item:active {
+      background: var(--border);
+    }
+
+    .qa-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .qa-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .qa-sub {
+      font-size: 12px;
+      color: var(--sub);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .btn-today {
+      position: absolute;
+      right: 16px;
+      top: 56%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--green);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 10;
+      color: white !important;
+    }
+
+    .btn-today i {
+      color: white !important;
+      width: 18px !important;
+      height: 18px !important;
+    }
+
+    .btn-today:active {
+      transform: translateY(-50%) scale(0.9);
+    }
+
+    .btn-today.hidden {
+      opacity: 0;
+      transform: translateY(-50%) scale(0.8);
+      pointer-events: none;
+    }
+
+    /* PROFILE */
+    .pav {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--bg);
+    }
+
+    .prow {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 20px 16px;
+    }
+
+    .pname {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -.4px;
+    }
+
+    .pemail {
+      font-size: 14px;
+      color: var(--sub);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .premium {
+      background: var(--text);
+      border-radius: var(--r);
+      margin: 0 16px 16px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      color: var(--bg);
+    }
+
+    .pt {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .ps {
+      font-size: 13px;
+      opacity: 0.8;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .mi {
+      background: var(--card);
+      border-radius: var(--rs);
+      margin: 0 16px 8px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      box-shadow: var(--sh);
+      transition: transform .15s;
+    }
+
+    .mi:active {
+      transform: scale(.985);
+    }
+
+    .mi-lbl {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .toggle {
+      width: 44px;
+      height: 24px;
+      border-radius: 12px;
+      background: var(--border);
+      position: relative;
+      transition: all .3s;
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      transition: all .3s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+    }
+
+    .toggle.on {
+      background: var(--green);
+    }
+
+    .toggle.on::after {
+      transform: translateX(20px);
+    }
+
+    /* TASKS */
+    .tchk {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--sub);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all .2s;
+      color: transparent;
+    }
+
+    .tchk.done {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+    }
+
+    .t-done .cc-name {
+      text-decoration: line-through;
+      color: var(--sub);
+    }
+
+    .prio-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .prio-high {
+      background: rgba(244, 67, 54, .15);
+      color: var(--red);
+    }
+
+    .prio-med {
+      background: rgba(255, 152, 0, .15);
+      color: #FF9800;
+    }
+
+    .prio-low {
+      background: rgba(76, 175, 80, .15);
+      color: var(--green);
+    }
+
+    /* GROUPS */
+    .gc {
+      background: var(--card);
+      border-radius: var(--r);
+      margin: 0 16px 12px;
+      padding: 16px;
+      box-shadow: var(--sh);
+      cursor: pointer;
+      transition: transform .15s;
+    }
+
+    .gc:active {
+      transform: scale(.985);
+    }
+
+    .gc-h {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .gc-av {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .gc-n {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .gc-mem {
+      font-size: 13px;
+      color: var(--sub);
+      font-weight: 600;
+    }
+
+    .gc-p {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 500;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+
+    /* COMING SOON OVERLAY */
+    .coming-soon-wrap {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .coming-soon-wrap .scroll {
+      filter: blur(6px) saturate(0.4);
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .coming-soon-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      gap: 16px;
+    }
+
+    .coming-soon-overlay .cs-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--sh);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .coming-soon-overlay .cs-title {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    .coming-soon-overlay .cs-sub {
+      font-size: 14px;
+      color: var(--sub);
+      font-weight: 600;
+      text-align: center;
+      max-width: 260px;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-8px)
+      }
+    }
+
+    /* WEEK VIEW SCHEDULE Grid */
+    .wv-row {
+      display: flex;
+      background: var(--card);
+      margin: 0 16px 12px;
+      border-radius: var(--rs);
+      box-shadow: var(--sh);
+      padding: 6px;
+      gap: 6px;
+    }
+
+    .wv-btn {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--sub);
+      transition: all .2s;
+    }
+
+    .wv-btn.on {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    .timetable {
+      background: var(--card);
+      border-radius: var(--r);
+      margin: 0 16px 16px;
+      box-shadow: var(--sh);
+      overflow-x: auto;
+      padding: 16px;
+    }
+
+    .tt-grid {
+      display: grid;
+      grid-template-columns: 50px repeat(5, 120px);
+      gap: 8px;
+    }
+
+    .tt-hdr {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--sub);
+      padding-bottom: 10px;
+    }
+
+    .tt-sid {
+      text-align: right;
+      padding-right: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sub);
+    }
+
+    .tt-cell {
+      position: relative;
+      background: var(--bg);
+      border-radius: 8px;
+      height: 70px;
+      padding: 8px;
+    }
+
+    .tt-item {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      right: 4px;
+      border-radius: 6px;
+      padding: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* SUBJECTS & PICKER */
+    .si {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin: 0 16px 8px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      transition: transform .15s;
+    }
+
+    .si:active {
+      transform: scale(.985);
+    }
+
+    .ssb {
+      background: transparent;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--sub);
+      border: 1px dashed var(--sub);
+      transition: all .2s;
+    }
+
+    .ssb.sel {
+      border-style: solid;
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    .nsr {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .nsdot {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+
+    .nsi {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -.8px;
+    }
+
+    .nsi::placeholder {
+      color: var(--sub);
+    }
+
+    /* MODALS */
+    .mo {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0);
+      backdrop-filter: blur(0px);
+      -webkit-backdrop-filter: blur(0px);
+      z-index: 300;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: all .25s ease;
+    }
+
+    .mo.open {
+      background: rgba(0, 0, 0, .45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      pointer-events: auto;
+      opacity: 1;
+    }
+
+    .mo.popup {
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: 60px 20px;
+    }
+
+    .ms {
+      background: var(--bg);
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-width: 430px;
+      max-height: 92dvh;
+      overflow-y: auto;
+      animation: su .32s cubic-bezier(.34, 1.56, .64, 1);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-bottom: none;
+    }
+
+    .ms.popup {
+      border-radius: 24px;
+      width: 280px;
+      animation: popIn .25s cubic-bezier(.34, 1.56, .64, 1);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .ms::-webkit-scrollbar {
+      display: none;
+    }
+
+    @keyframes su {
+      from {
+        transform: translateY(100%)
+      }
+
+      to {
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(0.8) translateY(-20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .mh {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin: 12px auto 0;
+      flex-shrink: 0;
+    }
+
+    .mtb {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px 10px;
+      flex-shrink: 0;
+    }
+
+    .mt {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .mb {
+      padding: 8px 20px 24px;
+      flex: 1;
+    }
+
+    .fi {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 13px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .fi-lbl {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--sub);
+    }
+
+    .fi input,
+    .fi select,
+    .fi textarea {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      text-align: right;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .fi input::placeholder {
+      color: var(--sub);
+      font-weight: 600;
+    }
+
+    .btn-p {
+      width: 100%;
+      padding: 16px;
+      border-radius: 16px;
+      background: var(--theme);
+      color: white;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all .2s;
+      box-shadow: 0 4px 16px rgba(108, 99, 255, 0.25);
+    }
+
+    .btn-p:active {
+      transform: scale(.98);
+    }
+
+    .btn-s {
+      width: 100%;
+      padding: 15px;
+      border-radius: 16px;
+      background: var(--bg);
+      color: var(--sub);
+      border: 1px solid var(--border);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 700;
+      opacity: 0;
+      transition: all .3s;
+      z-index: 999;
+      white-space: nowrap;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--sub);
+    }
+
+    .empty-ico {
+      margin-bottom: 12px;
+      color: var(--border);
+    }
+
+    .empty p {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    /* DAYS PICKER */
+    .dpr {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      justify-content: center;
+    }
+
+    .dpt {
+      padding: 10px 16px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      transition: all .2s;
+      color: var(--sub);
+    }
+
+    .dpt.on {
+      background: var(--theme);
+      border-color: var(--theme);
+      color: white;
+    }
+
+    /* PROFILE NEW HEADER */
+    .profile-header {
+      background: linear-gradient(135deg, var(--text) 0%, var(--sub) 100%);
+      padding: 28px 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .profile-big-av {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--bg);
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-name {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--bg);
+      letter-spacing: -0.5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-email {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 600;
+      margin-top: 3px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Long Press Animation */
+    @keyframes lp-pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(0.92);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .lp-active {
+      animation: lp-pulse 0.4s ease infinite;
+      opacity: 0.7;
+    }
+
+    .profile-edit-btn {
+      margin-left: auto;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--bg);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: calc(110px + env(safe-area-inset-bottom));
+      right: 20px;
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: var(--text);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s;
+      z-index: 100;
+      color: var(--bg);
+    }
+
+    .fab:active {
+      transform: scale(0.9);
+    }
+
+    /* HOME HEADER */
+    .home-header {
+      padding: 14px 20px 2px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .h-avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--text), var(--sub));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--bg);
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
+    }
+
+    .h-greeting {
+      font-size: 13px;
+      color: var(--sub);
+      font-weight: 500;
+    }
+
+    .h-name {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+  </style>
 </head>
 
 <body>
 
-  <!-- loading screen shown until app data is ready -->
-  <div id="loading-screen"
-    style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s ease;will-change:opacity;">
-    <div style="background:var(--text);border-radius:32px;padding:3px;box-shadow:var(--sh);animation:lp-pulse 1.2s ease infinite;overflow:hidden;">
-      <div style="width:120px;height:120px;border-radius:29px;background:white;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-        <img src="logo.png" style="width:100%;height:100%;object-fit:cover;border-radius:29px;" onerror="this.src='https://antigravity.google/favicon.ico'">
-      </div>
-    </div>
-    <div style="margin-top:32px;font-size:26px;font-weight:900;letter-spacing:-0.8px;color:var(--text);animation:pulse 2.5s infinite;">MySkedul</div>
-    <div style="margin-top:8px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:1.5px;">Academy OS</div>
-  </div>
-
-  <!-- onboarding — shown only on first launch -->
-  <div class="mo center" id="m-onboarding">
-    <div class="ms popup" style="padding:28px 20px;border-radius:28px;">
-      <div style="font-size:24px;font-weight:900;margin-bottom:12px;letter-spacing:-0.5px;">Welcome to MySkedul</div>
-      <p style="font-size:14px;color:var(--sub);margin-bottom:24px;line-height:1.5;">Let's get started. What should we call you?</p>
-      <div class="fi" style="background:var(--bg);"><i data-lucide="user" style="color:var(--sub)"></i><input id="ob-name" placeholder="Your Name" style="text-align:left;"></div>
-      <div class="fi" style="background:var(--bg);"><i data-lucide="mail" style="color:var(--sub)"></i><input id="ob-email" type="email" placeholder="Email Address" style="text-align:left;"></div>
-      <button class="btn-p" style="margin-top:14px;border-radius:18px;" onclick="finishOnboarding()">Continue</button>
-    </div>
-  </div>
-
   <!-- HOME -->
   <div class="page active" id="pg-home">
-    <div class="topbar home-header" style="position:sticky;top:0;backdrop-filter:none;-webkit-backdrop-filter:none;background:transparent;">
-      <div class="h-avatar" id="h-av">A</div>
-      <div>
-        <div class="h-greeting">Good day 👋</div>
-        <div class="h-name" id="h-uname">Anshul Yadav</div>
-      </div>
-      <button class="ib" style="margin-left:auto;" onclick="openQuickActions()">
-        <i data-lucide="edit-2" style="width:18px;height:18px;"></i>
-      </button>
-    </div>
     <div class="scroll">
-      <div class="hd" style="align-items:center;">
+      <div class="home-header">
+        <div class="h-avatar" id="h-av">A</div>
+        <div>
+          <div class="h-greeting">Good day 👋</div>
+          <div class="h-name" id="h-uname">Anshul Yadav</div>
+        </div>
+        <button class="ib" style="margin-left:auto;" onclick="openQuickActions()"><i data-lucide="edit-2"
+            style="width:18px;height:18px;"></i></button>
+      </div>
+      <div class="hd" style="align-items: center;">
         <div>
           <div style="font-size:13px;font-weight:700;color:var(--sub);margin-bottom:6px;" id="h-week-lbl">Week A</div>
           <div class="hd-big" id="h-day">Thursday</div>
@@ -64,9 +1596,8 @@
       <div class="ds-wrap">
         <div class="month-label" id="h-month-lbl">March 2026</div>
         <div class="ds" id="home-ds"></div>
-        <button class="btn-today" id="today-btn" onclick="scrollToToday()" title="Today">
-          <i data-lucide="calendar" style="width:20px;height:20px;"></i>
-        </button>
+        <button class="btn-today" id="today-btn" onclick="scrollToToday()" title="Today"><i data-lucide="calendar"
+            style="width:20px;height:20px;"></i></button>
       </div>
       <div class="sr">
         <div class="sc">
@@ -78,11 +1609,10 @@
           <div class="sv" id="st-start">—</div>
         </div>
       </div>
-      <div class="sw" style="padding:0 16px 12px;">
-        <div class="sb" style="padding:8px 16px;">
-          <i data-lucide="search" style="width:14px;color:var(--sub)"></i>
-          <input id="h-srch" placeholder="Search classes" oninput="renderHome()">
-        </div>
+      <div class="sw" style="padding:0 16px 8px;">
+        <div class="sb" style="padding:10px 16px;"><i data-lucide="search"
+            style="width:16px;color:var(--sub)"></i><input id="h-srch" placeholder="Search classes"
+            oninput="renderHome()"></div>
       </div>
       <div id="h-list"></div>
       <div style="height:20px"></div>
@@ -95,24 +1625,22 @@
   <!-- SCHEDULES -->
   <div class="page" id="pg-scheds">
     <div class="topbar">
-      <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left"></i></button>
+      <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left"
+          style="width:20px;height:20px;"></i></button>
       <span class="topbar-title">Schedules</span>
-      <div style="display:flex;gap:10px;">
-        <button class="ib" style="color:var(--theme);" onclick="openModal('m-share-options')">
-          <i data-lucide="share-2" style="width:20px;height:20px;"></i>
-        </button>
-        <button class="ib" onclick="openAddOptions()">
-          <i data-lucide="plus" style="width:20px;height:20px;"></i>
-        </button>
-      </div>
+      <button class="ib" onclick="openAddClass()"><i data-lucide="plus" style="width:20px;height:20px;"></i></button>
     </div>
     <div class="wv-row">
       <div class="wv-btn on" id="btn-list-view" onclick="setSchedView('list')">List View</div>
       <div class="wv-btn" id="btn-week-view" onclick="setSchedView('week')">Week View</div>
     </div>
     <div class="scroll">
-      <div id="v-list"><div id="scheds-list"></div></div>
-      <div id="v-week" style="display:none;"><div class="timetable" id="timetable-view"></div></div>
+      <div id="v-list">
+        <div id="scheds-list"></div>
+      </div>
+      <div id="v-week" style="display:none;">
+        <div class="timetable" id="timetable-view"></div>
+      </div>
       <div style="height:20px"></div>
     </div>
   </div>
@@ -120,15 +1648,14 @@
   <!-- SUBJECTS -->
   <div class="page" id="pg-subjs">
     <div class="topbar">
-      <button class="ib" onclick="switchNav('profile')"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
+      <button class="ib" onclick="switchNav('profile')"><i data-lucide="arrow-left"
+          style="width:20px;height:20px;"></i></button>
       <span class="topbar-title">Subjects</span>
       <button class="ib" onclick="openNewSubj()"><i data-lucide="plus" style="width:20px;height:20px;"></i></button>
     </div>
     <div class="sw">
-      <div class="sb">
-        <i data-lucide="search" style="width:18px;color:var(--sub)"></i>
-        <input id="sj-srch" placeholder="Search subjects" oninput="renderSubjList('subjs-list','sj-srch')">
-      </div>
+      <div class="sb"><i data-lucide="search" style="width:18px;color:var(--sub)"></i><input id="sj-srch"
+          placeholder="Search subjects" oninput="renderSubjList('subjs-list','sj-srch')"></div>
     </div>
     <div class="scroll">
       <div id="subjs-list"></div>
@@ -139,15 +1666,14 @@
   <!-- TASKS -->
   <div class="page" id="pg-tasks">
     <div class="topbar">
-      <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
+      <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left"
+          style="width:20px;height:20px;"></i></button>
       <span class="topbar-title">Tasks</span>
       <button class="ib" onclick="openAddTask()"><i data-lucide="plus" style="width:20px;height:20px;"></i></button>
     </div>
     <div class="sw" style="padding:0 16px 8px;">
-      <div class="sb" style="padding:10px 16px;">
-        <i data-lucide="search" style="width:16px;color:var(--sub)"></i>
-        <input id="t-srch" placeholder="Search tasks" oninput="renderTasks()">
-      </div>
+      <div class="sb" style="padding:10px 16px;"><i data-lucide="search" style="width:16px;color:var(--sub)"></i><input
+          id="t-srch" placeholder="Search tasks" oninput="renderTasks()"></div>
     </div>
     <div class="scroll">
       <div id="tasks-list"></div>
@@ -161,9 +1687,11 @@
   <!-- GROUPS -->
   <div class="page" id="pg-groups">
     <div class="topbar">
-      <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left" style="width:20px;height:20px;"></i></button>
+      <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left"
+          style="width:20px;height:20px;"></i></button>
       <span class="topbar-title">Groups</span>
-      <button class="ib" onclick="showToast('Coming soon!')"><i data-lucide="users" style="width:20px;height:20px;"></i></button>
+      <button class="ib" onclick="showToast('Coming soon!')"><i data-lucide="users"
+          style="width:20px;height:20px;"></i></button>
     </div>
     <div class="coming-soon-wrap">
       <div class="coming-soon-overlay">
@@ -185,12 +1713,13 @@
         <div class="profile-big-av" id="p-av">A</div>
         <div>
           <div class="profile-name" id="p-name">Anshul Yadav</div>
-          <div class="profile-email" id="p-email">ianshulyadav@gmail.com</div>
+          <div class="profile-email" id="p-email">ronakyadavyt@gmail.com</div>
         </div>
         <button class="profile-edit-btn" onclick="openEditProfile()">
           <i data-lucide="edit-2" style="width:17px;height:17px;"></i>
         </button>
       </div>
+
       <div class="premium" onclick="showToast('Premium UI Unlocked!')">
         <i data-lucide="star" style="width:28px;height:28px"></i>
         <div>
@@ -198,46 +1727,1088 @@
           <div class="ps">Full access functionality unlocked!</div>
         </div>
       </div>
-      <div style="padding:10px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Account</div>
-      <div class="mi" onclick="openEditProfile()"><i data-lucide="user" style="color:var(--sub);"></i><span class="mi-lbl">Account Details</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div class="mi" onclick="switchNav('sched')"><i data-lucide="calendar" style="color:var(--sub);"></i><span class="mi-lbl">Schedules</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div class="mi" onclick="switchNav('subjs')"><i data-lucide="book" style="color:var(--sub);"></i><span class="mi-lbl">Subjects</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div style="padding:16px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Schedule Sharing</div>
-      <div class="mi" onclick="openShareID()"><i data-lucide="cloud" style="color:#9F5DFF;"></i><span class="mi-lbl">Cloud Share</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div class="mi" onclick="shareAsFile()"><i data-lucide="share-2" style="color:#FF9F0A;"></i><span class="mi-lbl">Send File</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div class="mi" onclick="openImportID()"><i data-lucide="file-digit" style="color:#00D97E;"></i><span class="mi-lbl">Import via ID</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div class="mi" onclick="backupToFile()"><i data-lucide="download" style="color:var(--sub);"></i><span class="mi-lbl">Backup to File</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div class="mi" onclick="document.getElementById('restore-input').click()"><i data-lucide="rotate-ccw" style="color:var(--sub);"></i><span class="mi-lbl">Restore from File</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div class="mi" onclick="clearAllData()"><i data-lucide="trash-2" style="color:var(--red);"></i><span class="mi-lbl" style="color:var(--red);">Clear All Data</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div style="padding:16px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Preferences</div>
-      <div class="mi" onclick="toggleDarkMode()"><i data-lucide="moon" style="color:var(--sub);"></i><span class="mi-lbl">App Theme <span id="theme-lbl" style="font-size:11px;color:var(--sub);display:block;font-weight:500;">System</span></span><div class="toggle" id="dk-tog"></div></div>
-      <div class="mi" onclick="togglePerformanceMode()"><i data-lucide="zap" style="color:var(--theme);"></i><span class="mi-lbl">Performance Mode <span id="perf-lbl" style="font-size:11px;color:var(--sub);display:block;font-weight:500;">Automatic</span></span><div class="toggle" id="perf-tog"></div></div>
-      <div class="mi" onclick="openNotifSettings()"><i data-lucide="bell" style="color:var(--sub);"></i><span class="mi-lbl">Notifications</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div class="mi" onclick="toggleSet(this,'sync')"><i data-lucide="cloud" style="color:var(--sub);"></i><span class="mi-lbl">Auto-sync</span><div class="toggle on" id="s-tog"></div></div>
-      <div style="padding:16px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">About</div>
-      <div class="mi" onclick="openTelegram()"><i data-lucide="send" style="color:var(--sub);"></i><span class="mi-lbl">Telegram Community</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div class="mi" onclick="shareApp()"><i data-lucide="share-2" style="color:var(--sub);"></i><span class="mi-lbl">Share MySkedul</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div class="mi" onclick="showToast('ianshulyaduvanshi@gmail.com')"><i data-lucide="mail" style="color:var(--sub);"></i><span class="mi-lbl">Contact Support</span><i data-lucide="chevron-right" style="color:var(--sub)"></i></div>
-      <div class="mi"><i data-lucide="info" style="color:var(--sub);"></i><span class="mi-lbl">App Version</span><span style="font-size:13px;color:var(--sub);font-weight:600;">v 1.5.04.57</span></div>
+
+      <div
+        style="padding:10px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">
+        Account</div>
+      <div class="mi" onclick="openEditProfile()">
+        <i data-lucide="user" style="color:var(--sub);"></i><span class="mi-lbl">Account Details</span><i
+          data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
+      <div class="mi" onclick="switchNav('sched')">
+        <i data-lucide="calendar" style="color:var(--sub);"></i><span class="mi-lbl">Schedules</span><i
+          data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
+      <div class="mi" onclick="switchNav('subjs')">
+        <i data-lucide="book" style="color:var(--sub);"></i><span class="mi-lbl">Subjects</span><i
+          data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
+
+      <div
+        style="padding:16px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">
+        Preferences</div>
+      <div class="mi" onclick="toggleDarkMode()">
+        <i data-lucide="moon" style="color:var(--sub);"></i><span class="mi-lbl">Dark Mode</span>
+        <div class="toggle" id="dk-tog"></div>
+      </div>
+      <div class="mi" onclick="toggleSet(this,'notif')">
+        <i data-lucide="bell" style="color:var(--sub);"></i><span class="mi-lbl">Notifications</span>
+        <div class="toggle on" id="n-tog"></div>
+      </div>
+      <div class="mi" onclick="toggleSet(this,'sync')">
+        <i data-lucide="cloud" style="color:var(--sub);"></i><span class="mi-lbl">Auto-sync</span>
+        <div class="toggle on" id="s-tog"></div>
+      </div>
+
+      <div
+        style="padding:16px 20px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">
+        About</div>
+      <div class="mi" onclick="showToast('Studuck on social media coming soon!')">
+        <i data-lucide="share-2" style="color:var(--sub);"></i><span class="mi-lbl">Share Studuck</span><i
+          data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
+      <div class="mi" onclick="showToast('ianshulyaduvanshi@gmail.com')">
+        <i data-lucide="mail" style="color:var(--sub);"></i><span class="mi-lbl">Contact Support</span><i
+          data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
+      <div class="mi">
+        <i data-lucide="info" style="color:var(--sub);"></i><span class="mi-lbl">App Version</span><span
+          style="font-size:13px;color:var(--sub);font-weight:600;">v 1.0.03.26</span>
+      </div>
+
       <div style="height:20px"></div>
     </div>
   </div>
 
   <!-- BOTTOM NAV -->
   <div class="bnav">
-    <button class="nb active" id="bnav-home" onclick="switchNav('home')"><i data-lucide="home" class="ni"></i>Home</button>
-    <button class="nb" id="bnav-sched" onclick="switchNav('sched')"><i data-lucide="calendar-days" class="ni"></i>Schedule</button>
-    <button class="nb" id="bnav-tasks" onclick="switchNav('tasks')"><i data-lucide="check-square" class="ni"></i>Tasks</button>
-    <button class="nb" id="bnav-groups" onclick="switchNav('groups')"><i data-lucide="users" class="ni"></i>Groups</button>
-    <button class="nb" id="bnav-profile" onclick="switchNav('profile')"><i data-lucide="user" class="ni"></i>Profile</button>
+    <button class="nb active" id="bnav-home" onclick="switchNav('home')"><i data-lucide="home"
+        class="ni"></i>Home</button>
+    <button class="nb" id="bnav-sched" onclick="switchNav('sched')"><i data-lucide="calendar-days"
+        class="ni"></i>Schedule</button>
+    <button class="nb" id="bnav-tasks" onclick="switchNav('tasks')"><i data-lucide="check-square"
+        class="ni"></i>Tasks</button>
+    <button class="nb" id="bnav-groups" onclick="switchNav('groups')"><i data-lucide="users"
+        class="ni"></i>Groups</button>
+    <button class="nb" id="bnav-profile" onclick="switchNav('profile')"><i data-lucide="user"
+        class="ni"></i>Profile</button>
   </div>
 
-  <!-- hidden file inputs -->
-  <input type="file" id="import-input" style="display:none;" accept=".json" onchange="importSchedule(this.files[0])">
-  <input type="file" id="restore-input" style="display:none;" accept=".json" onchange="restoreFromFile(this.files[0])">
+  <!-- MODALS -->
+
+  <!-- Add Class Modal -->
+  <div class="mo" id="m-add-class" onclick="if(event.target===this)closeModal('m-add-class')">
+    <div class="ms">
+      <div class="mh"></div>
+      <div class="mtb"><button class="ib" onclick="closeModal('m-add-class')"><i
+            data-lucide="arrow-left"></i></button><span class="mt" id="m-class-title">Add Class</span><button class="ib"
+          onclick="saveClass()"><i data-lucide="check"></i></button></div>
+      <div class="mb">
+        <div class="ssb" id="ssb" onclick="openPicker()">Select a subject</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="fi"><i data-lucide="clock" style="color:var(--sub)"></i><input id="i-cs" type="time"
+              value="09:00"></div>
+          <div class="fi"><i data-lucide="clock" style="color:var(--sub)"></i><input id="i-ce" type="time"
+              value="10:00"></div>
+        </div>
+        <div class="fi"><i data-lucide="map-pin" style="color:var(--sub)"></i><input id="i-cr"
+            placeholder="Room/Location" style="text-align:left;"></div>
+        <div class="fi"><i data-lucide="user" style="color:var(--sub)"></i><input id="i-ct" placeholder="Teacher"
+            style="text-align:left;"></div>
+        <div style="margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:8px;">Days
+          </div>
+          <div class="dpr" id="dp-row">
+            <button class="dpt" data-d="Mon" onclick="this.classList.toggle('on')">Mon</button>
+            <button class="dpt" data-d="Tue" onclick="this.classList.toggle('on')">Tue</button>
+            <button class="dpt" data-d="Wed" onclick="this.classList.toggle('on')">Wed</button>
+            <button class="dpt" data-d="Thu" onclick="this.classList.toggle('on')">Thu</button>
+            <button class="dpt" data-d="Fri" onclick="this.classList.toggle('on')">Fri</button>
+            <button class="dpt" data-d="Sat" onclick="this.classList.toggle('on')">Sat</button>
+          </div>
+        </div>
+        <button class="btn-p" id="btn-save-class" onclick="saveClass()">Add Class</button>
+        <button class="btn-s" id="btn-del-class" style="display:none;color:var(--red);border-color:var(--red);"
+          onclick="deleteClass()">Delete Class</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subject Picker -->
+  <div class="mo" id="m-picker" onclick="if(event.target===this)closeModal('m-picker')">
+    <div class="ms" style="height:70vh;">
+      <div class="mh"></div>
+      <div class="mtb"><button class="ib" onclick="closeModal('m-picker')"><i
+            data-lucide="arrow-left"></i></button><span class="mt">Pick Subject</span><button class="ib"
+          onclick="openNewSubjInline()"><i data-lucide="plus"></i></button></div>
+      <div style="padding:0 16px 10px;">
+        <div class="sb"><i data-lucide="search" style="width:18px;color:var(--sub)"></i><input id="pk-srch"
+            placeholder="Search" oninput="renderSubjList('pk-list','pk-srch',true)"></div>
+      </div>
+      <div class="scroll">
+        <div id="pk-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Subject -->
+  <div class="mo" id="m-new-subj" onclick="if(event.target===this)closeModal('m-new-subj')">
+    <div class="ms">
+      <div class="mh"></div>
+      <div class="mtb"><button class="ib" onclick="closeModal('m-new-subj')"><i
+            data-lucide="arrow-left"></i></button><span class="mt">New Subject</span><button class="ib"
+          onclick="saveNewSubj()"><i data-lucide="check"></i></button></div>
+      <div class="mb">
+        <div class="nsr">
+          <div class="nsdot" id="ns-dot" onclick="cycleColor()" style="background:#3B82F6"></div>
+          <div style="flex:1;"><input class="nsi" id="i-nsn" placeholder="Name"></div>
+        </div>
+        <button class="btn-p" onclick="saveNewSubj()">Add Subject</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Task Modal -->
+  <div class="mo" id="m-task" onclick="if(event.target===this)closeModal('m-task')">
+    <div class="ms">
+      <div class="mh"></div>
+      <div class="mtb"><button class="ib" onclick="closeModal('m-task')"><i data-lucide="arrow-left"></i></button><span
+          class="mt">New Task</span><button class="ib" onclick="saveTask()"><i data-lucide="check"></i></button></div>
+      <div class="mb">
+        <div class="fi"><i data-lucide="check-square" style="color:var(--sub)"></i><input id="i-tn"
+            placeholder="Task Name" style="text-align:left;"></div>
+        <div class="fi"><i data-lucide="book" style="color:var(--sub)"></i><input id="i-ts"
+            placeholder="Subject (optional)" style="text-align:left;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="fi"><i data-lucide="calendar" style="color:var(--sub)"></i><input id="i-td" type="date"
+              style="text-align:left;"></div>
+          <div class="fi"><i data-lucide="clock" style="color:var(--sub)"></i><input id="i-tt" type="time"
+              style="text-align:left;"></div>
+        </div>
+        <div class="fi">
+          <i data-lucide="alert-circle" style="color:var(--sub)"></i><span class="fi-lbl"
+            style="flex:auto;">Priority</span>
+          <select id="i-tp">
+            <option value="high">High</option>
+            <option value="med" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <button class="btn-p" onclick="saveTask()">Add Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Profile Modal -->
+  <div class="mo" id="m-profile" onclick="if(event.target===this)closeModal('m-profile')">
+    <div class="ms">
+      <div class="mh"></div>
+      <div class="mtb"><button class="ib" onclick="closeModal('m-profile')"><i
+            data-lucide="arrow-left"></i></button><span class="mt">Account</span><button class="ib"
+          onclick="saveProfile()"><i data-lucide="check"></i></button></div>
+      <div class="mb">
+        <div class="fi"><i data-lucide="user" style="color:var(--sub)"></i><input id="i-pn" placeholder="Name"
+            style="text-align:left;"></div>
+        <div class="fi"><i data-lucide="mail" style="color:var(--sub)"></i><input id="i-pe" type="email"
+            placeholder="Email" style="text-align:left;"></div>
+        <button class="btn-p" onclick="saveProfile()">Save Profile</button>
+      </div>
+    </div>
+  </div>
 
   <div class="toast" id="toast"></div>
 
-  <script src="app.js"></script>
+  <!-- Quick Actions Modal (Popup style) -->
+  <div class="mo popup" id="m-quick-actions" onclick="if(event.target===this)closeModal('m-quick-actions')">
+    <div class="ms popup" style="max-height:auto;">
+      <div class="mtb" style="padding:16px 20px 8px;">
+        <span class="mt" style="font-size:16px;">Quick Actions</span>
+        <button class="ib" style="width:30px;height:30px;background:var(--border);"
+          onclick="closeModal('m-quick-actions')"><i data-lucide="x" style="width:14px;height:14px;"></i></button>
+      </div>
+      <div style="padding:0 8px 16px;">
+        <div class="qa-item" style="padding:12px 14px; gap:12px;"
+          onclick="closeModal('m-quick-actions');switchNav('sched')">
+          <div class="qa-icon" style="background:rgba(108,99,255,.12);width:38px;height:38px;"><i
+              data-lucide="calendar-days" style="width:18px;height:18px;color:var(--theme);"></i></div>
+          <div>
+            <div class="qa-title" style="font-size:14px;">Schedule</div>
+            <div class="qa-sub" style="font-size:11px;">Planner</div>
+          </div>
+        </div>
+        <div class="qa-item" id="qa-test-btn" style="padding:12px 14px; gap:12px;">
+          <div class="qa-icon" style="background:rgba(255,152,0,.12);width:38px;height:38px;"><i data-lucide="file-edit"
+              style="width:18px;height:18px;color:#FF9800;"></i></div>
+          <div>
+            <div class="qa-title" id="qa-test-title" style="font-size:14px;">Class Test</div>
+            <div class="qa-sub" id="qa-test-sub" style="font-size:11px;">Mark Today</div>
+          </div>
+        </div>
+        <div class="qa-item" id="qa-exam-btn" style="padding:12px 14px; gap:12px;">
+          <div class="qa-icon" style="background:rgba(244,67,54,.12);width:38px;height:38px;"><i data-lucide="file-text"
+              style="width:18px;height:18px;color:var(--red);"></i></div>
+          <div>
+            <div class="qa-title" id="qa-exam-title" style="font-size:14px;">Exam Day</div>
+            <div class="qa-sub" id="qa-exam-sub" style="font-size:11px;">Mark Today</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Picker Modal -->
+  <div class="mo" id="m-test-picker" onclick="if(event.target===this)closeModal('m-test-picker')">
+    <div class="ms">
+      <div class="mh"></div>
+      <div class="mtb"><button class="ib" onclick="closeModal('m-test-picker')"><i
+            data-lucide="arrow-left"></i></button><span class="mt">Mark as Test</span>
+        <div style="width:40px"></div>
+      </div>
+      <div class="mb" style="padding-bottom:30px;">
+        <p style="font-size:13px;color:var(--sub);font-weight:600;margin-bottom:14px;">Select classes to mark as TEST
+          for this day:</p>
+        <div id="test-picker-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Focused Test Editor Modal -->
+  <div class="mo" id="m-test-editor" onclick="if(event.target===this)closeModal('m-test-editor')">
+    <div class="ms">
+      <div class="mh"></div>
+      <div class="mtb"><button class="ib" onclick="closeModal('m-test-editor')"><i
+            data-lucide="arrow-left"></i></button><span class="mt" id="m-test-editor-title">Test Details</span><button
+          class="ib" onclick="closeModal('m-test-editor')"><i data-lucide="check"></i></button></div>
+      <div class="mb">
+        <input type="hidden" id="i-t-id"><input type="hidden" id="i-t-date">
+        <p
+          style="font-size:12px;color:var(--sub);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">
+          Customise Test Details</p>
+        <div class="fi"><i data-lucide="type" style="color:var(--sub)"></i><input id="i-t-name"
+            placeholder="Test Name (e.g. Unit Test 1)" style="text-align:left;"></div>
+        <div class="fi"><i data-lucide="map-pin" style="color:var(--sub)"></i><input id="i-t-room"
+            placeholder="Room Override" style="text-align:left;"></div>
+        <button class="btn-s" style="color:var(--red);border-color:rgba(244,67,54,0.2);margin-top:20px;"
+          onclick="unmarkSingleTest()"><i data-lucide="trash-2"
+            style="width:14px;display:inline;vertical-align:middle;margin-right:4px;"></i> Mark as Normal
+          Registration</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exam Detail Editor Modal -->
+  <div class="mo" id="m-exam-editor" onclick="if(event.target===this)closeModal('m-exam-editor')">
+    <div class="ms">
+      <div class="mh"></div>
+      <div class="mtb"><button class="ib" onclick="closeModal('m-exam-editor')"><i
+            data-lucide="arrow-left"></i></button><span class="mt">Exam Details</span><button class="ib"
+          onclick="saveExamDetails()"><i data-lucide="check"></i></button></div>
+      <div class="mb">
+        <div class="fi"><i data-lucide="book" style="color:var(--sub)"></i><input id="i-exam-subj"
+            placeholder="Exam Subject" style="text-align:left;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="fi"><i data-lucide="clock" style="color:var(--sub)"></i><input id="i-exam-start" type="time"
+              value="09:00"></div>
+          <div class="fi"><i data-lucide="clock" style="color:var(--sub)"></i><input id="i-exam-end" type="time"
+              value="12:00"></div>
+        </div>
+        <div class="fi"><i data-lucide="map-pin" style="color:var(--sub)"></i><input id="i-exam-room"
+            placeholder="Room / Hall" style="text-align:left;"></div>
+        <input type="hidden" id="i-exam-date">
+        <button class="btn-p" onclick="saveExamDetails()">Save Exam</button>
+        <button class="btn-s" style="color:var(--red);border-color:var(--red);" id="btn-del-exam"
+          onclick="deleteExamFromEditor()">Remove Exam Day</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Icon init
+    lucide.createIcons();
+
+    function lp(el, cb) {
+      let t;
+      const start = (e) => {
+        t = setTimeout(() => {
+          if ('vibrate' in navigator) navigator.vibrate(40);
+          el.classList.add('lp-active');
+          cb();
+          setTimeout(() => el.classList.remove('lp-active'), 200);
+          t = null;
+        }, 600);
+      };
+      const cancel = () => { clearTimeout(t); t = null; el.classList.remove('lp-active'); };
+      el.addEventListener('mousedown', start);
+      el.addEventListener('touchstart', (e) => { if (e.cancelable) start(e); }, { passive: true });
+      el.addEventListener('mouseup', cancel);
+      el.addEventListener('mouseleave', cancel);
+      el.addEventListener('touchend', cancel);
+      el.addEventListener('contextmenu', (e) => e.preventDefault());
+    }
+    function dt(el, cb) {
+      let last = 0; el.addEventListener('click', () => {
+        const now = Date.now(); if (now - last < 300) { cb(); last = 0; } else last = now;
+      });
+    }
+
+    const COLS = ['#3B82F6', '#22C55E', '#EF4444', '#8B5CF6', '#F97316', '#EC4899', '#14B8A6', '#FFC107'];
+    let holidays = [];
+    let subjects = [
+      { id: 1, name: 'Mathematics', color: '#3B82F6' },
+      { id: 2, name: 'Physics', color: '#22C55E' },
+      { id: 3, name: 'English Lit', color: '#EC4899' },
+      { id: 4, name: 'Computer Science', color: '#8B5CF6' }
+    ];
+
+    let classes = [
+      { id: 1, sj: 1, room: 'Room 101', teacher: 'Mr. Smith', start: '08:00', end: '09:30', days: ['Mon', 'Wed'] },
+      { id: 2, sj: 2, room: 'Lab 3', teacher: 'Dr. Brown', start: '10:00', end: '11:30', days: ['Thu'] },
+      { id: 3, sj: 3, room: '2F', teacher: 'Mrs. White', start: '19:00', end: '19:09', days: ['Fri'] },
+      { id: 4, sj: 4, room: 'Computer Lab', teacher: 'Prof. Davis', start: '14:00', end: '15:30', days: ['Tue', 'Fri'] }
+    ];
+
+    let tasks = [];
+    let groups = [
+      { id: 1, name: 'CS-2024 Batch A', mem: ['You', 'Arjun', 'Priya'], lmsg: 'Project submission deadline extended.', av: '💻' },
+      { id: 2, name: 'Math Study Group', mem: ['You', 'Ankit'], lmsg: 'Sharing notes for Chapter 5.', av: '📐' }
+    ];
+
+    // PERSISTENCE
+    function saveData() {
+      const data = { subjects, classes, tasks, holidays, examDays, testOverrides, pName, pEmail };
+      localStorage.setItem('studuck_data', JSON.stringify(data));
+    }
+    function loadData() {
+      const raw = localStorage.getItem('studuck_data');
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.subjects) subjects = d.subjects;
+        if (d.classes) classes = d.classes;
+        if (d.tasks) tasks = d.tasks;
+        if (d.holidays) holidays = d.holidays;
+        if (d.examDays) examDays = d.examDays;
+        if (d.testOverrides) testOverrides = d.testOverrides;
+        if (d.pName) pName = d.pName;
+        if (d.pEmail) pEmail = d.pEmail;
+      }
+    }
+
+    const sn = id => { const s = subjects.find(x => x.id === id); return s ? s.name : 'Unknown'; };
+    const sc = id => { const s = subjects.find(x => x.id === id); return s ? s.color : '#0D0D0D'; };
+
+    let n = new Date();
+    let todayMins = n.getHours() * 60 + n.getMinutes();
+    function t2m(t) { const [h, m] = t.split(':'); return parseInt(h) * 60 + parseInt(m); }
+    function status(c) { const s = t2m(c.start), e = t2m(c.end); if (todayMins >= s && todayMins < e) return 'current'; if (todayMins >= e) return 'past'; return 'upcoming'; }
+
+    // Exam Days: array of {date:'2026-04-05', subject:'Math', start:'09:00', end:'12:00', room:'Hall A'}
+    let examDays = [];
+    // Test Overrides: array of {date:'2026-03-27', classId:2, subject:'', room:'', start:'', end:''}
+    let testOverrides = [];
+
+    // Global Nav
+    function switchNav(tab) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nb').forEach(b => { if (b) b.classList.remove('active') });
+      document.getElementById('pg-' + (tab === 'sched' ? 'scheds' : tab)).classList.add('active');
+      const bn = document.getElementById('bnav-' + tab); if (bn) bn.classList.add('active');
+      if (tab === 'home') renderHome();
+      if (tab === 'sched') renderSchedList();
+      if (tab === 'tasks') renderTasks();
+      if (tab === 'groups') renderGroups();
+      if (tab === 'subjs') renderSubjList('subjs-list', 'sj-srch');
+    }
+
+    // Quick Actions
+    function openQuickActions() {
+      const selDateStr = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+      const isToday = n.toDateString() === new Date().toDateString();
+      const dayName = isToday ? "Today" : n.toLocaleDateString('en-US', { weekday: 'long' });
+
+      const isExam = examDays.some(e => e.date === selDateStr);
+      const hasTests = testOverrides.some(t => t.date === selDateStr);
+
+      const et = document.getElementById('qa-exam-title');
+      const es = document.getElementById('qa-exam-sub');
+      const tt = document.getElementById('qa-test-title');
+      const ts = document.getElementById('qa-test-sub');
+
+      if (isExam) {
+        et.textContent = "Remove Exam Day";
+        es.textContent = "Unmark " + dayName;
+        document.getElementById('qa-exam-btn').onclick = () => { closeModal('m-quick-actions'); setTimeout(() => { removeExamDay(selDateStr); }, 200); };
+      } else {
+        et.textContent = "Exam Day";
+        es.textContent = "Mark " + dayName;
+        document.getElementById('qa-exam-btn').onclick = () => { closeModal('m-quick-actions'); setTimeout(() => { markExamDay(selDateStr); }, 200); };
+      }
+
+      if (hasTests) {
+        tt.textContent = "Remove Class Test";
+        ts.textContent = "Clear " + dayName;
+        document.getElementById('qa-test-btn').onclick = () => { closeModal('m-quick-actions'); setTimeout(() => { clearTests(selDateStr); }, 200); };
+      } else {
+        tt.textContent = "Class Test";
+        ts.textContent = "Mark " + dayName;
+        document.getElementById('qa-test-btn').onclick = () => { closeModal('m-quick-actions'); setTimeout(() => openTestPicker(selDateStr), 200); };
+      }
+
+      openModal('m-quick-actions');
+      lucide.createIcons();
+    }
+
+    // Calendar Generator
+    let curSelDateStr = null;
+    function generateCalendar() {
+      const ds = document.getElementById('home-ds');
+      ds.innerHTML = '';
+      const base = new Date();
+      base.setDate(base.getDate() - 14);
+      for (let i = 0; i < 40; i++) {
+        const d = new Date(base); d.setDate(base.getDate() + i);
+        const dn = d.toLocaleDateString('en-US', { weekday: 'short' });
+        const dm = d.toLocaleDateString('en-US', { month: 'short' });
+        const num = d.getDate();
+        const isTot = d.toDateString() === new Date().toDateString();
+        const dStr = d.toDateString();
+        const dIso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        const isExam = examDays.some(e => e.date === dIso);
+        const isTestDay = testOverrides.some(t => t.date === dIso);
+        const isHol = holidays.includes(dIso);
+        if (isTot && !curSelDateStr) curSelDateStr = dStr;
+        const btn = document.createElement('div');
+
+        // Priority Border: Exam (Red) > Test (Orange) > Holiday (Green)
+        let bCls = '';
+        if (isExam) bCls = ' exam-day';
+        else if (isTestDay) bCls = ' test-day';
+        else if (isHol) bCls = ' holiday';
+        btn.className = 'db' + (isTot ? ' tod' : '') + bCls;
+        if (curSelDateStr === dStr && !isTot) btn.classList.add('sel');
+
+        // Multi-Dots logic
+        let dots = '';
+        if (isExam) dots += `<span class="cdot" style="background:var(--red)"></span>`;
+        if (isTestDay) dots += `<span class="cdot" style="background:#FF9800"></span>`;
+        if (isHol) dots += `<span class="cdot" style="background:var(--green)"></span>`;
+        if (!dots) dots = `<span class="cdot" style="background:var(--sub)"></span>`;
+
+        btn.innerHTML = `<span class="dn${d.getDay() === 0 ? ' sun' : ''}">${dn}</span><span class="dd${d.getDay() === 0 ? ' sun' : ''}">${num}</span><span class="dm">${dm}</span><div class="dot-row">${dots}</div>`;
+        btn.onclick = () => {
+          curSelDateStr = dStr;
+          document.querySelectorAll('.db').forEach(b => { b.classList.remove('sel'); });
+          if (!isTot) btn.classList.add('sel');
+          n = new Date(dStr);
+          updateHeader(); renderHome();
+        };
+        lp(btn, () => toggleExamDay(dIso));
+        dt(btn, () => toggleHoliday(dIso));
+        ds.appendChild(btn);
+      }
+    }
+    function checkTodayBtn() {
+      const ds = document.getElementById('home-ds');
+      const tb = document.getElementById('today-btn');
+      const t = ds ? ds.querySelector('.tod') : null;
+      if (!tb || !ds || !t) return;
+      const idealLeft = t.offsetLeft - ds.offsetWidth / 2 + 25;
+      if (Math.abs(ds.scrollLeft - idealLeft) > 30 || curSelDateStr !== new Date().toDateString()) {
+        tb.classList.remove('hidden');
+      } else {
+        tb.classList.add('hidden');
+      }
+    }
+
+    function scrollToToday() {
+      curSelDateStr = new Date().toDateString();
+      n = new Date(); updateHeader(); renderHome();
+      generateCalendar();
+      const ds = document.getElementById('home-ds');
+      const t = ds.querySelector('.tod');
+      if (t) {
+        ds.scrollTo({ left: t.offsetLeft - ds.offsetWidth / 2 + 25, behavior: 'smooth' });
+        setTimeout(checkTodayBtn, 300); // Wait for scroll to finish
+      }
+    }
+
+    function scrollToSelected() {
+      const ds = document.getElementById('home-ds');
+      const sel = ds.querySelector('.sel') || ds.querySelector('.tod');
+      if (sel) ds.scrollTo({ left: sel.offsetLeft - ds.offsetWidth / 2 + 25, behavior: 'smooth' });
+    }
+
+    function getWeekNumber(d) {
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+      return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function updateHeader() {
+      document.getElementById('h-day').textContent = n.toLocaleDateString('en-US', { weekday: 'long' });
+      document.getElementById('h-date').textContent = n.getDate() + ' ' + n.toLocaleDateString('en-US', { month: 'long' });
+      const mlbl = document.getElementById('h-month-lbl');
+      if (mlbl) { mlbl.textContent = n.toLocaleDateString('en-US', { month: 'long' }) + ' ' + n.getFullYear(); }
+      const wlbl = document.getElementById('h-week-lbl');
+      if (wlbl) { wlbl.textContent = 'Week ' + getWeekNumber(n); }
+      checkTodayBtn();
+    }
+
+    window.onload = () => {
+      loadData();
+      generateCalendar();
+      scrollToToday();
+      updateProfUI();
+      if (localStorage.getItem('dk') === '1') { document.body.parentElement.dataset.theme = 'dark'; document.getElementById('dk-tog').classList.add('on'); }
+
+      const ds = document.getElementById('home-ds');
+      if (ds) {
+        ds.addEventListener('scroll', checkTodayBtn);
+      }
+    };
+
+    // HOME RENDER
+    function renderHome() {
+      const q = document.getElementById('h-srch').value.toLowerCase();
+      const now = new Date();
+      const todayMins = now.getHours() * 60 + now.getMinutes();
+      const dayName = n.toLocaleDateString('en-US', { weekday: 'short' });
+      const selDateStr = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+      const isToday = n.toDateString() === new Date().toDateString();
+      const isFuture = n > new Date(new Date().toDateString());
+
+      // Check if this is an exam day
+      const examEntry = examDays.find(e => e.date === selDateStr);
+      const isExamDay = !!examEntry;
+      const isHoliday = holidays.includes(selDateStr);
+
+      let dc = classes.filter(c => c.days.includes(dayName) && (!q || sn(c.sj).toLowerCase().includes(q)));
+      dc.sort((a, b) => t2m(a.start) - t2m(b.start));
+
+      document.getElementById('st-cnt').textContent = isHoliday ? 'Off' : (isExamDay ? 'Exam' : dc.length);
+      document.getElementById('st-start').textContent = isHoliday ? '—' : (isExamDay && examEntry.start ? examEntry.start : (dc[0] ? dc[0].start : '—'));
+      const cont = document.getElementById('h-list');
+      cont.innerHTML = '';
+
+      if (isHoliday) {
+        cont.innerHTML = `
+      <div style="text-align:center;padding:60px 20px;display:flex;flex-direction:column;align-items:center;gap:16px;">
+        <div style="width:80px;height:80px;border-radius:24px;background:rgba(76,175,80,0.1);display:flex;align-items:center;justify-content:center;color:var(--green);">
+          <i data-lucide="sun" style="width:40px;height:40px;"></i>
+        </div>
+        <div style="font-size:24px;font-weight:900;letter-spacing:-0.5px;">Holiday Today!</div>
+        <p style="font-size:14px;color:var(--sub);font-weight:600;max-width:240px;line-height:1.5;">Take a breather and relax. No regular classes or tests for today.</p>
+        <button class="btn-s" style="width:auto;padding:12px 24px;border-radius:20px;" onclick="toggleHoliday('${selDateStr}')">Mark as Regular Day</button>
+      </div>
+    `;
+      } else if (isExamDay) {
+        let examHtml = '';
+        if (examEntry.subject) {
+          let examPct = 0, examSt = 'upcoming';
+          if (isToday && examEntry.start && examEntry.end) {
+            const es = t2m(examEntry.start), ee = t2m(examEntry.end);
+            if (todayMins >= es && todayMins < ee) { examSt = 'current'; examPct = Math.min(100, Math.max(0, ((todayMins - es) / (ee - es)) * 100)); }
+            else if (todayMins >= ee) { examSt = 'past'; }
+          }
+          examHtml += `<div class="exam-card" onclick="openExamEditor('${selDateStr}')">
+        ${examSt === 'current' ? `<div class="pb" style="width:${examPct}%;background:rgba(244,67,54,.3);"></div>` : ''}
+        <div style="width:5px;align-self:stretch;background:var(--red);border-radius:0 4px 4px 0;margin-right:14px;flex-shrink:0;"></div>
+        <div class="cc-info">
+          <div class="exam-badge">${examSt === 'current' ? '<div class="ldot" style="background:var(--red)"></div>Exam Live' : 'Exam'}</div>
+          <div class="cc-name">${examEntry.subject}</div>
+          <div class="cc-room" style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+            ${examEntry.room ? `<span style="display:flex;align-items:center;gap:4px;color:var(--text);font-weight:700;"><i data-lucide="map-pin" style="width:12px"></i> ${examEntry.room}</span>` : ''}
+          </div>
+        </div>
+        <div class="cc-t"><div class="cc-ts">${examEntry.start || '—'}</div><div class="cc-te">${examEntry.end || ''}</div></div>
+      </div>`;
+        } else {
+          examHtml += `<div class="empty" style="padding:24px 20px;cursor:pointer;" onclick="openExamEditor('${selDateStr}')"><div style="width:56px;height:56px;border-radius:16px;background:rgba(244,67,54,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;"><i data-lucide="file-text" style="width:28px;height:28px;color:var(--red);"></i></div><p style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:6px;">Exam Day</p><p style="font-size:13px;">Tap to add exam details</p></div>`;
+        }
+        cont.innerHTML = examHtml;
+      } else if (!dc.length) {
+        cont.innerHTML = `<div class="empty"><i data-lucide="coffee" class="empty-ico" style="width:48px;height:48px;"></i><p>No classes ${isToday ? 'today' : 'this day'}!</p></div>`;
+      } else {
+        function renderCard(c, isPast) {
+          let st = isToday ? status(c) : 'upcoming';
+          let cls = 'cc', badge = '';
+          const tOverride = testOverrides.find(t => t.date === selDateStr && t.classId === c.id);
+          const isTest = !!tOverride;
+
+          if (isToday) {
+            if (st === 'current') { cls += ' current-cls'; badge = `<div class="live-badge"><div class="ldot"></div>Now</div>`; }
+            else if (st === 'upcoming' && c === nextCls) { badge = `<div class="next-badge">▸ Next Up</div>`; }
+            if (isPast) { cls += ' past'; }
+          }
+          if (isTest) { badge = `<div class="test-badge">TEST</div>`; }
+
+          let progPct = 0;
+          if (isToday && st === 'current') progPct = Math.min(100, Math.max(0, ((todayMins - t2m(c.start)) / (t2m(c.end) - t2m(c.start))) * 100));
+          let color = sc(c.sj);
+          const displayName = (isTest && tOverride.name) ? tOverride.name : sn(c.sj);
+          const displayRoom = (isTest && tOverride.room) ? tOverride.room : c.room;
+
+          const div = document.createElement('div');
+          div.className = cls;
+          if (isPast) div.style = "opacity:0.45;filter:grayscale(30%);";
+          div.innerHTML = `
+        ${isToday && st === 'current' ? `<div class="pb" style="width:${progPct}%"></div>` : ''}
+        <div class="cc-bar" style="background:${color}"></div>
+        <div class="cc-info">
+          ${badge}
+          <div class="cc-name">${displayName}${isTest ? ' <span style="color:var(--red);font-size:12px;">(Test)</span>' : ''}</div>
+          <div class="cc-room" style="display:flex;align-items:center;gap:12px;margin-top:2px;">
+            <span style="display:flex;align-items:center;gap:4px;color:var(--text);font-weight:700;"><i data-lucide="map-pin" style="width:12px"></i> ${displayRoom}</span>
+            ${c.teacher ? `<span style="display:flex;align-items:center;gap:4px;color:var(--sub);font-size:11px;font-weight:500;margin-left:2px;"><div style="width:16px;height:16px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;"><i data-lucide="user" style="width:10px;height:10px;color:var(--text);"></i></div> ${c.teacher}</span>` : ''}
+          </div>
+        </div>
+        <div class="cc-t"><div class="cc-ts">${c.start}</div><div class="cc-te">${c.end}</div></div>
+      `;
+          div.onclick = () => { if (isTest) openSingleTestEditor(selDateStr, c.id); else openEditClass(c.id); };
+          lp(div, () => handleTestLongPress(selDateStr, c.id));
+          return div;
+        }
+
+        if (isToday) {
+          const upcoming = dc.filter(c => status(c) !== 'past');
+          const past = dc.filter(c => status(c) === 'past');
+          var nextCls = upcoming.find(c => status(c) === 'upcoming');
+          upcoming.forEach(c => { cont.appendChild(renderCard(c, false)); });
+          if (past.length) {
+            const pdiv = document.createElement('div'); pdiv.className = 'pdiv'; pdiv.innerHTML = `<span>Past</span>`;
+            cont.appendChild(pdiv);
+            past.forEach(c => { cont.appendChild(renderCard(c, true)); });
+          }
+        } else {
+          dc.forEach(c => { cont.appendChild(renderCard(c, false)); });
+        }
+      }
+      lucide.createIcons();
+    }
+
+    // SCHEDULE
+    function setSchedView(v) {
+      document.getElementById('btn-list-view').classList.remove('on');
+      document.getElementById('btn-week-view').classList.remove('on');
+      document.getElementById('btn-' + v + '-view').classList.add('on');
+      document.getElementById('v-list').style.display = v === 'list' ? 'block' : 'none';
+      document.getElementById('v-week').style.display = v === 'week' ? 'block' : 'none';
+      if (v === 'week') buildTimetable();
+    }
+    function renderSchedList() {
+      const cont = document.getElementById('scheds-list');
+      if (!classes.length) { cont.innerHTML = '<div class="empty">No schedules</div>'; return; }
+      let html = '';
+      ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].forEach(d => {
+        let x = classes.filter(c => c.days.includes(d));
+        x.sort((a, b) => t2m(a.start) - t2m(b.start));
+        if (x.length) {
+          html += `<div class="pdiv"><span>${d}</span></div>`;
+          x.forEach(c => {
+            html += `<div class="cc" onclick="openEditClass(${c.id})"><div class="cc-bar" style="background:${sc(c.sj)}"></div><div class="cc-info"><div class="cc-name">${sn(c.sj)}</div><div class="cc-room">${c.room}</div></div><div class="cc-t"><div class="cc-ts">${c.start}</div><div class="cc-te">${c.end}</div></div></div>`;
+          });
+        }
+      });
+      cont.innerHTML = html;
+    }
+    function buildTimetable() {
+      const tt = document.getElementById('timetable-view');
+      let html = `<div class="tt-grid"><div class="tt-hdr">Time</div>`;
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+      days.forEach(d => html += `<div class="tt-hdr">${d}</div>`);
+      const hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
+      hours.forEach(h => {
+        html += `<div class="tt-sid">${h}</div>`;
+        days.forEach(d => {
+          let cl = classes.find(c => c.days.includes(d) && c.start.startsWith(h.substr(0, 2)));
+          if (cl) { let col = sc(cl.sj); html += `<div class="tt-cell"><div class="tt-item" style="background:${col}20;border-left:3px solid ${col};color:${col}" onclick="openEditClass(${cl.id})">${sn(cl.sj)}</div></div>`; }
+          else html += `<div class="tt-cell"></div>`;
+        });
+      });
+      html += `</div>`; tt.innerHTML = html;
+    }
+
+    // EDIT / ADD CLASS
+    let formSubj = null;
+    let editClassId = null;
+
+    function openAddClass() {
+      editClassId = null; formSubj = null;
+      document.getElementById('m-class-title').textContent = 'Add Class';
+      document.getElementById('btn-save-class').textContent = 'Add Class';
+      document.getElementById('btn-del-class').style.display = 'none';
+      document.getElementById('ssb').textContent = 'Select a subject';
+      document.getElementById('ssb').className = 'ssb';
+      document.querySelectorAll('.dpt').forEach(t => t.classList.remove('on'));
+      document.getElementById('i-cs').value = '09:00';
+      document.getElementById('i-ce').value = '10:00';
+      document.getElementById('i-cr').value = '';
+      document.getElementById('i-ct').value = '';
+      openModal('m-add-class');
+    }
+
+    function openEditClass(id) {
+      editClassId = id;
+      let c = classes.find(x => x.id === id);
+      formSubj = c.sj;
+      document.getElementById('m-class-title').textContent = 'Edit Class';
+      document.getElementById('btn-save-class').textContent = 'Save Changes';
+      document.getElementById('btn-del-class').style.display = 'block';
+      document.getElementById('ssb').textContent = sn(c.sj);
+      document.getElementById('ssb').className = 'ssb sel';
+      document.getElementById('i-cs').value = c.start;
+      document.getElementById('i-ce').value = c.end;
+      document.getElementById('i-cr').value = c.room || '';
+      document.getElementById('i-ct').value = c.teacher || '';
+      document.querySelectorAll('.dpt').forEach(t => {
+        if (c.days.includes(t.dataset.d)) t.classList.add('on');
+        else t.classList.remove('on');
+      });
+      openModal('m-add-class');
+    }
+
+    function deleteClass() {
+      if (!editClassId) return;
+      classes = classes.filter(c => c.id !== editClassId);
+      closeModal('m-add-class'); renderSchedList(); renderHome(); buildTimetable(); showToast('Class deleted');
+    }
+
+    function renderSubjList(listId, searchId, forPicker = false) {
+      const cont = document.getElementById(listId);
+      const q = (document.getElementById(searchId)?.value || '').toLowerCase();
+      const f = subjects.filter(s => !q || s.name.toLowerCase().includes(q));
+      if (!f.length) { cont.innerHTML = `<div class="empty">No subjects</div>`; return; }
+      cont.innerHTML = f.map(s => `<div class="si" onclick="${forPicker ? `pickSubj(${s.id})` : ''}">
+    <div class="cc-bar" style="background:${s.color}"></div>
+    <div style="flex:1;font-size:16px;font-weight:700;">${s.name}</div>
+  </div>`).join('');
+    }
+    function openPicker() { renderSubjList('pk-list', 'pk-srch', true); openModal('m-picker'); }
+    function pickSubj(id) {
+      formSubj = id; const s = subjects.find(x => x.id === id);
+      const btn = document.getElementById('ssb');
+      btn.textContent = s.name; btn.classList.add('sel');
+      closeModal('m-picker');
+    }
+    function saveClass() {
+      if (!formSubj) return showToast('Select a subject');
+      let days = [...document.querySelectorAll('.dpt.on')].map(x => x.dataset.d);
+      if (!days.length) return showToast('Select days');
+      if (editClassId) {
+        let c = classes.find(x => x.id === editClassId);
+        c.sj = formSubj; c.room = document.getElementById('i-cr').value;
+        c.start = document.getElementById('i-cs').value; c.end = document.getElementById('i-ce').value;
+        c.teacher = document.getElementById('i-ct').value; c.days = days;
+        showToast('Class updated');
+      } else {
+        classes.push({ id: Date.now(), sj: formSubj, room: document.getElementById('i-cr').value, teacher: document.getElementById('i-ct').value, start: document.getElementById('i-cs').value, end: document.getElementById('i-ce').value, days: days });
+        showToast('Class added');
+      }
+      closeModal('m-add-class'); renderSchedList(); renderHome(); buildTimetable();
+    }
+
+    let cIdx = 0;
+    function cycleColor() { cIdx = (cIdx + 1) % COLS.length; document.getElementById('ns-dot').style.background = COLS[cIdx]; }
+    function openNewSubj() { cIdx = 0; document.getElementById('ns-dot').style.background = COLS[cIdx]; document.getElementById('i-nsn').value = ''; openModal('m-new-subj'); }
+    function openNewSubjInline() { closeModal('m-picker'); setTimeout(() => openNewSubj(), 200); }
+    function saveNewSubj() {
+      let n = document.getElementById('i-nsn').value.trim();
+      if (!n) return showToast('Enter name');
+      let ns = { id: Date.now(), name: n, color: COLS[cIdx] };
+      subjects.push(ns); closeModal('m-new-subj');
+      renderSubjList('subjs-list', 'sj-srch'); showToast('Subject added');
+      saveData();
+    }
+
+    // TASKS & GROUPS
+    function renderTasks() {
+      const q = document.getElementById('t-srch').value.toLowerCase();
+      const cont = document.getElementById('tasks-list');
+      let f = tasks.filter(t => !q || t.name.toLowerCase().includes(q));
+      if (!f.length) { cont.innerHTML = `<div class="empty"><i data-lucide="check-circle" class="empty-ico" style="width:48px;height:48px;"></i><p>All caught up!</p></div>`; lucide.createIcons(); return; }
+      cont.innerHTML = f.map((t, i) => {
+        let dueStr = '';
+        if (t.dueDate) {
+          const d = new Date(t.dueDate);
+          dueStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          if (t.dueTime) dueStr += ` · ${t.dueTime}`;
+        }
+        return `<div class="cc ${t.done ? 't-done' : ''}" style="padding-left:14px;gap:12px;animation-delay:${i * 0.05}s;">
+    <div class="tchk ${t.done ? 'done' : ''}" onclick="togT(${t.id})"><i data-lucide="check" style="width:14px"></i></div>
+    <div class="cc-info"><div class="cc-name" style="margin:0">${t.name}</div>${t.subj ? `<div class="cc-room" style="margin-top:4px"><i data-lucide="book" style="width:12px"></i> ${t.subj}</div>` : ''}
+    ${dueStr ? `<div style="font-size:11px;color:var(--sub);margin-top:3px;display:flex;align-items:center;gap:4px;"><i data-lucide="calendar" style="width:11px"></i>${dueStr}</div>` : ''}</div>
+    <div class="prio-badge prio-${t.prio}">${t.prio.toUpperCase()}</div>
+  </div>`;
+      }).join('');
+      lucide.createIcons();
+    }
+    function togT(id) { let t = tasks.find(x => x.id === id); t.done = !t.done; renderTasks(); }
+    function openAddTask() {
+      document.getElementById('i-tn').value = '';
+      document.getElementById('i-ts').value = '';
+      document.getElementById('i-td').value = '';
+      document.getElementById('i-tt').value = '';
+      document.getElementById('i-tp').value = 'med';
+      openModal('m-task');
+    }
+    function saveTask() {
+      let n = document.getElementById('i-tn').value; if (!n) return showToast('Task name required');
+      tasks.push({
+        id: Date.now(),
+        name: n,
+        subj: document.getElementById('i-ts').value,
+        prio: document.getElementById('i-tp').value,
+        dueDate: document.getElementById('i-td').value || '',
+        dueTime: document.getElementById('i-tt').value || '',
+        done: false
+      });
+      closeModal('m-task'); renderTasks(); showToast('Task added');
+    }
+    function renderGroups() {
+      document.getElementById('groups-list').innerHTML = groups.map(g => `<div class="gc">
+    <div class="gc-h"><div class="gc-av">${g.av}</div><div><div class="gc-n">${g.name}</div><div class="gc-mem">${g.mem.join(', ')}</div></div><i data-lucide="chevron-right" style="margin-left:auto;color:var(--sub)"></i></div>
+    <div class="gc-p">💬 ${g.lmsg}</div>
+  </div>`).join('');
+      lucide.createIcons();
+    }
+
+    // PROFILE
+    let pName = 'Anshul Yadav', pEmail = 'ronakyadavyt@gmail.com';
+    function updateProfUI() {
+      document.getElementById('p-av').textContent = pName[0].toUpperCase();
+      document.getElementById('h-av').textContent = pName[0].toUpperCase();
+      document.getElementById('h-uname').textContent = pName;
+      document.getElementById('p-name').textContent = pName;
+      document.getElementById('p-email').textContent = pEmail;
+    }
+    function openEditProfile() { document.getElementById('i-pn').value = pName; document.getElementById('i-pe').value = pEmail; openModal('m-profile'); }
+    function saveProfile() { pName = document.getElementById('i-pn').value || 'Student'; pEmail = document.getElementById('i-pe').value; updateProfUI(); closeModal('m-profile'); showToast('Profile Saved'); }
+
+    // TOGGLES
+    function toggleDarkMode() {
+      const isD = document.body.parentElement.dataset.theme === 'dark';
+      const tog = document.getElementById('dk-tog');
+      if (!isD) { document.body.parentElement.dataset.theme = 'dark'; localStorage.setItem('dk', '1'); tog.classList.add('on'); }
+      else { document.body.parentElement.removeAttribute('data-theme'); localStorage.setItem('dk', '0'); tog.classList.remove('on'); }
+    }
+    function toggleSet(el, id) { el.querySelector('.toggle').classList.toggle('on'); }
+
+    // UTILS — with History API back-gesture support
+    // Each modal open pushes a history state so the Android back gesture
+    // fires popstate and closes the modal instead of leaving the app.
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+      history.pushState({ modal: id }, '');
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (!el.classList.contains('open')) return;
+      el.classList.remove('open');
+      // If the current history state refers to this modal, go back silently
+      if (history.state && history.state.modal === id) {
+        history.back();
+      }
+    }
+    function closeTopmostModal() {
+      // Find the last opened (top-most) modal and close it
+      const open = [...document.querySelectorAll('.mo.open')];
+      if (open.length > 0) {
+        const top = open[open.length - 1];
+        top.classList.remove('open');
+        return true;
+      }
+      return false;
+    }
+
+    // Handle Android hardware back button / browser back gesture
+    window.addEventListener('popstate', (e) => {
+      // If a modal is open, close it and stay in the app
+      if (closeTopmostModal()) return;
+      // If we are on a sub-tab (not home), go back to home
+      const activePage = document.querySelector('.page.active');
+      if (activePage && activePage.id !== 'pg-home') {
+        switchNav('home');
+        // Re-push a state so the user needs another back press to leave
+        history.pushState({ page: 'home' }, '');
+        return;
+      }
+    });
+
+    // Push an initial base state so the first back-press hits our handler
+    history.replaceState({ page: 'home' }, '');
+    let tt;
+    function showToast(m) {
+      const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show');
+      clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    // EXAM DAY & TEST OVERRIDES
+    function markExamDay(dateStr) {
+      if (!examDays.some(e => e.date === dateStr)) {
+        // Conflict resolution: Remove holiday if any
+        const hIdx = holidays.indexOf(dateStr);
+        if (hIdx >= 0) { holidays.splice(hIdx, 1); showToast('Holiday removed for Exam'); }
+        examDays.push({ date: dateStr, subject: '', start: '', end: '', room: '' });
+        showToast('Marked as Exam Day');
+        generateCalendar(); scrollToSelected(); renderHome();
+        saveData();
+      }
+    }
+    function toggleExamDay(dateStr) {
+      const idx = examDays.findIndex(e => e.date === dateStr);
+      if (idx >= 0) {
+        examDays.splice(idx, 1);
+        showToast('Exam Day removed');
+      } else {
+        const hIdx = holidays.indexOf(dateStr);
+        if (hIdx >= 0) { holidays.splice(hIdx, 1); showToast('Holiday removed for Exam'); }
+        examDays.push({ date: dateStr, subject: '', start: '', end: '', room: '' });
+        showToast('Marked as Exam Day');
+      }
+      generateCalendar(); scrollToSelected(); renderHome();
+      saveData();
+    }
+    function removeExamDay(dateStr) {
+      examDays = examDays.filter(e => e.date !== dateStr);
+      showToast('Exam Day removed');
+      generateCalendar(); scrollToSelected(); renderHome();
+      saveData();
+    }
+    function deleteExamFromEditor() {
+      const dateStr = document.getElementById('i-exam-date').value;
+      closeModal('m-exam-editor');
+      removeExamDay(dateStr);
+    }
+    function openExamEditor(dateStr) {
+      const entry = examDays.find(e => e.date === dateStr);
+      document.getElementById('i-exam-date').value = dateStr;
+      document.getElementById('i-exam-subj').value = entry ? entry.subject : '';
+      document.getElementById('i-exam-start').value = entry && entry.start ? entry.start : '09:00';
+      document.getElementById('i-exam-end').value = entry && entry.end ? entry.end : '12:00';
+      document.getElementById('i-exam-room').value = entry ? entry.room : '';
+      openModal('m-exam-editor');
+    }
+    function saveExamDetails() {
+      const dateStr = document.getElementById('i-exam-date').value;
+      const subj = document.getElementById('i-exam-subj').value;
+      if (!subj) return showToast('Enter exam subject');
+      let entry = examDays.find(e => e.date === dateStr);
+      if (!entry) { entry = { date: dateStr }; examDays.push(entry); }
+      entry.subject = subj;
+      entry.start = document.getElementById('i-exam-start').value;
+      entry.end = document.getElementById('i-exam-end').value;
+      entry.room = document.getElementById('i-exam-room').value;
+      closeModal('m-exam-editor');
+      generateCalendar(); scrollToSelected(); renderHome();
+      showToast('Exam details saved');
+      saveData();
+    }
+    function openTestPicker(dateStr) {
+      const dayName = n.toLocaleDateString('en-US', { weekday: 'short' });
+      const dc = classes.filter(c => c.days.includes(dayName));
+      dc.sort((a, b) => t2m(a.start) - t2m(b.start));
+      const cont = document.getElementById('test-picker-list');
+      if (!dc.length) { cont.innerHTML = `<p style="color:var(--sub);font-size:14px;">No classes on this day.</p>`; openModal('m-test-picker'); return; }
+      cont.innerHTML = dc.map(c => {
+        const override = testOverrides.find(t => t.date === dateStr && t.classId === c.id);
+        const isMarked = !!override;
+        const color = sc(c.sj);
+        return `<div class="cc" style="margin:0 0 8px;cursor:pointer;flex-direction:column;align-items:flex-start;padding-left:16px;${isMarked ? 'border:2px solid #FF9800;' : ''}" onclick="toggleTestOverride('${dateStr}',${c.id})">
+      <div style="display:flex;align-items:center;width:100%;">
+        <div class="cc-bar" style="background:${color};margin-left:-16px;"></div>
+        <div class="cc-info">
+          <div class="cc-name" style="margin:0">${sn(c.sj)}</div>
+          <div class="cc-room"><i data-lucide="clock" style="width:12px"></i> ${c.start} - ${c.end}</div>
+        </div>
+        <div style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:800;${isMarked ? 'background:rgba(255,152,0,.15);color:#FF9800;' : 'background:var(--bg);color:var(--sub);'}">${isMarked ? 'TEST' : 'Normal'}</div>
+      </div>
+      ${isMarked ? `<div style="width:100%;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);" onclick="event.stopPropagation()">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="fi" style="margin-bottom:0;padding:8px 12px;background:var(--card);"><i data-lucide="type" style="width:14px;color:var(--sub)"></i><input placeholder="Test Name" value="${override.name || ''}" oninput="updateTestName('${dateStr}',${c.id},this.value)" style="text-align:left;font-size:13px;font-weight:700;"></div>
+            <div class="fi" style="margin-bottom:0;padding:8px 12px;background:var(--card);"><i data-lucide="map-pin" style="width:14px;color:var(--sub)"></i><input placeholder="Room" value="${override.room || ''}" oninput="updateTestRoom('${dateStr}',${c.id},this.value)" style="text-align:left;font-size:13px;font-weight:700;"></div>
+          </div>
+        </div>` : ''}
+    </div>`;
+      }).join('');
+      lucide.createIcons();
+      openModal('m-test-picker');
+    }
+    function updateTestName(dateStr, classId, name) {
+      const override = testOverrides.find(t => t.date === dateStr && t.classId === classId);
+      if (override) { override.name = name; renderHome(); saveData(); }
+    }
+    function updateTestRoom(dateStr, classId, room) {
+      const override = testOverrides.find(t => t.date === dateStr && t.classId === classId);
+      if (override) { override.room = room; renderHome(); saveData(); }
+    }
+    function openSingleTestEditor(dateStr, classId) {
+      const cls = classes.find(c => c.id === classId);
+      let override = testOverrides.find(t => t.date === dateStr && t.classId === classId);
+      if (!override) {
+        const hIdx = holidays.indexOf(dateStr);
+        if (hIdx >= 0) { holidays.splice(hIdx, 1); showToast('Holiday removed for Test'); }
+        override = { date: dateStr, classId: classId, name: '', room: '' };
+        testOverrides.push(override);
+      }
+      document.getElementById('i-t-id').value = classId;
+      document.getElementById('i-t-date').value = dateStr;
+      document.getElementById('i-t-name').value = override.name || '';
+      document.getElementById('i-t-room').value = override.room || '';
+      document.getElementById('i-t-name').oninput = (e) => updateTestName(dateStr, classId, e.target.value);
+      document.getElementById('i-t-room').oninput = (e) => updateTestRoom(dateStr, classId, e.target.value);
+      document.getElementById('m-test-editor-title').textContent = sn(cls.sj);
+      openModal('m-test-editor');
+      generateCalendar(); renderHome(); saveData();
+      lucide.createIcons();
+    }
+    function unmarkSingleTest() {
+      const id = parseInt(document.getElementById('i-t-id').value);
+      const date = document.getElementById('i-t-date').value;
+      testOverrides = testOverrides.filter(t => !(t.date === date && t.classId === id));
+      closeModal('m-test-editor');
+      generateCalendar(); renderHome(); showToast('Marked as Normal');
+      saveData();
+    }
+    function handleTestLongPress(dateStr, classId) {
+      const idx = testOverrides.findIndex(t => t.date === dateStr && t.classId === classId);
+      if (idx >= 0) {
+        testOverrides.splice(idx, 1);
+        showToast('Marked as Normal');
+        generateCalendar(); renderHome(); saveData();
+      } else {
+        openSingleTestEditor(dateStr, classId);
+      }
+    }
+    function toggleTestOverride(dateStr, classId) {
+      const idx = testOverrides.findIndex(t => t.date === dateStr && t.classId === classId);
+      if (idx >= 0) { testOverrides.splice(idx, 1); showToast('Test removed'); }
+      else {
+        const hIdx = holidays.indexOf(dateStr);
+        if (hIdx >= 0) { holidays.splice(hIdx, 1); showToast('Holiday removed for Test'); }
+        testOverrides.push({ date: dateStr, classId: classId }); showToast('Marked as Test');
+      }
+      generateCalendar(); renderHome(); saveData();
+    }
+    function toggleHoliday(dateStr) {
+      const idx = holidays.indexOf(dateStr);
+      if (idx >= 0) { holidays.splice(idx, 1); showToast('Holiday removed'); }
+      else {
+        const eIdx = examDays.findIndex(e => e.date === dateStr);
+        if (eIdx >= 0) { examDays.splice(eIdx, 1); showToast('Exam removed for Holiday'); }
+        const oldLen = testOverrides.length;
+        testOverrides = testOverrides.filter(t => t.date !== dateStr);
+        if (testOverrides.length < oldLen) showToast('Tests removed for Holiday');
+        holidays.push(dateStr);
+        showToast('Enjoy your Holiday!');
+      }
+      generateCalendar(); renderHome(); saveData();
+    }
+    function clearTests(dateStr) {
+      testOverrides = testOverrides.filter(t => t.date !== dateStr);
+      showToast('All tests cleared');
+      renderHome(); saveData();
+    }
+  </script>
 </body>
+
 </html>
