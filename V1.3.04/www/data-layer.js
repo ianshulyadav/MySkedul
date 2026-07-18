@@ -162,13 +162,14 @@ class Task {
   constructor(d) {
     this.id      = requireId(d.id);
     this.name    = requireString(d.name, 'Task name', 200);
+    this.sj      = d.sj ? requireId(d.sj) : null;
     this.subj    = optionalString(d.subj, 'subj', 100);
     this.prio    = PRIO_SET.has(d.prio) ? d.prio : 'med';
     this.dueDate = optionalDate(d.dueDate);
     this.dueTime = optionalTime(d.dueTime);
     this.done    = !!d.done;
   }
-  toJSON() { return { id: this.id, name: this.name, subj: this.subj, prio: this.prio, dueDate: this.dueDate, dueTime: this.dueTime, done: this.done }; }
+  toJSON() { return { id: this.id, name: this.name, sj: this.sj, subj: this.subj, prio: this.prio, dueDate: this.dueDate, dueTime: this.dueTime, done: this.done }; }
   static fromJSON(r)     { return new Task(r); }
   static safeFromJSON(r) { try { return Task.fromJSON(r); } catch { return null; } }
 }
@@ -232,8 +233,14 @@ class ListRepo {
     this._store = store; this._key = key; this._Model = Model;
   }
 
+  getKey() {
+    const active = DataStore.schedules.getActiveId();
+    if (active === 'default' || !active) return this._key;
+    return `${this._key}_${active}`;
+  }
+
   async _readRaw() {
-    try { const r = await dbGet(this._store, this._key); return Array.isArray(r) ? r : []; }
+    try { const r = await dbGet(this._store, this.getKey()); return Array.isArray(r) ? r : []; }
     catch (e) { console.error(`[Repo ${this._key}] read failed`, e); return []; }
   }
 
@@ -246,7 +253,7 @@ class ListRepo {
   }
 
   async _writeAll(items) {
-    try { await dbPut(this._store, this._key, items.map(i => i.toJSON())); }
+    try { await dbPut(this._store, this.getKey(), items.map(i => i.toJSON())); }
     catch (e) {
       if (e.name === 'QuotaExceededError') throw new Error('Storage full. Please clear old data.');
       throw e;
@@ -361,10 +368,15 @@ class TaskRepo extends ListRepo {
 }
 
 class CalendarRepo {
-  async _readAll() {
-    try { return (await dbGet('calendar', 'data')) || {}; } catch { return {}; }
+  getKey() {
+    const active = DataStore.schedules.getActiveId();
+    if (active === 'default' || !active) return 'data';
+    return `data_${active}`;
   }
-  async _writeAll(cal) { await dbPut('calendar', 'data', cal); }
+  async _readAll() {
+    try { return (await dbGet('calendar', this.getKey())) || {}; } catch { return {}; }
+  }
+  async _writeAll(cal) { await dbPut('calendar', this.getKey(), cal); }
 
   async getHolidays() {
     const cal = await this._readAll();
@@ -523,6 +535,40 @@ const DataStore = {
     return { subjects: [], classes: [], tasks: [], meta: new UserMeta(), notifSettings: new NotifSettings(), holidays: [], examDays: [], testOverrides: [] };
   },
 
+  async getSnapshotForSchedule(id) {
+    const listKey = (id === 'default') ? 'list' : `list_${id}`;
+    const calKey = (id === 'default') ? 'data' : `data_${id}`;
+    try {
+      const db = await getDB();
+      const tx = db.transaction(['subjects', 'classes', 'tasks', 'calendar'], 'readonly');
+      
+      const storeSub = tx.objectStore('subjects');
+      const storeCls = tx.objectStore('classes');
+      const storeTsk = tx.objectStore('tasks');
+      const storeCal = tx.objectStore('calendar');
+      
+      const subPromise = new Promise(r => { const req = storeSub.get(listKey); req.onsuccess = () => r(req.result || []); req.onerror = () => r([]); });
+      const clsPromise = new Promise(r => { const req = storeCls.get(listKey); req.onsuccess = () => r(req.result || []); req.onerror = () => r([]); });
+      const tskPromise = new Promise(r => { const req = storeTsk.get(listKey); req.onsuccess = () => r(req.result || []); req.onerror = () => r([]); });
+      const calPromise = new Promise(r => { const req = storeCal.get(calKey); req.onsuccess = () => r(req.result || {}); req.onerror = () => r({}); });
+      
+      const [subRaw, clsRaw, tskRaw, calRaw] = await Promise.all([subPromise, clsPromise, tskPromise, calPromise]);
+      
+      return {
+        subjects: subRaw,
+        classes: clsRaw,
+        tasks: tskRaw,
+        holidays: calRaw.holidays || [],
+        examDays: calRaw.examDays || [],
+        testOverrides: calRaw.testOverrides || [],
+        _v: 4, _ts: Date.now()
+      };
+    } catch (e) {
+      console.error('[DataStore] getSnapshotForSchedule failed', e);
+      return { subjects: [], classes: [], tasks: [], holidays: [], examDays: [], testOverrides: [] };
+    }
+  },
+
   // ── Snapshot / Restore ───────────────────────────────────
 
   async snapshot() {
@@ -545,17 +591,88 @@ const DataStore = {
 
   async restore(raw) {
     return enqueue(async () => {
+      const active = this.schedules.getActiveId();
+      const listKey = (active === 'default' || !active) ? 'list' : `list_${active}`;
+      const calKey = (active === 'default' || !active) ? 'data' : `data_${active}`;
       const safe = (arr, Model) => Array.isArray(arr) ? arr.map(r => { try { return new Model(r).toJSON(); } catch { return null; } }).filter(Boolean) : [];
       await dbBatchPut([
-        { store: 'subjects', key: 'list',         value: safe(raw.subjects, Subject)           },
-        { store: 'classes',  key: 'list',          value: safe(raw.classes, ScheduleClass)      },
-        { store: 'tasks',    key: 'list',          value: safe(raw.tasks, Task)                 },
-        { store: 'meta',     key: 'current',       value: { globalUserName: raw.globalUserName || raw.meta?.globalUserName || 'Student', globalUserEmail: raw.globalUserEmail || raw.meta?.globalUserEmail || '', ts: Date.now() } },
-        { store: 'meta',     key: 'notifSettings', value: raw.notifSettings || {}              },
-        { store: 'calendar', key: 'data',          value: { holidays: raw.holidays || [], examDays: raw.examDays || [], testOverrides: raw.testOverrides || [] } },
+        { store: 'subjects', key: listKey,         value: safe(raw.subjects, Subject)           },
+        { store: 'classes',  key: listKey,          value: safe(raw.classes, ScheduleClass)      },
+        { store: 'tasks',    key: listKey,          value: safe(raw.tasks, Task)                 },
+        { store: 'meta',     key: 'current',        value: { globalUserName: raw.globalUserName || raw.meta?.globalUserName || 'Student', globalUserEmail: raw.globalUserEmail || raw.meta?.globalUserEmail || '', ts: Date.now() } },
+        { store: 'meta',     key: 'notifSettings',  value: raw.notifSettings || {}              },
+        { store: 'calendar', key: calKey,           value: { holidays: raw.holidays || [], examDays: raw.examDays || [], testOverrides: raw.testOverrides || [] } },
       ]);
       await mirrorToLS();
     });
+  },
+
+  // ── Schedules Metadata API ──────────────────────────────
+
+  schedules: {
+    getAll() {
+      try {
+        const raw = localStorage.getItem('MySkedul_SchedulesList');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+      return [{ id: 'default', name: 'Default Schedule' }];
+    },
+
+    getActiveId() {
+      return localStorage.getItem('MySkedul_ActiveScheduleId') || 'default';
+    },
+
+    async setActiveId(id) {
+      localStorage.setItem('MySkedul_ActiveScheduleId', id);
+      await DataStore.flush();
+    },
+
+    async create(name) {
+      const list = this.getAll();
+      const newId = 'SCH_' + Date.now();
+      const entry = { id: newId, name: name.trim() || `Schedule ${list.length + 1}`, created: Date.now() };
+      list.push(entry);
+      localStorage.setItem('MySkedul_SchedulesList', JSON.stringify(list));
+      return entry;
+    },
+
+    async rename(id, newName) {
+      const list = this.getAll();
+      const idx = list.findIndex(s => s.id === id);
+      if (idx !== -1) {
+        list[idx].name = newName.trim();
+        localStorage.setItem('MySkedul_SchedulesList', JSON.stringify(list));
+        return true;
+      }
+      return false;
+    },
+
+    async delete(id) {
+      if (id === 'default') return false;
+      
+      const list = this.getAll();
+      const filtered = list.filter(s => s.id !== id);
+      localStorage.setItem('MySkedul_SchedulesList', JSON.stringify(filtered));
+      
+      try {
+        const db = await getDB();
+        const tx = db.transaction(['subjects', 'classes', 'tasks', 'calendar'], 'readwrite');
+        tx.objectStore('subjects').delete(`list_${id}`);
+        tx.objectStore('classes').delete(`list_${id}`);
+        tx.objectStore('tasks').delete(`list_${id}`);
+        tx.objectStore('calendar').delete(`data_${id}`);
+      } catch (e) {
+        console.error('[DataStore] Clean deleted schedule failed', e);
+      }
+
+      if (this.getActiveId() === id) {
+        await this.setActiveId('default');
+      }
+      return true;
+    }
   },
 
   // ── Subjects ─────────────────────────────────────────────

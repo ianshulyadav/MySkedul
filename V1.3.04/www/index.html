@@ -83,7 +83,7 @@
     }
 
     [data-tier="high"] {
-      --blur: blur(15px);
+      --blur: blur(10px);
       --dur: 0.55s;
       --dur-modal: 0.75s;
     }
@@ -126,6 +126,35 @@
     button:active, .btn-p:active, .btn-s:active, .ib:active, .qa-item:active, .mi:active, .nb:active {
       transform: scale(0.96);
       opacity: 0.8;
+    }
+
+    /* Hardware-Accelerated Liquid Pill selector */
+    .sched-pill {
+      flex: 0 0 auto;
+      padding: 6px 14px;
+      font-size: 11.5px;
+      font-weight: 800;
+      border-radius: 12px;
+      height: 32px;
+      white-space: nowrap;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      color: var(--sub);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      will-change: transform, background-color, border-color, color, box-shadow;
+      cursor: pointer;
+    }
+
+    .sched-pill:active {
+      transform: scale(0.95);
+    }
+
+    .sched-pill.on {
+      background: var(--theme);
+      border-color: var(--theme);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(108, 99, 255, 0.25);
+      transform: scale(1.02);
     }
 
     [data-tier="low"] .stagger-item {
@@ -666,6 +695,100 @@
       box-shadow: 0 2px 4px rgba(108, 99, 255, 0.2);
     }
 
+    /* =============================================
+       SKELETON LOADERS — Shimmer Effect System
+    ============================================= */
+    @keyframes skShimmer {
+      0%   { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+
+    .sk {
+      background: linear-gradient(
+        90deg,
+        var(--card) 25%,
+        var(--border) 50%,
+        var(--card) 75%
+      );
+      background-size: 200% 100%;
+      animation: skShimmer 1.6s ease-in-out infinite;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Skeleton: class card (home / schedule) */
+    .sk-cc {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .sk-cc .sk-bar   { width: 5px; height: 54px; border-radius: 4px; flex-shrink:0; }
+    .sk-cc .sk-body  { flex:1; display:flex; flex-direction:column; gap:8px; }
+    .sk-cc .sk-line  { height: 13px; border-radius: 6px; }
+    .sk-cc .sk-line.w80 { width: 80%; }
+    .sk-cc .sk-line.w50 { width: 50%; }
+    .sk-cc .sk-line.w35 { width: 35%; }
+    .sk-cc .sk-time  { display:flex; flex-direction:column; gap:6px; align-items:flex-end; }
+    .sk-cc .sk-time .sk-line { width: 38px; }
+
+    /* Skeleton: group section header */
+    .sk-gc-hdr {
+      display:flex; align-items:center; gap:10px;
+      padding: 14px 0 6px;
+    }
+    .sk-gc-hdr .sk { width: 18px; height: 18px; border-radius: 5px; }
+    .sk-gc-hdr .sk-lbl { height: 13px; border-radius: 6px; width: 100px; }
+
+    /* Skeleton: group card */
+    .sk-gcrd {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 16px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .sk-gcrd .sk-left  { width: 4px; height: 44px; border-radius: 4px; flex-shrink:0; }
+    .sk-gcrd .sk-body  { flex:1; display:flex; flex-direction:column; gap:7px; }
+    .sk-gcrd .sk-line  { height: 12px; border-radius: 6px; }
+    .sk-gcrd .sk-line.w55 { width: 55%; }
+    .sk-gcrd .sk-line.w40 { width: 40%; }
+    .sk-gcrd .sk-btn   { width: 72px; height: 36px; border-radius: 12px; }
+
+    /* Skeleton: task card */
+    .sk-task {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .sk-task .sk-chk   { width: 22px; height: 22px; border-radius: 8px; flex-shrink:0; }
+    .sk-task .sk-body  { flex:1; display:flex; flex-direction:column; gap:7px; }
+    .sk-task .sk-line  { height: 12px; border-radius: 6px; }
+    .sk-task .sk-line.w70 { width: 70%; }
+    .sk-task .sk-line.w45 { width: 45%; }
+    .sk-task .sk-badge { width: 36px; height: 20px; border-radius: 8px; flex-shrink:0; }
+
+    /* Low-end: disable shimmer to save battery */
+    [data-tier="low"] .sk {
+      animation: none;
+      opacity: 0.5;
+    }
+
     /* ===== GROUP CARD STAGGER ANIMATION ===== */
     @keyframes gcCardIn {
       from {
@@ -720,6 +843,136 @@
       animation-delay: 0.24s;
     }
 
+    /* ===== INSTITUTION FOLDER CARD ===== */
+    .inst-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px 16px 20px;
+    }
+
+    .inst-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 20px 20px 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.1);
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s var(--ease);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      animation: gcCardIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: 0.05s;
+    }
+
+    .inst-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: linear-gradient(to bottom, #7E74FF, #9F5DFF);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .inst-card:active {
+      transform: scale(0.965);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .inst-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: rgba(108,99,255,0.1);
+      border: 1px solid rgba(108,99,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--theme);
+    }
+
+    .inst-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .inst-name {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .inst-sub {
+      font-size: 12px;
+      color: var(--sub);
+      font-weight: 600;
+      letter-spacing: 0.1px;
+    }
+
+    .inst-chevron {
+      color: var(--sub);
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    .inst-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(108,99,255,0.08);
+      border: 1px solid rgba(108,99,255,0.15);
+      color: var(--theme);
+      border-radius: 10px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      margin-top: 5px;
+      width: fit-content;
+    }
+
+    [data-theme="dark"] .inst-pill {
+      background: rgba(108,99,255,0.12);
+      border-color: rgba(108,99,255,0.25);
+    }
+
+    /* Section heading inside inst view */
+    .inst-section-lbl {
+      padding: 10px 20px 2px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.7;
+    }
+
+    /* Override branch-tabs sticky offset for inner groups view */
+    .groups-inner-tabs {
+      top: 0 !important;
+    }
+
+    /* View transition */
+    #groups-inst-view,
+    #groups-inner-view {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #groups-inner-view {
+      display: none;
+    }
+
     /* GPU ACCELERATION CORES */
     .cc,
     .sc,
@@ -733,6 +986,43 @@
 
     .ultra-mode .gpu {
       will-change: transform;
+    }
+
+    /* ===== QR SCANNER INTERFACE ===== */
+    @keyframes laser {
+      0% { top: 4%; }
+      50% { top: 96%; }
+      100% { top: 4%; }
+    }
+    .scanner-laser {
+      width: 92%;
+      height: 3px;
+      background: #7E74FF;
+      position: absolute;
+      left: 4%;
+      border-radius: 5px;
+      box-shadow: 0 0 12px #7E74FF, 0 0 4px #7E74FF;
+      animation: laser 2s infinite ease-in-out;
+      z-index: 2;
+    }
+    .scanner-overlay {
+      position: absolute;
+      border: 3px solid #7E74FF;
+      width: 250px;
+      height: 250px;
+      border-radius: 36px;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      overflow: hidden;
+      animation: pulseScanner 2s infinite ease-in-out;
+    }
+    @keyframes pulseScanner {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); border-color: #9F5DFF; box-shadow: 0 0 0 9999px rgba(0,0,0,0.65), 0 0 15px rgba(159,93,255,0.4); }
+      100% { transform: scale(1); }
     }
 
     /* ===== DEVICE TIER ADAPTIVE SYSTEM ===== */
@@ -798,8 +1088,8 @@
       flex: 1;
       height: 56px;
       background: var(--card-glass);
-      backdrop-filter: blur(25px) saturate(280%);
-      -webkit-backdrop-filter: blur(25px) saturate(280%);
+      backdrop-filter: blur(12px) saturate(200%);
+      -webkit-backdrop-filter: blur(12px) saturate(200%);
       border: 1px solid var(--border-glass);
       padding: 4px;
       border-radius: 28px;
@@ -2457,6 +2747,7 @@
       box-shadow: var(--sh);
       padding: 6px;
       gap: 6px;
+      position: relative;
     }
 
     .wv-btn {
@@ -2468,67 +2759,178 @@
       font-size: 14px;
       cursor: pointer;
       color: var(--sub);
-      transition: all .2s;
+      transition: color 0.25s ease;
+      position: relative;
+      z-index: 2;
     }
 
     .wv-btn.on {
+      color: var(--bg) !important;
+    }
+
+    .wv-blob {
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      left: 6px;
+      width: calc(50% - 9px);
       background: var(--text);
-      color: var(--bg);
+      border-radius: 10px;
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      z-index: 1;
+      pointer-events: none;
     }
 
     .timetable {
       background: var(--card);
-      border-radius: var(--r);
-      margin: 0 16px 16px;
-      box-shadow: var(--sh);
+      border-radius: 16px;
+      margin: 8px 6px 20px;
       overflow-x: auto;
-      padding: 16px;
+      padding: 0;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y !important;
+      border: 1px solid var(--border);
+      box-shadow: var(--sh);
+    }
+
+    .timetable::-webkit-scrollbar {
+      display: none;
     }
 
     .tt-grid {
       display: grid;
-      grid-template-columns: 50px repeat(5, 120px);
-      gap: 8px;
+      grid-template-columns: 65px repeat(var(--hour-count, 8), 145px);
+      gap: 0;
+      padding: 0;
+      width: max-content;
+      box-sizing: border-box;
+      background: var(--card);
     }
 
     .tt-hdr {
       text-align: center;
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--sub);
-      padding-bottom: 10px;
+      font-size: 11.5px;
+      font-weight: 900;
+      color: var(--theme);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 18px 2px 14px;
+      background: var(--card);
+      border-bottom: 1.5px solid var(--border);
+      border-right: 1px solid var(--border);
+      box-sizing: border-box;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 11;
     }
 
-    .tt-sid {
-      text-align: right;
-      padding-right: 8px;
-      font-size: 12px;
-      font-weight: 700;
+    .tt-hdr-sticky {
+      position: sticky;
+      left: 0;
+      top: 0;
+      z-index: 15;
+      background: var(--card) !important;
+      border-right: 2px solid var(--border) !important;
+      border-bottom: 2.5px solid var(--border) !important;
+    }
+
+    .tt-day-sid {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
       color: var(--sub);
+      background: var(--card) !important;
+      border-bottom: 1px solid var(--border) !important;
+      border-right: 2px solid var(--border) !important;
+      height: 94px;
+      box-sizing: border-box;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .tt-day-sid.today-sid {
+      color: var(--theme) !important;
+      background: rgba(108, 99, 255, 0.04) !important;
     }
 
     .tt-cell {
       position: relative;
-      background: var(--bg);
-      border-radius: 8px;
-      height: 70px;
-      padding: 8px;
+      background: var(--card);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+      border-right: 1.5px dashed rgba(0, 0, 0, 0.03) !important;
+      height: 94px;
+      padding: 6px;
+      box-sizing: border-box;
+      transition: all 0.25s ease;
+    }
+
+    [data-theme="dark"] .tt-cell {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+      border-right: 1.5px dashed rgba(255, 255, 255, 0.03) !important;
+    }
+
+    .tt-cell.empty-cell {
+      background: transparent;
     }
 
     .tt-item {
       position: absolute;
-      top: 4px;
-      bottom: 4px;
-      left: 4px;
-      right: 4px;
-      border-radius: 6px;
-      padding: 6px;
-      font-size: 11px;
-      font-weight: 700;
+      top: 6px;
+      bottom: 6px;
+      left: 6px;
+      right: 6px;
+      border-radius: 12px;
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       overflow: hidden;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      text-align: left;
+      border: none;
+      box-sizing: border-box;
+    }
+
+    .tt-item:active {
+      transform: scale(0.95) translateY(1px);
+      filter: brightness(0.95);
+    }
+
+    .tt-item-name {
+      font-size: 12.5px;
+      font-weight: 850;
+      color: var(--text);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.25;
+      letter-spacing: -0.2px;
+    }
+
+    .tt-item-room {
+      font-size: 9.5px;
+      font-weight: 850;
+      display: flex;
+      align-items: center;
+      gap: 3.5px;
+      opacity: 0.95;
+    }
+
+    .tt-item-time {
+      font-size: 9px;
+      font-weight: 800;
+      opacity: 0.75;
+      margin-top: 1px;
     }
 
     /* SUBJECTS & PICKER */
@@ -2598,6 +3000,19 @@
       scrollbar-width: none;
       -ms-overflow-style: none;
       padding-bottom: 90px;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    #v-list {
+      padding: 0 6px;
+      transition: opacity 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+      will-change: opacity, transform;
+    }
+
+    #v-week {
+      transition: opacity 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+      will-change: opacity, transform;
     }
 
     .scroll::-webkit-scrollbar {
@@ -3198,11 +3613,14 @@
 
   <!-- HOME -->
   <div class="page active" id="pg-home">
-    <div class="home-header">
-      <div class="h-avatar" id="h-av">S</div>
-      <div class="h-user-wrap">
-        <div class="h-greeting" id="h-greet">Good day 👋</div>
-        <div class="h-name" id="h-uname">Student</div>
+    <div class="home-header" style="display:flex; align-items:center; justify-content:space-between;">
+      <div class="h-avatar" id="h-av" onclick="switchNav('profile')" style="cursor:pointer;">S</div>
+      <div class="h-user-wrap" onclick="openScheduleSwitcher()" style="cursor:pointer; display:flex; flex-direction:column; align-items:flex-start; flex:1; margin-left:14px; min-width:0;">
+        <div class="h-greeting" id="h-greet" style="font-size:11px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:0.5px;">Hello 👋</div>
+        <div class="h-name" style="display:flex; align-items:center; gap:4px; font-weight:900; font-size:18px; color:var(--text); letter-spacing:-0.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%;">
+          <span id="active-schedule-name">Default Schedule</span>
+          <i data-lucide="chevron-down" style="width:14px; height:14px; color:var(--theme); stroke-width:3; flex-shrink:0;"></i>
+        </div>
       </div>
       <button class="ib header-edit-btn" onclick="openQuickActions()" title="Quick Actions">
         <i data-lucide="edit-3" style="width:20px;height:20px;"></i>
@@ -3242,19 +3660,26 @@
 
   <!-- SCHEDULES -->
   <div class="page" id="pg-scheds">
-    <div class="topbar">
-      <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left"></i></button>
-      <span class="topbar-title">Schedules</span>
-      <div style="display:flex;gap:10px;">
-        <button class="ib" style="color:var(--theme);" onclick="openModal('m-share-options')" title="Share Schedule"><i
-            data-lucide="share-2" style="width:20px;height:20px;"></i></button>
-        <button class="ib" onclick="openAddOptions()"><i data-lucide="plus"
-            style="width:20px;height:20px;"></i></button>
+    <div class="sched-header-fixed" style="position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 1.5px solid var(--border);">
+      <div class="topbar" style="position: static; border-bottom: none; box-shadow: none;">
+        <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left"></i></button>
+        <div onclick="openScheduleSwitcher()" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; padding: 6px 12px; min-width:0;">
+          <span class="topbar-title" style="margin:0; font-size:18px; font-weight:800; color:var(--text); letter-spacing:-0.5px;">Schedules</span>
+          <i data-lucide="layers" style="width:16px; height:16px; color:var(--theme); stroke-width:2.5;"></i>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="ib" onclick="openAddOptions()"><i data-lucide="plus"
+              style="width:20px;height:20px;"></i></button>
+        </div>
       </div>
-    </div>
-    <div class="wv-row">
-      <div class="wv-btn on" id="btn-list-view" onclick="setSchedView('list')">List View</div>
-      <div class="wv-btn" id="btn-week-view" onclick="setSchedView('week')">Week View</div>
+      <div class="sched-pills-wrap" style="padding: 10px 16px 8px; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; border-bottom: none;">
+        <div id="sched-pills-container" style="display: flex; gap: 8px;"></div>
+      </div>
+      <div class="wv-row" style="margin: 4px 14px 12px; box-shadow: none; border: 1px solid var(--border); position: relative;">
+        <div class="wv-blob" id="wv-blob"></div>
+        <div class="wv-btn on" id="btn-list-view" onclick="setSchedView('list')">List View</div>
+        <div class="wv-btn" id="btn-week-view" onclick="setSchedView('week')">Week View</div>
+      </div>
     </div>
     <div class="scroll">
       <div id="v-list">
@@ -3298,11 +3723,260 @@
     </div>
   </div>
 
+  <!-- SUGGESTIONS BOARD FULL-SCREEN OVERLAY -->
+  <div id="pg-suggestions-dash" style="
+    position:fixed; inset:0; z-index:2900;
+    background:var(--bg);
+    display:flex; flex-direction:column;
+    transform:translateX(100%);
+    transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    will-change:transform;
+    max-width:480px; left:50%; margin-left:-240px;
+  ">
+    <!-- Topbar -->
+    <div class="topbar" style="background:var(--bg);border-bottom:1px solid var(--border);">
+      <button class="ib" onclick="closeSuggestionsModal()"><i data-lucide="arrow-left"></i></button>
+      <span class="topbar-title">Suggestions Board</span>
+      <div style="width:40px;"></div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div style="flex:1;overflow-y:auto;padding:16px 14px 120px;display:flex;flex-direction:column;gap:16px;">
+      <p style="font-size:12.5px; color:var(--sub); line-height:1.4; padding:0 4px; font-weight:500;">Upvote ideas from the community to get them completed higher ranking, or suggest a new feature!</p>
+      
+      <!-- Input Panel -->
+      <div style="background:var(--card); border:1px solid var(--border); padding:20px; border-radius:24px; display:flex; flex-direction:column; gap:12px; box-shadow:var(--sh);">
+        <span style="font-size:14px; font-weight:800; color:var(--text); letter-spacing:-0.2px;">Add Suggestion</span>
+        <textarea id="sug-text" placeholder="I suggest adding..." style="width:100%; height:75px; border:1.5px solid var(--border); border-radius:14px; background:var(--bg); color:var(--text); font-family:inherit; font-size:13px; font-weight:600; padding:12px; outline:none; resize:none; box-sizing:border-box; transition:border-color 0.2s var(--ease);"></textarea>
+        <button id="btn-post-suggestion" class="btn-p" style="margin:0; height:42px; border-radius:12px; font-size:13px; font-weight:900; background:var(--theme); color:white; border:none; box-shadow:0 4px 12px rgba(108,99,255,0.2);" onclick="submitSuggestion()">Post Suggestion</button>
+        <div id="sug-disabled-alternative" style="display:none; font-size:11.5px; font-weight:600; color:var(--sub); text-align:center; line-height:1.4; margin-top:2px;"></div>
+      </div>
+
+      <div style="padding:10px 4px 2px; font-size:11px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:1px;">All Suggestions</div>
+      
+      <div id="suggestions-list-container" style="display:flex; flex-direction:column; gap:10px;">
+        <!-- Loaded dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SUGGESTIONS BOARD DETAIL THREAD OVERLAY -->
+  <div id="pg-suggestions-thread" style="
+    position:fixed; inset:0; z-index:2950;
+    background:var(--bg);
+    display:flex; flex-direction:column;
+    transform:translateX(100%);
+    transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    will-change:transform;
+    max-width:480px; left:50%; margin-left:-240px;
+  ">
+    <!-- Topbar -->
+    <div class="topbar" style="background:var(--bg);border-bottom:1px solid var(--border);">
+      <button class="ib" onclick="closeSuggestionThread()"><i data-lucide="arrow-left"></i></button>
+      <span class="topbar-title">Discussion Thread</span>
+      <div style="width:40px;"></div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div style="flex:1;overflow-y:auto;padding:16px 14px 120px;display:flex;flex-direction:column;gap:16px;">
+      <!-- Thread OP Card -->
+      <div id="thread-op-card" style="background:var(--card); border:1px solid var(--border); border-radius:24px; padding:20px; box-shadow:var(--sh); display:flex; flex-direction:column; gap:12px;">
+        <!-- Hydrated dynamically -->
+      </div>
+
+      <!-- Add Comment Section -->
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:24px; padding:16px; display:flex; flex-direction:column; gap:10px; box-shadow:var(--sh);">
+        <span style="font-size:13px; font-weight:800; color:var(--text); letter-spacing:-0.2px;">Add Comment</span>
+        <div style="display:flex; gap:8px;">
+          <input id="thread-comment-input" placeholder="Type a response..." style="flex:1; border:1.5px solid var(--border); border-radius:12px; background:var(--bg); color:var(--text); font-family:inherit; font-size:13px; font-weight:600; padding:10px 14px; outline:none; box-sizing:border-box;">
+          <button class="btn-p" style="margin:0; width:52px; height:42px; border-radius:12px; background:var(--theme); border:none; display:flex; align-items:center; justify-content:center; flex-shrink:0;" onclick="submitThreadComment()"><i data-lucide="send" style="width:16px; height:16px; color:white;"></i></button>
+        </div>
+      </div>
+
+      <div style="padding:8px 4px 2px; font-size:11px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:1px;">Comments</div>
+      
+      <div id="thread-comments-container" style="display:flex; flex-direction:column; gap:10px;">
+        <!-- Loaded dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN DASHBOARD FULL-SCREEN OVERLAY -->
+  <div id="pg-admin-dash" style="
+    position:fixed; inset:0; z-index:3000;
+    background:var(--bg);
+    display:flex; flex-direction:column;
+    transform:translateX(100%);
+    transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    will-change:transform;
+    max-width:480px; left:50%; margin-left:-240px;
+  ">
+    <!-- Topbar -->
+    <div class="topbar" style="background:var(--bg);border-bottom:1px solid var(--border);">
+      <button class="ib" onclick="closeAdminDashboard()"><i data-lucide="arrow-left"></i></button>
+      <span class="topbar-title">Admin Dashboard</span>
+      <div style="width:40px;"></div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div style="flex:1;overflow-y:auto;padding:16px 14px 120px;display:flex;flex-direction:column;gap:12px;">
+
+      <!-- Hero Stats Row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;">
+        <!-- Stat: Active Users -->
+        <div style="
+          background:var(--card);
+          border:1px solid var(--border);
+          border-radius:22px;
+          padding:18px 16px;
+          display:flex;flex-direction:column;gap:10px;
+          box-shadow:var(--sh);
+          position:relative;overflow:hidden;
+        ">
+          <div style="position:absolute;right:-10px;bottom:-10px;width:80px;height:80px;border-radius:50%;background:rgba(108,99,255,0.06);"></div>
+          <div style="width:38px;height:38px;border-radius:12px;background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.15);display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="users" style="width:18px;height:18px;color:var(--theme);stroke-width:2.5;"></i>
+          </div>
+          <div>
+            <div id="adm-stat-users" style="font-size:32px;font-weight:900;letter-spacing:-1.5px;color:var(--text);line-height:1;">—</div>
+            <div style="font-size:11px;font-weight:700;color:var(--sub);margin-top:3px;">Active Users</div>
+            <div style="font-size:10px;font-weight:600;color:var(--sub);opacity:0.6;">Last 7 days</div>
+          </div>
+        </div>
+        <!-- Stat: Feedbacks -->
+        <div style="
+          background:var(--card);
+          border:1px solid var(--border);
+          border-radius:22px;
+          padding:18px 16px;
+          display:flex;flex-direction:column;gap:10px;
+          box-shadow:var(--sh);
+          position:relative;overflow:hidden;
+        ">
+          <div style="position:absolute;right:-10px;bottom:-10px;width:80px;height:80px;border-radius:50%;background:rgba(0,217,126,0.06);"></div>
+          <div style="width:38px;height:38px;border-radius:12px;background:rgba(0,217,126,0.1);border:1px solid rgba(0,217,126,0.15);display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="message-square" style="width:18px;height:18px;color:var(--green);stroke-width:2.5;"></i>
+          </div>
+          <div>
+            <div id="adm-stat-feedbacks" style="font-size:32px;font-weight:900;letter-spacing:-1.5px;color:var(--text);line-height:1;">—</div>
+            <div style="font-size:11px;font-weight:700;color:var(--sub);margin-top:3px;">Feedbacks</div>
+            <div style="font-size:10px;font-weight:600;color:var(--sub);opacity:0.6;">All time</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section label -->
+      <div style="padding:8px 2px 2px;font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Manage</div>
+
+      <!-- Card: User Feedback -->
+      <div id="adm-card-feedbacks" onclick="openAdminSection('feedbacks')" style="
+        background:var(--card);border:1px solid var(--border);border-radius:22px;
+        padding:20px;display:flex;align-items:center;gap:16px;
+        box-shadow:var(--sh);cursor:pointer;
+        transition:transform 0.15s var(--ease);
+        -webkit-tap-highlight-color:transparent;
+      " ontouchstart="this.style.transform='scale(0.97)'" ontouchend="this.style.transform=''">
+        <div style="width:48px;height:48px;border-radius:16px;background:rgba(0,217,126,0.1);border:1px solid rgba(0,217,126,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="message-square" style="width:22px;height:22px;color:var(--green);stroke-width:2;"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">User Feedback</div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600;margin-top:2px;">Review messages from users</div>
+        </div>
+        <i data-lucide="chevron-right" style="color:var(--sub);opacity:0.5;flex-shrink:0;"></i>
+      </div>
+
+      <!-- Card: Suggestions Queue -->
+      <div id="adm-card-suggestions" onclick="openAdminSection('suggestions')" style="
+        background:var(--card);border:1px solid var(--border);border-radius:22px;
+        padding:20px;display:flex;align-items:center;gap:16px;
+        box-shadow:var(--sh);cursor:pointer;
+        transition:transform 0.15s var(--ease);
+        -webkit-tap-highlight-color:transparent;
+      " ontouchstart="this.style.transform='scale(0.97)'" ontouchend="this.style.transform=''">
+        <div style="width:48px;height:48px;border-radius:16px;background:rgba(255,159,10,0.1);border:1px solid rgba(255,159,10,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="lightbulb" style="width:22px;height:22px;color:#FF9F0A;stroke-width:2;"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">Suggestions Queue</div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600;margin-top:2px;">Approve & complete user ideas</div>
+        </div>
+        <i data-lucide="chevron-right" style="color:var(--sub);opacity:0.5;flex-shrink:0;"></i>
+      </div>
+
+      <!-- Card: Admin Toggle Suggestions Posting -->
+      <div style="
+        background:var(--card);border:1px solid var(--border);border-radius:22px;
+        padding:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;
+        box-shadow:var(--sh);
+      ">
+        <div style="display:flex; align-items:center; gap:16px; flex:1; min-width:0;">
+          <div style="width:48px;height:48px;border-radius:16px;background:rgba(255,59,48,0.08);border:1px solid rgba(255,59,48,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="ban" style="width:22px;height:22px;color:var(--red);stroke-width:2;"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">Disable Suggestions</div>
+            <div style="font-size:12px;color:var(--sub);font-weight:600;margin-top:2px;">Turn off new ideas posting</div>
+          </div>
+        </div>
+        <!-- Toggle button switch -->
+        <div id="tog-suggestions-status" onclick="toggleSuggestionsStatus()" class="toggle" style="margin:0; cursor:pointer;"></div>
+      </div>
+
+      <!-- Card: Completed Changelog -->
+      <div id="adm-card-changelog" onclick="openAdminSection('changelog')" style="
+        background:var(--card);border:1px solid var(--border);border-radius:22px;
+        padding:20px;display:flex;align-items:center;gap:16px;
+        box-shadow:var(--sh);cursor:pointer;
+        transition:transform 0.15s var(--ease);
+        -webkit-tap-highlight-color:transparent;
+      " ontouchstart="this.style.transform='scale(0.97)'" ontouchend="this.style.transform=''">
+        <div style="width:48px;height:48px;border-radius:16px;background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="check-circle-2" style="width:22px;height:22px;color:var(--theme);stroke-width:2;"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">Completed Changelog</div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600;margin-top:2px;">View completed feature history</div>
+        </div>
+        <i data-lucide="chevron-right" style="color:var(--sub);opacity:0.5;flex-shrink:0;"></i>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ADMIN SECTION DETAIL FULL-SCREEN -->
+  <div id="pg-admin-section" style="
+    position:fixed; inset:0; z-index:3100;
+    background:var(--bg);
+    display:flex; flex-direction:column;
+    transform:translateX(100%);
+    transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    will-change:transform;
+    max-width:480px; left:50%; margin-left:-240px;
+  ">
+    <div class="topbar" style="background:var(--bg);border-bottom:1px solid var(--border);">
+      <button class="ib" onclick="closeAdminSection()"><i data-lucide="arrow-left"></i></button>
+      <span class="topbar-title" id="adm-section-title">Feedback</span>
+      <div style="width:40px;"></div>
+    </div>
+    <div id="adm-section-content" style="flex:1;overflow-y:auto;padding:16px 14px 120px;display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+
   <!-- GROUPS -->
   <div class="page" id="pg-groups">
-    <div class="topbar">
+    <!-- Topbar: institution mode -->
+    <div class="topbar" id="groups-topbar-inst">
       <button class="ib" onclick="switchNav('home')"><i data-lucide="arrow-left"></i></button>
       <span class="topbar-title">Groups</span>
+      <button class="ib" onclick="openSuggestionsModal()" title="Community Suggestions" style="color:var(--theme);">
+        <i data-lucide="lightbulb" style="width:20px; height:20px; stroke-width:2.5;"></i>
+      </button>
+    </div>
+
+    <!-- Topbar: inner (filter+list) mode -->
+    <div class="topbar" id="groups-topbar-inner" style="display:none;">
+      <button class="ib" onclick="backToInstitutions()"><i data-lucide="arrow-left"></i></button>
+      <span class="topbar-title" id="groups-inner-title">ABESIT</span>
       <div style="width:40px; display:flex; justify-content:flex-end;">
         <button class="ib" id="btn-admin-add" style="display:none; width:40px; height:40px;"
           onclick="openAdminUpload()">
@@ -3311,30 +3985,52 @@
       </div>
     </div>
 
-    <!-- Branch Filter Tabs -->
-    <div class="branch-tabs">
-      <div class="bt-wrap">
-        <div class="bt-blob" id="bt-blob"></div>
-        <div class="bt on" id="tab-All" onclick="filterBranch('All', 0)">All</div>
-        <div class="bt" id="tab-1st" onclick="filterBranch('1st Year', 1)">1st Yr</div>
-        <div class="bt" id="tab-AI" onclick="filterBranch('CSE-AI', 2)">CSE-AI</div>
-        <div class="bt" id="tab-CSE" onclick="filterBranch('CSE', 3)">CSE</div>
-        <div class="bt" id="tab-DSIT" onclick="filterBranch('DS/IT', 4)">DS/IT</div>
-        <div class="bt" id="tab-More" onclick="filterBranch('More', 5)">More</div>
+    <!-- INSTITUTION VIEW (default) -->
+    <div id="groups-inst-view">
+      <div class="scroll" style="padding-top:0;">
+        <div class="inst-section-lbl">Your College</div>
+        <div class="inst-grid">
+          <div class="inst-card" id="inst-abesit" onclick="openInstitution('ABESIT')">
+            <div class="inst-icon">
+              <i data-lucide="landmark" style="width:26px; height:26px; stroke-width:2;"></i>
+            </div>
+            <div class="inst-info">
+              <div class="inst-name">ABESIT</div>
+              <div class="inst-pill"><i data-lucide="users" style="width:10px;"></i>&nbsp;Ghaziabad, UP</div>
+            </div>
+            <div class="inst-chevron"><i data-lucide="chevron-right" style="width:20px;"></i></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Standard Search Bar (Home/Schedule Style) -->
-    <div class="sw" style="padding: 0 16px 12px;">
-      <div class="sb">
-        <i data-lucide="search" style="color:var(--sub); width:18px;"></i>
-        <input id="g-srch" type="text" placeholder="Search by Section or Code..." oninput="renderGroups()">
+    <!-- INNER VIEW (branch filter + search + cards) -->
+    <div id="groups-inner-view">
+      <!-- Branch Filter Tabs (top:0 override since topbar is outside this view's scroll) -->
+      <div class="branch-tabs groups-inner-tabs">
+        <div class="bt-wrap">
+          <div class="bt-blob" id="bt-blob"></div>
+          <div class="bt on" id="tab-All" onclick="filterBranch('All', 0)">All</div>
+          <div class="bt" id="tab-1st" onclick="filterBranch('1st Year', 1)">1st Yr</div>
+          <div class="bt" id="tab-AI" onclick="filterBranch('CSE-AI', 2)">CSE-AI</div>
+          <div class="bt" id="tab-CSE" onclick="filterBranch('CSE', 3)">CSE</div>
+          <div class="bt" id="tab-DSIT" onclick="filterBranch('DS/IT', 4)">DS/IT</div>
+          <div class="bt" id="tab-More" onclick="filterBranch('More', 5)">More</div>
+        </div>
       </div>
-    </div>
 
-    <div class="scroll" style="background:var(--bg); padding-top:0;">
-      <div id="groups-list" style="padding:8px 16px 20px; display:flex; flex-direction:column; gap:10px;">
-        <!-- Distribution Cards (.cc) go here -->
+      <!-- Standard Search Bar (Home/Schedule Style) -->
+      <div class="sw" style="padding: 0 16px 12px;">
+        <div class="sb">
+          <i data-lucide="search" style="color:var(--sub); width:18px;"></i>
+          <input id="g-srch" type="text" placeholder="Search by Section or Code..." oninput="renderGroups()">
+        </div>
+      </div>
+
+      <div class="scroll" style="background:var(--bg); padding-top:0;">
+        <div id="groups-list" style="padding:8px 16px 20px; display:flex; flex-direction:column; gap:10px;">
+          <!-- Distribution Cards (.cc) go here -->
+        </div>
       </div>
     </div>
   </div>
@@ -3358,12 +4054,17 @@
         </button>
       </div>
 
-      <div class="premium" onclick="showToast('Premium UI Unlocked!')">
+      <div class="premium" onclick="showToast(typeof isAdmin !== 'undefined' && isAdmin ? 'Premium UI Unlocked!' : 'Premium Access Active!')">
         <i data-lucide="star" style="width:28px;height:28px"></i>
         <div>
-          <div class="pt">Premium Access</div>
-          <div class="ps">Full access functionality unlocked!</div>
+          <div class="pt" id="profile-premium-title">Premium Access</div>
+          <div class="ps" id="profile-premium-desc">Full access functionality unlocked!</div>
         </div>
+      </div>
+
+      <!-- Admin Tools Panel (only visible when admin is logged in) -->
+      <div id="profile-dynamic-section">
+        <!-- Admin panel rendered here by renderDynamicProfileSection() when isAdmin === true -->
       </div>
 
       <div
@@ -3373,7 +4074,7 @@
         <i data-lucide="user" style="color:var(--sub);"></i><span class="mi-lbl">Account Details</span><i
           data-lucide="chevron-right" style="color:var(--sub)"></i>
       </div>
-      <div class="mi" onclick="switchNav('sched')">
+      <div class="mi" onclick="openScheduleSwitcher()">
         <i data-lucide="calendar" style="color:var(--sub);"></i><span class="mi-lbl">Schedules</span><i
           data-lucide="chevron-right" style="color:var(--sub)"></i>
       </div>
@@ -3423,39 +4124,36 @@
         <i data-lucide="bell" style="color:var(--sub);"></i><span class="mi-lbl">Notifications</span>
         <i data-lucide="chevron-right" style="color:var(--sub)"></i>
       </div>
+      <div class="mi" onclick="openFeedbackModal()">
+        <i data-lucide="message-square" style="color:var(--sub);"></i><span class="mi-lbl">Send Feedback</span>
+        <i data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
       <div class="mi" onclick="toggleSet(this,'sync')">
         <i data-lucide="cloud" style="color:var(--sub);"></i><span class="mi-lbl">Auto-sync</span>
         <div class="toggle on" id="s-tog"></div>
       </div>
+      <div class="mi" onclick="openSuggestionsModal()">
+        <i data-lucide="lightbulb" style="color:var(--theme);"></i><span class="mi-lbl">Suggestions Board</span><i data-lucide="chevron-right" style="color:var(--sub)"></i>
+      </div>
 
-      <div
-        style="padding:16px 14px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">
-        About</div>
+      <div style="padding:16px 14px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">About</div>
       <div class="mi" onclick="openTelegram()">
-        <i data-lucide="send" style="color:var(--sub);"></i><span class="mi-lbl">Telegram Community</span><i
-          data-lucide="chevron-right" style="color:var(--sub)"></i>
+        <i data-lucide="send" style="color:var(--sub);"></i><span class="mi-lbl">Telegram Community</span><i data-lucide="chevron-right" style="color:var(--sub)"></i>
       </div>
       <div class="mi" onclick="shareApp()">
-        <i data-lucide="share-2" style="color:var(--sub);"></i><span class="mi-lbl">Share MySkedul</span><i
-          data-lucide="chevron-right" style="color:var(--sub)"></i>
+        <i data-lucide="share-2" style="color:var(--sub);"></i><span class="mi-lbl">Share MySkedul</span><i data-lucide="chevron-right" style="color:var(--sub)"></i>
       </div>
       <div class="mi" onclick="showToast('ianshulyaduvanshi@gmail.com')">
-        <i data-lucide="mail" style="color:var(--sub);"></i><span class="mi-lbl">Contact Support</span><i
-          data-lucide="chevron-right" style="color:var(--sub)"></i>
+        <i data-lucide="mail" style="color:var(--sub);"></i><span class="mi-lbl">Contact Support</span><i data-lucide="chevron-right" style="color:var(--sub)"></i>
       </div>
-      <div class="mi" id="profile-app-details" onclick="window.handleAppDetailsClick()" style="cursor:pointer;">
+      <div class="mi" id="profile-app-details" onclick="window.handleAppDetailsClick && window.handleAppDetailsClick()" style="cursor:pointer;">
         <i data-lucide="info" style="color:var(--sub);"></i>
         <span class="mi-lbl">App Details
-          <span id="app-version-lbl" style="font-size:11px; color:var(--sub); display:block; font-weight:500;">v1.3.04
-          </span>
+          <span id="app-version-lbl" style="font-size:11px; color:var(--sub); display:block; font-weight:500;">v1.3.04</span>
         </span>
         <div id="app-details-status" style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-          <div id="app-premium-tag"
-            style="font-size:10px; font-weight:800; color:var(--theme); opacity:0.6; text-transform:uppercase;">ULTRA
-            PREMIUM</div>
-          <div id="update-badge"
-            style="display:none; background:var(--green); color:#fff; font-size:9px; padding:2px 6px; border-radius:10px; font-weight:900;">
-            UPDATE AVAILABLE</div>
+          <div id="app-premium-tag" style="font-size:10px; font-weight:800; color:var(--theme); opacity:0.6; text-transform:uppercase;">ULTRA PREMIUM</div>
+          <div id="update-badge" style="display:none; background:var(--green); color:#fff; font-size:9px; padding:2px 6px; border-radius:10px; font-weight:900;">UPDATE AVAILABLE</div>
         </div>
       </div>
     </div>
@@ -3526,6 +4224,7 @@
             <button class="dpt" data-d="Thu" onclick="this.classList.toggle('on')">Thu</button>
             <button class="dpt" data-d="Fri" onclick="this.classList.toggle('on')">Fri</button>
             <button class="dpt" data-d="Sat" onclick="this.classList.toggle('on')">Sat</button>
+            <button class="dpt" data-d="Sun" onclick="this.classList.toggle('on')">Sun</button>
           </div>
         </div>
         <button class="btn-p" id="btn-save-class" onclick="saveClass()">Add Class</button>
@@ -3583,8 +4282,7 @@
       <div class="mb">
         <div class="fi"><i data-lucide="check-square" style="color:var(--sub)"></i><input id="i-tn"
             placeholder="Task Name" style="text-align:left;"></div>
-        <div class="fi"><i data-lucide="book" style="color:var(--sub)"></i><input id="i-ts"
-            placeholder="Subject (optional)" style="text-align:left;"></div>
+        <div class="ssb" id="task-ssb" onclick="openPicker('task')" style="margin-bottom:8px;">Select a subject (optional)</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0;overflow:hidden;">
           <div class="fi"><i data-lucide="calendar" style="color:var(--sub)"></i><input id="i-td" type="date"
               style="text-align:left;"></div>
@@ -3702,6 +4400,21 @@
     </div>
   </div>
 
+  <!-- CUSTOM CONFIRM DIALOG MODAL -->
+  <div class="mo center" id="mod-confirm" onclick="if(event.target===this)closeCustomConfirm(false)">
+    <div class="ms" style="width: min(340px, 90vw); border-radius: 28px; padding: 20px; text-align: center;">
+      <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(255,159,10,0.1); border: 1.5px solid rgba(255,159,10,0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+        <i data-lucide="help-circle" style="width: 26px; height: 26px; color:#FF9F0A; stroke-width:2.5;"></i>
+      </div>
+      <h3 style="font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 8px;" id="confirm-title">Are you sure?</h3>
+      <p style="font-size: 12.5px; color: var(--sub); line-height: 1.45; margin-bottom: 20px;" id="confirm-desc">Do you really want to perform this action?</p>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-s" style="flex: 1; margin: 0; height: 42px; border-radius: 12px; font-size: 12px; font-weight: 900;" onclick="closeCustomConfirm(false)">Cancel</button>
+        <button class="btn-p" style="flex: 1; margin: 0; height: 42px; border-radius: 12px; font-size: 12px; font-weight: 900; background: var(--green); border: none; color: white;" onclick="closeCustomConfirm(true)">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <div class="mo center" id="mod-share" onclick="if(event.target===this)closeModal('mod-share')">
     <div class="ms">
       <div class="mtb">
@@ -3712,11 +4425,34 @@
         <p style="color:var(--sub);font-size:13px;margin-bottom:12px;line-height:1.4">Share this code with friends. They
           can enter it in "Import via ID" to instantly get your entire schedule.</p>
         <div class="share-id-box" id="share-code-display">PREPARING...</div>
+        
+        <!-- Beautiful QR Code Container -->
+        <div style="display:flex; justify-content:center; align-items:center; margin:16px 0 12px; background:var(--card); padding:12px; border-radius:24px; border:1px solid var(--border); box-shadow: inset 0 2px 6px rgba(0,0,0,0.02); min-height: 184px; position:relative;">
+          <img id="share-qr-code" style="width:160px; height:160px; border-radius:12px; display:none;" alt="QR Code">
+          <div id="share-qr-loading" style="width:160px; height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--sub); font-size:11px; font-weight:700; gap:8px;">
+            <i data-lucide="loader" style="width:20px; animation:spin 1s linear infinite;"></i>
+            Generating QR Code...
+          </div>
+        </div>
+
         <div style="display:flex;gap:10px;margin-top:12px;">
           <button class="copy-btn" id="btn-copy-share" style="flex:1;margin:0">Copy Code</button>
           <button class="copy-btn" id="btn-whatsapp-id"
             style="flex:1.2;margin:0;background:#25D366;color:white;border-color:#25D366;display:flex;align-items:center;justify-content:center;gap:6px;"><i
               data-lucide="message-circle" style="width:16px"></i> WhatsApp</button>
+        </div>
+        
+        <!-- Social Contact Shortcuts for Quick Sharing -->
+        <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-top:14px; padding-top:12px; border-top:1.5px solid var(--border);">
+          <span style="font-size:11px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:0.5px;">Contact / Share:</span>
+          <!-- Telegram Round Button -->
+          <a href="https://t.me/MySkedul" target="_blank" style="width:34px; height:34px; border-radius:50%; background:#24A1DE; display:flex; align-items:center; justify-content:center; color:white; border:none; text-decoration:none; box-shadow:0 3px 8px rgba(36,161,222,0.3);" title="Telegram">
+            <i data-lucide="send" style="width:15px; height:15px; transform:translate(-1px, 0px);"></i>
+          </a>
+          <!-- Gmail Contact Support Button -->
+          <a href="mailto:ianshulyaduvanshi@gmail.com?subject=MySkedul%20Support" style="width:34px; height:34px; border-radius:50%; background:#EA4335; display:flex; align-items:center; justify-content:center; color:white; border:none; text-decoration:none; box-shadow:0 3px 8px rgba(234,67,53,0.3);" title="Gmail Support">
+            <i data-lucide="mail" style="width:15px; height:15px;"></i>
+          </a>
         </div>
       </div>
     </div>
@@ -3729,10 +4465,34 @@
         <button class="ib" onclick="closeModal('mod-import')"><i data-lucide="x"></i></button>
       </div>
       <div class="mb">
-        <p style="color:var(--sub);font-size:13px;margin-bottom:16px;line-height:1.4">Enter the 6-character Share Code
-          below (e.g., SCH-A1B2C3).</p>
-        <input type="text" id="import-id-input" placeholder="SCH-" maxlength="10">
+        <p style="color:var(--sub);font-size:13px;margin-bottom:16px;line-height:1.4">Enter the Share Code below or scan the schedule QR Code.</p>
+        
+        <!-- Input field next to Scan QR button -->
+        <div style="display:flex; gap:8px; margin-bottom:16px; width:100%;">
+          <input type="text" id="import-id-input" placeholder="SCH-" maxlength="10" style="flex:1; margin:0; text-transform:uppercase;">
+          <button class="btn-s" id="btn-scan-qr" onclick="startQRScanner()" style="width:52px; height:52px; display:flex; align-items:center; justify-content:center; margin:0; border-radius:18px; border: 1.5px solid var(--border); background: var(--bg);">
+            <i data-lucide="scan-line" style="width:20px; height:20px; color:var(--theme); stroke-width:2.5;"></i>
+          </button>
+        </div>
+
         <button class="btn-p" id="btn-do-import" onclick="importFromID()" style="width:100%">Import Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Camera QR Scanner Modal -->
+  <div class="mo" id="m-scanner" style="z-index: 3000;">
+    <div class="ms" style="height:100dvh; max-height:100dvh; border-radius:0; padding:0; background:#000; display:flex; flex-direction:column; overflow:hidden;">
+      <div class="topbar" style="background:transparent; color:#fff; border:none; position:absolute; top:0; left:0; right:0; z-index:10; box-shadow:none;">
+        <button class="ib" style="color:#fff; background:rgba(0,0,0,0.4); border-radius:50%; width:40px; height:40px;" onclick="stopQRScanner()"><i data-lucide="arrow-left"></i></button>
+        <span class="topbar-title" style="color:#fff; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">Scan Schedule QR</span>
+        <div style="width:40px;"></div>
+      </div>
+      <div style="position:relative; flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#000;">
+        <video id="scanner-video" style="width:100%; height:100%; object-fit:cover;" autoplay playsinline></video>
+        <div class="scanner-overlay">
+          <div class="scanner-laser"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -3759,6 +4519,37 @@
         <button class="btn-p" onclick="saveExamDetails()">Save Exam</button>
         <button class="btn-s" style="color:var(--red);border-color:var(--red);" id="btn-del-exam"
           onclick="deleteExamFromEditor()">Remove Exam Day</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schedule Switcher Bottom Sheet Modal -->
+  <div class="mo" id="m-schedule-switcher" onclick="if(event.target===this)closeModal('m-schedule-switcher')">
+    <div class="ms" style="border-radius:32px 32px 0 0; max-height:85vh;">
+      <div class="mtb" style="padding:16px 20px 8px;">
+        <span class="mt" style="font-size:18px;">Schedules</span>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="ib" style="width:30px; height:30px; background:var(--border); color:var(--green);" onclick="closeModal('m-schedule-switcher'); openModal('mod-import');" title="Cloud Import">
+            <i data-lucide="cloud-download" style="width:14px; height:14px; stroke-width:2.5;"></i>
+          </button>
+          <button class="ib" style="width:30px; height:30px; background:var(--border); color:#FF9F0A;" onclick="closeModal('m-schedule-switcher'); document.getElementById('import-input').click();" title="Import JSON File">
+            <i data-lucide="file-down" style="width:14px; height:14px; stroke-width:2.5;"></i>
+          </button>
+          <button class="ib" style="width:30px; height:30px; background:var(--border);" onclick="closeModal('m-schedule-switcher')">
+            <i data-lucide="x" style="width:14px; height:14px;"></i>
+          </button>
+        </div>
+      </div>
+      <div class="mb" style="padding:0 16px 24px; display:flex; flex-direction:column; gap:16px;">
+        <p style="font-size:11px; color:var(--sub); font-weight:800; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px; margin-top:4px;">Switch Active Schedule</p>
+        <div id="switcher-schedules-list" style="display:flex; flex-direction:column; gap:10px; max-height:45vh; overflow-y:auto; padding-bottom:8px;">
+          <!-- Dynamically populated schedules list -->
+        </div>
+        <div style="border-top:1.5px solid var(--border); padding-top:16px; margin-top:8px; display:flex; flex-direction:column;">
+          <button class="btn-p" style="margin:0; height:56px; border-radius:18px; font-weight:900; font-size:14px; background:var(--theme); color:#fff; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="promptCreateSchedule()">
+            <i data-lucide="plus" style="width:18px; height:18px; stroke-width:3;"></i> Create New Schedule
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -4030,7 +4821,20 @@
           classes = data.classes.map(c => c.toJSON ? c.toJSON() : c);
         }
         if (data.tasks) {
-          tasks = data.tasks.map(t => t.toJSON ? t.toJSON() : t);
+          tasks = data.tasks.map(t => {
+            const item = t.toJSON ? t.toJSON() : t;
+            // Migration path: if task has string subj but no sj ID reference, resolve it
+            if (item.subj && !item.sj) {
+              let sub = subjects.find(s => s.name.toLowerCase() === item.subj.toLowerCase());
+              if (!sub) {
+                const newId = genId();
+                sub = { id: newId, name: item.subj, color: COLS[Math.floor(Math.random() * COLS.length)] };
+                subjects.push(sub);
+              }
+              item.sj = sub.id;
+            }
+            return item;
+          });
         }
 
         if (data.holidays) holidays = data.holidays;
@@ -4060,7 +4864,7 @@
       }
     }
 
-    const sn = id => { const s = subjects.find(x => x.id === id); return s ? s.name : 'Unknown'; };
+    const sn = id => { const s = subjects.find(x => x.id === id); return s ? s.name.replace(/(\S)-(\S)/g, '$1\u2011$2') : 'Unknown'; };
     const sc = id => { const s = subjects.find(x => x.id === id); return s ? s.color : '#0D0D0D'; };
 
     // Global Utility Helper
@@ -4102,10 +4906,14 @@
         return;
       }
 
-      // Exit History Mode when leaving groups tab
-      if (curTab === 'groups' && tab !== 'groups' && activeHistory.length > 0) {
-        activeHistory = [];
-        viewingHistoryTitle = '';
+      // Exit History Mode and reset to institution view when leaving groups tab
+      if (curTab === 'groups' && tab !== 'groups') {
+        if (activeHistory.length > 0) {
+          activeHistory = [];
+          viewingHistoryTitle = '';
+        }
+        // Reset groups to institution view when leaving
+        _showGroupsInstView();
       }
 
       const pages = document.querySelectorAll('.page');
@@ -4175,7 +4983,10 @@
         }
         else if (tab === 'sched') renderSchedList();
         else if (tab === 'tasks') renderTasks();
-        else if (tab === 'groups') renderGroups();
+        else if (tab === 'groups') {
+          // Always reset to institution card view when switching to groups tab
+          _showGroupsInstView();
+        }
         else if (tab === 'subjs') renderSubjList('subjs-list', 'sj-srch');
         else if (tab === 'profile') updateProfUI();
 
@@ -4436,6 +5247,18 @@
     window.onload = async () => {
       await loadData();
 
+      // Analytics ping & unique device id tracking
+      let deviceId = localStorage.getItem('MySkedul_deviceId');
+      if (!deviceId) {
+        deviceId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : (Math.random().toString(36).substring(2) + Date.now().toString(36));
+        localStorage.setItem('MySkedul_deviceId', deviceId);
+      }
+      fetch(workerURL + '/analytics/ping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceId })
+      }).catch(e => console.warn("Analytics ping error:", e));
+
       // INITIAL SINGLE-PASS RENDER (Consolidated to prevent double-refresh)
       n = new Date(); // Hard reset to today
       curSelDateStr = n.toDateString();
@@ -4452,6 +5275,7 @@
       });
       // Sync status bar with initial theme
       syncStatusBar();
+      initFCMListener();
 
       // PRE-POSITION CALENDAR (Smooth Reveal)
       const ds = document.getElementById('home-ds');
@@ -4549,9 +5373,15 @@
     }
 
     // HOME RENDER
+    let _homeFirstRender = true;
     function renderHome() {
       const cont = document.getElementById('h-list');
+      // Show skeleton on very first render (before data is painted)
+      if (_homeFirstRender && cont && cont.innerHTML === '') {
+        cont.innerHTML = _skCC(4);
+      }
       if (cont) cont.innerHTML = ''; // SYNC CLEAR: Erase old cards instantly
+      _homeFirstRender = false;
 
       const q = (document.getElementById('h-srch')?.value || '').toLowerCase();
       const now = new Date();
@@ -4688,7 +5518,7 @@
             });
           }
         }
-        lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
+        lucide.createIcons({ root: cont, attrs: { 'stroke-width': 2.5 } });
       };
 
       requestAnimationFrame(render);
@@ -4715,21 +5545,21 @@
       reader.onload = async (e) => {
         try {
           const d = JSON.parse(e.target.result);
-          if (Array.isArray(d.subjects)) subjects = d.subjects;
-          if (Array.isArray(d.classes)) classes = d.classes;
-          if (Array.isArray(d.tasks)) tasks = d.tasks;
-          if (Array.isArray(d.holidays)) holidays = d.holidays;
-          if (Array.isArray(d.examDays)) examDays = d.examDays;
-          if (Array.isArray(d.testOverrides)) testOverrides = d.testOverrides;
-          if (d.globalUserName) globalUserName = d.globalUserName;
-          if (d.globalUserEmail) globalUserEmail = d.globalUserEmail;
-          await saveData(); // Instant offline persistence
-          showToast('Data Restored! Working 100% Offline.');
-          setTimeout(() => {
-            location.reload();
-            switchNav('home');
-          }, 1500);
-        } catch (err) { showToast('Invalid file'); }
+          await DB.restore(d);
+          
+          subjects = []; classes = []; tasks = []; holidays = []; examDays = []; testOverrides = [];
+          await loadData();
+          
+          updateProfUI();
+          generateCalendar();
+          renderHome();
+          renderTasks();
+          renderSchedList();
+          buildTimetable();
+          
+          showToast('Backup Restored Successfully!');
+          switchNav('home');
+        } catch (err) { showToast('Restore failed'); }
       };
       reader.readAsText(file);
     }
@@ -4757,32 +5587,70 @@
           data.classes.forEach(nc => { nc.id = Date.now() + Math.random(); classes.push(nc); });
           await saveData();
           showToast('Schedule Merged Offline!');
-          renderHome(); renderSchedList(); buildTimetable();
+          
+          renderHome();
+          renderSchedList();
+          buildTimetable();
+          
           document.getElementById('import-input').value = '';
-          switchNav('home');
+          switchNav('sched');
         } catch (err) { showToast('Import failed'); }
       };
       reader.readAsText(file);
     }
     function setSchedView(v) {
-      document.getElementById('btn-list-view').classList.remove('on');
-      document.getElementById('btn-week-view').classList.remove('on');
+      const btnList = document.getElementById('btn-list-view');
+      const btnWeek = document.getElementById('btn-week-view');
+      const vList = document.getElementById('v-list');
+      const vWeek = document.getElementById('v-week');
+      if (!vList || !vWeek) return;
+
+      btnList.classList.remove('on');
+      btnWeek.classList.remove('on');
       document.getElementById('btn-' + v + '-view').classList.add('on');
-      document.getElementById('v-list').style.display = v === 'list' ? 'block' : 'none';
-      document.getElementById('v-week').style.display = v === 'week' ? 'block' : 'none';
-      if (v === 'week') buildTimetable();
+      
+      const blob = document.getElementById('wv-blob');
+      if (blob) {
+        blob.style.transform = v === 'list' ? 'translateX(0)' : 'translateX(calc(100% + 6px))';
+      }
+
+      // Smooth sliding crossfade transitions
+      const activeOut = v === 'list' ? vWeek : vList;
+      const activeIn = v === 'list' ? vList : vWeek;
+
+      // Fade/slide out current active panel
+      activeOut.style.opacity = '0';
+      activeOut.style.transform = v === 'list' ? 'translateX(16px)' : 'translateX(-16px)';
+      
+      setTimeout(() => {
+        activeOut.style.display = 'none';
+        
+        // Setup entrance configuration
+        activeIn.style.display = 'block';
+        activeIn.style.opacity = '0';
+        activeIn.style.transform = v === 'list' ? 'translateX(-16px)' : 'translateX(16px)';
+        
+        // Force reflow
+        activeIn.offsetHeight;
+        
+        // Slide in
+        activeIn.style.opacity = '1';
+        activeIn.style.transform = 'translateX(0)';
+        
+        if (v === 'week') buildTimetable();
+      }, 150);
     }
-    function renderSchedList() {
+     function renderSchedList() {
+      renderSchedPills();
       const cont = document.getElementById('scheds-list');
       if (!cont) return;
-      cont.classList.remove('sync-reveal');
       if (!classes.length) { cont.innerHTML = '<div class="empty">No schedules</div>'; return; }
       cont.innerHTML = '';
       let cardIdxTotal = 0;
       void cont.offsetWidth; // Force reflow
       cont.classList.add('sync-reveal');
       const isLow = document.body.classList.contains('low-end');
-      ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].forEach(d => {
+      ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach(d => {
         let x = classes.filter(c => c.days.includes(d));
         x.sort((a, b) => t2m(a.start) - t2m(b.start));
         if (x.length) {
@@ -4813,19 +5681,131 @@
     }
     function buildTimetable() {
       const tt = document.getElementById('timetable-view');
-      let html = `<div class="tt-grid"><div class="tt-hdr">Time</div>`;
-      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-      days.forEach(d => html += `<div class="tt-hdr">${d}</div>`);
-      const hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
-      hours.forEach(h => {
-        html += `<div class="tt-sid">${h}</div>`;
-        days.forEach(d => {
-          let cl = classes.find(c => c.days.includes(d) && c.start.startsWith(h.substr(0, 2)));
-          if (cl) { let col = sc(cl.sj); html += `<div class="tt-cell"><div class="tt-item" style="background:${col}20;border-left:3px solid ${col};color:${col}" onclick="openEditClass(${cl.id})">${sn(cl.sj)}</div></div>`; }
-          else html += `<div class="tt-cell"></div>`;
+      if (!tt) return;
+      
+      // If database contains no classes, immediately render clean empty state
+      if (!classes || classes.length === 0) {
+        tt.innerHTML = `
+          <div class="empty-timetable-state" style="padding: 50px 20px; text-align: center; color: var(--sub); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+            <i data-lucide="calendar" style="width: 32px; height: 32px; stroke-width: 2; color: var(--theme); opacity: 0.8; margin-bottom: 4px;"></i>
+            <div style="font-size: 14px; font-weight: 800; color: var(--text);">No Classes Scheduled</div>
+            <div style="font-size: 11px; opacity: 0.7; max-width: 200px; margin: 0 auto; line-height: 1.4;">Add classes to your schedule to view your week timeline sheet.</div>
+          </div>`;
+        tt.classList.add('sync-reveal');
+        lucide.createIcons({ root: tt });
+        return;
+      }
+
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const todayIdx = new Date().getDay();
+      const convertedTodayIdx = todayIdx === 0 ? 6 : todayIdx - 1;
+      const todayName = dayNames[convertedTodayIdx];
+      
+      // Resolve atomic, non-overlapping time intervals from DB class boundaries
+      const uniqueTimesSet = new Set();
+      classes.forEach(c => {
+        uniqueTimesSet.add(c.start);
+        uniqueTimesSet.add(c.end);
+      });
+      const uniqueTimes = Array.from(uniqueTimesSet).sort((a, b) => t2m(a) - t2m(b));
+      
+      const intervals = [];
+      for (let i = 0; i < uniqueTimes.length - 1; i++) {
+        intervals.push({
+          start: uniqueTimes[i],
+          end: uniqueTimes[i + 1],
+          label: `${uniqueTimes[i]} – ${uniqueTimes[i + 1]}`
+        });
+      }
+
+      // Resolve active days that have classes in the database
+      let activeDays = [];
+      classes.forEach(c => {
+        c.days.forEach(d => {
+          if (!activeDays.includes(d)) activeDays.push(d);
         });
       });
-      html += `</div>`; tt.innerHTML = html;
+      activeDays.sort((a, b) => dayNames.indexOf(a) - dayNames.indexOf(b));
+
+      // Check if the timetable has any uneven/spanning classes
+      let isUneven = false;
+      classes.forEach(cl => {
+        const sIdx = intervals.findIndex(inv => t2m(inv.start) === t2m(cl.start));
+        const eIdx = intervals.findIndex(inv => t2m(inv.end) === t2m(cl.end));
+        if (sIdx !== -1 && eIdx !== -1 && (eIdx - sIdx) > 0) {
+          isUneven = true;
+        }
+      });
+
+      // Update grid columns count dynamically
+      tt.querySelector('.tt-grid')?.style.setProperty('--hour-count', intervals.length);
+
+      let html = `<div style="text-align:center; font-size:10px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:12px; display:flex; align-items:center; justify-content:center; gap:4px;"><i data-lucide="chevrons-left-right" style="width:12px; height:12px;"></i> Swipe horizontally to view day timeline</div>`;
+      html += `<div class="tt-grid" style="--hour-count: ${intervals.length};">`;
+      
+      // Row 1: Time sticky corner + Interval columns headers (Period numbers or time labels)
+      html += `<div class="tt-hdr tt-hdr-sticky" style="grid-row: 1; grid-column: 1;">Day</div>`;
+      intervals.forEach((inv, idx) => {
+        const label = isUneven ? `${idx + 1}` : inv.label;
+        html += `<div class="tt-hdr" style="grid-row: 1; grid-column: ${idx + 2}; font-size: 10px; padding: 16px 4px 12px;">${label}</div>`;
+      });
+      
+      // Rows: Active Days only (each day gets explicit grid-row offset)
+      activeDays.forEach((d, dayIdx) => {
+        const dayRowIdx = dayIdx + 2;
+        const isToday = d === todayName;
+        html += `<div class="tt-day-sid ${isToday ? 'today-sid' : ''}" style="grid-row: ${dayRowIdx}; grid-column: 1;">${d} ${isToday ? '•' : ''}</div>`;
+        
+        let dayClasses = classes.filter(c => c.days.includes(d));
+        const covered = new Array(intervals.length).fill(false);
+        
+        // Render classes with dynamic column spans and inner time ranges
+        dayClasses.forEach(cl => {
+          const sIdx = intervals.findIndex(inv => t2m(inv.start) === t2m(cl.start));
+          const eIdx = intervals.findIndex(inv => t2m(inv.end) === t2m(cl.end));
+          if (sIdx !== -1 && eIdx !== -1) {
+            for (let i = sIdx; i <= eIdx; i++) covered[i] = true;
+            
+            const colStart = sIdx + 2;
+            const span = eIdx - sIdx + 1;
+            let col = sc(cl.sj);
+            
+            html += `
+              <div class="tt-cell" style="grid-row: ${dayRowIdx}; grid-column: ${colStart} / span ${span};">
+                <div class="tt-item" style="background:${col}12; border-left:4px solid ${col};" onclick="openEditClass(${cl.id})">
+                  <div style="display:flex; flex-direction:column; gap:2px;">
+                    <div class="tt-item-name">${sn(cl.sj)}</div>
+                    ${isUneven ? `<div class="tt-item-time" style="color:${col};">${cl.start} – ${cl.end}</div>` : ''}
+                  </div>
+                  <div class="tt-item-room" style="color:${col}; margin-top: auto;"><i data-lucide="map-pin" style="width:9px; height:9px; stroke-width:3;"></i> ${cl.room || '—'}</div>
+                </div>
+              </div>`;
+          }
+        });
+        
+        // Render individual empty spacer cells for uncovered segments
+        intervals.forEach((inv, idx) => {
+          if (!covered[idx]) {
+            const colStart = idx + 2;
+            html += `<div class="tt-cell empty-cell" style="grid-row: ${dayRowIdx}; grid-column: ${colStart};"></div>`;
+          }
+        });
+      });
+      
+      html += `</div>`;
+      tt.innerHTML = html;
+      tt.classList.add('sync-reveal');
+      lucide.createIcons({ root: tt });
+
+      // Auto-scroll to center first scheduled slot of Today
+      const firstClassToday = classes.find(c => c.days.includes(todayName));
+      if (firstClassToday) {
+        const sIdx = intervals.findIndex(inv => t2m(inv.start) === t2m(firstClassToday.start));
+        if (sIdx !== -1) {
+          const scrollOffset = 65 + (sIdx * 145) - (tt.clientWidth - 65) / 2 + 145 / 2;
+          tt.scrollLeft = Math.max(0, scrollOffset);
+        }
+      }
     }
 
     // EDIT / ADD CLASS
@@ -4882,6 +5862,8 @@
       const cont = document.getElementById(listId);
       cont.classList.remove('sync-reveal');
       const q = (document.getElementById(searchId)?.value || '').toLowerCase();
+      // Skeleton flash while filtering
+      if (!q) cont.innerHTML = _skSubj(forPicker ? 4 : 5);
       const f = subjects.filter(s => !q || s.name.toLowerCase().includes(q));
       if (!f.length) { cont.innerHTML = `<div class="empty">No subjects</div>`; return; }
       cont.innerHTML = '';
@@ -4903,7 +5885,7 @@
         </div>` : ''}`;
         cont.appendChild(div);
       });
-      lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
+      lucide.createIcons({ root: cont, attrs: { 'stroke-width': 2.5 } });
     }
     function deleteSubject(id) {
       const sb = subjects.find(s => s.id === id);
@@ -4918,11 +5900,21 @@
         showToast('Subject deleted');
       }, 'trash-2');
     }
-    function openPicker() { renderSubjList('pk-list', 'pk-srch', true); openModal('m-picker'); }
+    let pickerTarget = 'class';
+    function openPicker(target = 'class') {
+      pickerTarget = target;
+      renderSubjList('pk-list', 'pk-srch', true);
+      openModal('m-picker');
+    }
     function pickSubj(id) {
       formSubj = id; const s = subjects.find(x => x.id === id);
-      const btn = document.getElementById('ssb');
-      btn.textContent = s.name; btn.classList.add('sel');
+      if (pickerTarget === 'class') {
+        const btn = document.getElementById('ssb');
+        if (btn) { btn.textContent = s.name; btn.classList.add('sel'); }
+      } else {
+        const btn = document.getElementById('task-ssb');
+        if (btn) { btn.textContent = s.name; btn.classList.add('sel'); }
+      }
       closeModal('m-picker');
     }
     function saveClass() {
@@ -5018,14 +6010,16 @@
           dueStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
           if (t.dueTime) dueStr += ` · ${t.dueTime}`;
         }
+        const color = t.sj ? sc(t.sj) : 'transparent';
         const div = document.createElement('div');
         div.className = `cc stagger-item ${t.done ? 't-done' : ''}`;
-        div.style.cssText = `padding-left:14px;gap:12px;${!isLow ? `animation-delay:${i * 0.04}s;` : ''}`;
+        div.style.cssText = `padding-left:14px;gap:12px;position:relative;overflow:hidden;${!isLow ? `animation-delay:${i * 0.04}s;` : ''}`;
         div.innerHTML = `
-          <div class="tchk ${t.done ? 'done' : ''}" onclick="event.stopPropagation();togT(${t.id})"><i data-lucide="check" style="width:14px"></i></div>
+          ${t.sj ? `<div class="cc-bar" style="background:${color};margin-left:-14px;"></div>` : ''}
+          <div class="tchk ${t.done ? 'done' : ''}" style="${t.sj ? '' : 'margin-left:0;'} border-color:${color};" onclick="event.stopPropagation();togT(${t.id})"><i data-lucide="check" style="width:14px"></i></div>
           <div class="cc-info">
             <div class="cc-name" style="margin:0">${t.name}</div>
-            ${t.subj ? `<div class="cc-room" style="margin-top:4px"><i data-lucide="book" style="width:12px"></i> ${t.subj}</div>` : ''}
+            ${t.sj ? `<div class="cc-room" style="margin-top:4px;color:${color};font-weight:700;"><i data-lucide="book" style="width:12px;display:inline-block;vertical-align:middle;margin-top:-2px;"></i> ${sn(t.sj)}</div>` : ''}
             ${dueStr ? `<div style="font-size:11px;color:var(--sub);margin-top:3px;display:flex;align-items:center;gap:4px;"><i data-lucide="calendar" style="width:11px"></i>${dueStr}</div>` : ''}
           </div>
           <div class="prio-badge prio-${t.prio}">${t.prio.toUpperCase()}</div>
@@ -5034,15 +6028,34 @@
         lp(div, () => deleteTask(t.id));
         cont.appendChild(div);
       });
-      lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
+      lucide.createIcons({ root: cont, attrs: { 'stroke-width': 2.5 } });
     }
-    function togT(id) { let t = tasks.find(x => x.id === id); t.done = !t.done; renderTasks(); saveData(); }
+    function togT(id) {
+      let t = tasks.find(x => x.id === id);
+      t.done = !t.done;
+      if (t.done) haptic('success');
+      else haptic('light');
+      renderTasks();
+      saveData();
+    }
     let editingTaskId = null;
     function openAddTask(id = null) {
       editingTaskId = id;
       const t = id ? tasks.find(x => x.id === id) : null;
       document.getElementById('i-tn').value = t ? t.name : '';
-      document.getElementById('i-ts').value = t ? t.subj : '';
+      formSubj = t ? t.sj : null;
+
+      const ssb = document.getElementById('task-ssb');
+      if (ssb) {
+        if (formSubj) {
+          ssb.textContent = sn(formSubj);
+          ssb.className = 'ssb sel';
+        } else {
+          ssb.textContent = 'Select a subject (optional)';
+          ssb.className = 'ssb';
+        }
+      }
+
       document.getElementById('i-td').value = t ? t.dueDate : '';
       document.getElementById('i-tt').value = t ? t.dueTime : '';
       document.getElementById('i-tp').value = t ? t.prio : 'med';
@@ -5052,10 +6065,12 @@
       openModal('m-task');
     }
     function saveTask() {
-      let n = document.getElementById('i-tn').value; if (!n) return showToast('Task name required');
+      let n = document.getElementById('i-tn').value;
+      if (!n) return showToast('Task name required');
       const data = {
         name: n,
-        subj: document.getElementById('i-ts').value,
+        sj: formSubj,
+        subj: formSubj ? sn(formSubj) : '', // Backwards compatibility legacy field
         prio: document.getElementById('i-tp').value,
         dueDate: document.getElementById('i-td').value || '',
         dueTime: document.getElementById('i-tt').value || '',
@@ -5071,33 +6086,221 @@
       closeModal('m-task'); renderTasks(); saveData();
     }
     function deleteTask(id) {
-      if (confirm('Delete this task?')) {
-        tasks = tasks.filter(t => t.id !== id);
-        renderTasks(); saveData(); showToast('Task deleted');
-      }
+      const t = tasks.find(x => x.id === id);
+      showConfirm(
+        "Delete Task?",
+        `This will delete "${t ? t.name : 'this task'}" forever.`,
+        () => {
+          tasks = tasks.filter(x => x.id !== id);
+          closeModal('m-task');
+          renderTasks();
+          saveData();
+          showToast('Task deleted');
+        },
+        'trash-2'
+      );
     }
-    function renderGroups() {
-      document.getElementById('groups-list').innerHTML = groups.map(g => `<div class="gc">
-    <div class="gc-h"><div class="gc-av">${g.av}</div><div><div class="gc-n">${g.name}</div><div class="gc-mem">${g.mem.join(', ')}</div></div><i data-lucide="chevron-right" style="margin-left:auto;color:var(--sub)"></i></div>
-    <div class="gc-p">💬 ${g.lmsg}</div>
-  </div>`).join('');
+    // ===== SKELETON LOADER HELPERS =====
+    function _skWeekView() {
+      if (!classes || classes.length === 0) return '';
+      
+      // Resolve slots and active days dynamically from DB
+      let slots = [];
+      classes.forEach(c => {
+        const slotStr = `${c.start} – ${c.end}`;
+        if (!slots.includes(slotStr)) slots.push(slotStr);
+      });
+      slots.sort((a, b) => {
+        const timeA = t2m(a.split('–')[0].trim());
+        const timeB = t2m(b.split('–')[0].trim());
+        return timeA - timeB;
+      });
+
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      let activeDays = [];
+      classes.forEach(c => {
+        c.days.forEach(d => {
+          if (!activeDays.includes(d)) activeDays.push(d);
+        });
+      });
+      activeDays.sort((a, b) => dayNames.indexOf(a) - dayNames.indexOf(b));
+
+      let html = `<div style="text-align:center; font-size:10px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:12px; opacity:0.5;">Building timetable...</div>`;
+      html += `<div class="tt-grid" style="--hour-count: ${slots.length}; opacity: 0.6; pointer-events: none;">`;
+      html += `<div class="tt-hdr tt-hdr-sticky">Day</div>`;
+      slots.forEach(() => {
+        html += `<div class="tt-hdr"><div class="sk-flash" style="height:10px; width:45px; margin:0 auto; border-radius:4px; background:var(--border);"></div></div>`;
+      });
+      activeDays.forEach(d => {
+        html += `<div class="tt-day-sid">${d}</div>`;
+        slots.forEach(() => {
+          html += `<div class="tt-cell empty-cell"><div class="sk-flash" style="height:100%; width:100%; border-radius:10px; opacity:0.1; background:var(--border);"></div></div>`;
+        });
+      });
+      html += `</div>`;
+      return html;
+    }
+
+    function _skCC(n = 4) {
+      // Class card skeleton (home / schedule)
+      let h = '';
+      for (let i = 0; i < n; i++) {
+        h += `<div class="sk-cc">
+          <div class="sk sk-bar"></div>
+          <div class="sk-body">
+            <div class="sk sk-line w80"></div>
+            <div class="sk sk-line w50"></div>
+          </div>
+          <div class="sk-time">
+            <div class="sk sk-line"></div>
+            <div class="sk sk-line"></div>
+          </div>
+        </div>`;
+      }
+      return h;
+    }
+
+    function _skGC(sections = 2, cardsEach = 2) {
+      // Group skeleton: section header + cards
+      let h = '';
+      for (let s = 0; s < sections; s++) {
+        h += `<div class="sk-gc-hdr"><div class="sk"></div><div class="sk sk-lbl"></div></div>`;
+        for (let c = 0; c < cardsEach; c++) {
+          h += `<div class="sk-gcrd">
+            <div class="sk sk-left"></div>
+            <div class="sk-body">
+              <div class="sk sk-line w55"></div>
+              <div class="sk sk-line w40"></div>
+            </div>
+            <div class="sk sk-btn"></div>
+          </div>`;
+        }
+      }
+      return h;
+    }
+
+    function _skTask(n = 4) {
+      // Task card skeleton
+      let h = '';
+      for (let i = 0; i < n; i++) {
+        h += `<div class="sk-task">
+          <div class="sk sk-chk"></div>
+          <div class="sk-body">
+            <div class="sk sk-line w70"></div>
+            <div class="sk sk-line w45"></div>
+          </div>
+          <div class="sk sk-badge"></div>
+        </div>`;
+      }
+      return h;
+    }
+
+    function _skSubj(n = 5) {
+      // Subject card skeleton
+      let h = '';
+      for (let i = 0; i < n; i++) {
+        h += `<div class="subj-card sk-cc" style="padding:12px 16px; margin-bottom:10px;">
+          <div class="sk" style="width:5px; height:36px; border-radius:4px;"></div>
+          <div class="sk-body" style="justify-content:center; padding-left:12px; flex:1;">
+            <div class="sk sk-line w40"></div>
+          </div>
+          <div style="display:flex; gap:4px; margin-left:auto;">
+            <div class="sk" style="width:32px; height:32px; border-radius:10px;"></div>
+            <div class="sk" style="width:32px; height:32px; border-radius:10px;"></div>
+          </div>
+        </div>`;
+      }
+      return h;
+    }
+
+    // ===== INSTITUTION VIEW HELPERS =====
+    function _showGroupsInstView() {
+      const instV = document.getElementById('groups-inst-view');
+      const innerV = document.getElementById('groups-inner-view');
+      const topInst = document.getElementById('groups-topbar-inst');
+      const topInner = document.getElementById('groups-topbar-inner');
+      if (instV) instV.style.display = 'flex';
+      if (innerV) innerV.style.display = 'none';
+      if (topInst) topInst.style.display = 'flex';
+      if (topInner) topInner.style.display = 'none';
       lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
     }
 
-    // PROFILE
+    function _showGroupsInnerView(instName) {
+      const instV = document.getElementById('groups-inst-view');
+      const innerV = document.getElementById('groups-inner-view');
+      const topInst = document.getElementById('groups-topbar-inst');
+      const topInner = document.getElementById('groups-topbar-inner');
+      const titleEl = document.getElementById('groups-inner-title');
+      if (instV) instV.style.display = 'none';
+      if (innerV) innerV.style.display = 'flex';
+      if (topInst) topInst.style.display = 'none';
+      if (topInner) topInner.style.display = 'flex';
+      if (titleEl) titleEl.textContent = instName || 'Groups';
+      // Clear search + reset branch tab
+      const srch = document.getElementById('g-srch');
+      if (srch) srch.value = '';
+      filterBranch('All', 0);
+      renderGroups();
+      lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
+    }
+
+    function openInstitution(name) {
+      haptic('light');
+      syncGroupsManifest();
+      _showGroupsInnerView(name);
+    }
+
+    function backToInstitutions() {
+      haptic('light');
+      activeHistory = [];
+      viewingHistoryTitle = '';
+      _showGroupsInstView();
+    }
+
+    function renderGroups() {
+      const cont = document.getElementById('groups-list');
+      if (!cont) return;
+      // delegate to async cloud render
+      _renderGroupsAsync(cont);
+    }
+
+    async function _renderGroupsAsync(cont) {
+      await renderGroups_cloud(cont);
+    }
+
     let globalUserName = 'Student', globalUserEmail = '';
     function updateProfUI() {
       if (!globalUserName) globalUserName = 'Student';
       const char = (globalUserName && globalUserName.length > 0) ? globalUserName[0].toUpperCase() : 'S';
       document.getElementById('p-av').textContent = char;
       document.getElementById('h-av').textContent = char;
-      document.getElementById('h-uname').textContent = globalUserName;
+      document.getElementById('h-greet').textContent = `Hello, ${globalUserName} 👋`;
+      
+      const activeId = DB.schedules.getActiveId();
+      const schedulesList = DB.schedules.getAll();
+      const activeName = (schedulesList.find(s => s.id === activeId)?.name) || 'Default Schedule';
+      const schedLabel = document.getElementById('active-schedule-name');
+      if (schedLabel) schedLabel.textContent = activeName;
+      
+      const pSchedLabel = document.getElementById('p-active-sched');
+      if (pSchedLabel) pSchedLabel.textContent = activeName;
+      
       document.getElementById('p-name').textContent = globalUserName;
       document.getElementById('p-email').textContent = globalUserEmail;
+
+      // Update switcher active label if it's currently open
+      if (document.getElementById('m-schedule-switcher').classList.contains('open') || 
+          document.getElementById('m-schedule-switcher').classList.contains('active')) {
+        renderSwitcherSchedules();
+      }
 
       // Toggle Admin Badge
       const badge = document.getElementById('admin-badge');
       if (badge) badge.style.display = isAdmin ? 'block' : 'none';
+
+      // Update Dynamic Profile Section (About App vs Admin Panel Tools)
+      renderDynamicProfileSection();
     }
     function openEditProfile() { document.getElementById('i-pn').value = globalUserName; document.getElementById('i-pe').value = globalUserEmail; openModal('m-profile'); }
     function saveProfile() { globalUserName = document.getElementById('i-pn').value || 'Student'; globalUserEmail = document.getElementById('i-pe').value; updateProfUI(); closeModal('m-profile'); showToast('Profile Saved'); }
@@ -5149,10 +6352,33 @@
     let skipNextPopstate = false;
     let exitTap = false;
 
+    // ===== PREMIUM CUSTOM DIALOG ENGINE (PROMISE-BASED) =====
+    let confirmResolver = null;
+    function showCustomConfirm(title, desc) {
+      document.getElementById('confirm-title').textContent = title || "Are you sure?";
+      document.getElementById('confirm-desc').textContent = desc || "";
+      openModal('mod-confirm');
+      return new Promise((resolve) => {
+        confirmResolver = resolve;
+      });
+    }
+    function closeCustomConfirm(approved) {
+      closeModal('mod-confirm');
+      if (confirmResolver) {
+        confirmResolver(approved);
+        confirmResolver = null;
+      }
+    }
+
     function uMS() { requestAnimationFrame(() => { document.body.classList.toggle('modal-open', document.querySelectorAll('.mo.active').length > 0); }); }
     function openModal(id) {
       const el = document.getElementById(id);
       if (!el) return;
+      const activeModals = document.querySelectorAll('.mo.active');
+      let baseZIndex = 2100;
+      if (id === 'm-scanner') baseZIndex = 3000;
+      else if (id === 'mod-confirm') baseZIndex = 4000; // Force topmost priority
+      el.style.zIndex = baseZIndex + (activeModals.length * 10);
       el.classList.add('active'); uMS();
       lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
       history.pushState({ modal: id }, '');
@@ -5160,7 +6386,9 @@
     function closeModal(id) {
       const el = document.getElementById(id);
       if (!el || !el.classList.contains('active')) return;
-      el.classList.remove('active'); uMS();
+      el.classList.remove('active'); 
+      el.style.zIndex = '';
+      uMS();
       // If the current history state refers to this modal, go back silently
       if (history.state && history.state.modal === id) {
         skipNextPopstate = true;
@@ -5171,8 +6399,16 @@
       // Find the last opened (top-most) modal and close it
       const open = [...document.querySelectorAll('.mo.active')];
       if (open.length > 0) {
+        // Sort by actual computed zIndex to close the topmost modal first
+        open.sort((a, b) => {
+          const zA = parseInt(window.getComputedStyle(a).zIndex) || 0;
+          const zB = parseInt(window.getComputedStyle(b).zIndex) || 0;
+          return zA - zB;
+        });
         const top = open[open.length - 1];
-        top.classList.remove('active'); uMS();
+        top.classList.remove('active');
+        top.style.zIndex = '';
+        uMS();
         return true;
       }
       return false;
@@ -5206,6 +6442,244 @@
         return;
       }
     });
+
+    // ===== MULTIPLE SCHEDULES SWITCHING ENGINE =====
+    function openScheduleSwitcher() {
+      renderSwitcherSchedules();
+      openModal('m-schedule-switcher');
+    }
+
+    function renderSwitcherSchedules() {
+      const cont = document.getElementById('switcher-schedules-list');
+      if (!cont) return;
+      const list = DB.schedules.getAll();
+      const activeId = DB.schedules.getActiveId();
+      
+      cont.innerHTML = list.map(s => {
+        const isActive = s.id === activeId;
+        return `
+          <div class="qa-item" style="padding:16px; gap:14px; margin-bottom:0; align-items:center; cursor:pointer; background:${isActive ? 'rgba(108,99,255,0.05)' : 'var(--card)'}; border-color:${isActive ? 'var(--theme)' : 'var(--border)'};" onclick="switchActiveSchedule('${s.id}')">
+            <div class="qa-icon" style="background:${isActive ? 'rgba(108,99,255,0.12)' : 'rgba(0,0,0,0.03)'}; width:38px; height:38px;">
+              <i data-lucide="calendar" style="width:18px; height:18px; color:${isActive ? 'var(--theme)' : 'var(--sub)'};"></i>
+            </div>
+            <div style="flex:1; min-width:0; text-align:left;">
+              <div class="qa-title" style="font-size:14px; font-weight:800; ${isActive ? 'color:var(--theme);' : ''}">${s.name}</div>
+              <div class="qa-sub" style="font-size:10px;">${isActive ? 'Active Schedule' : 'Tap to switch'}</div>
+            </div>
+            <div style="display:flex; gap:6px;" onclick="event.stopPropagation();">
+              <button class="ib" style="width:32px; height:32px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--theme);" onclick="shareParticularSchedule('${s.id}', '${s.name}')" title="Share Schedule">
+                <i data-lucide="share-2" style="width:14px; height:14px;"></i>
+              </button>
+              <button class="ib" style="width:32px; height:32px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--sub);" onclick="promptRenameSchedule('${s.id}', '${s.name}')">
+                <i data-lucide="edit-2" style="width:14px; height:14px;"></i>
+              </button>
+              ${s.id !== 'default' ? `
+                <button class="ib" style="width:32px; height:32px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--red);" onclick="deleteScheduleConfirm('${s.id}', '${s.name}')">
+                  <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons({ root: cont, attrs: { 'stroke-width': 2.5 } });
+    }
+
+    function renderSchedPills() {
+      const cont = document.getElementById('sched-pills-container');
+      if (!cont) return;
+      const list = DB.schedules.getAll();
+      const activeId = DB.schedules.getActiveId();
+      
+      cont.innerHTML = list.map(s => {
+        const isActive = s.id === activeId;
+        return `
+          <button class="sched-pill ${isActive ? 'on' : ''}" onclick="switchActiveSchedule('${s.id}')">
+            ${s.name}
+          </button>
+        `;
+      }).join('');
+    }
+
+    async function shareParticularSchedule(id, name) {
+      haptic('medium');
+      showToast("Preparing schedule file...");
+      try {
+        const data = await DB.getSnapshotForSchedule(id);
+        const fileName = `${name.replace(/\s+/g, '_')}_Schedule.json`;
+        const json = JSON.stringify(data);
+
+        if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+          const { Filesystem, Share } = Capacitor.Plugins;
+          if (Filesystem && Share) {
+            const result = await Filesystem.writeFile({
+              path: fileName,
+              data: json,
+              directory: 'CACHE',
+              encoding: 'utf8'
+            });
+            await Share.share({
+              title: name,
+              text: `Here is my "${name}" schedule from MySkedul!`,
+              files: [result.uri]
+            });
+          }
+        } else {
+          const file = new File([json], fileName, { type: 'application/json' });
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ title: name, files: [file] });
+          } else {
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = fileName; a.click();
+            URL.revokeObjectURL(url);
+            showToast("Downloaded schedule file!");
+          }
+        }
+      } catch (e) {
+        console.error(e);
+        showToast("Failed to share schedule");
+      }
+    }
+
+    async function switchActiveSchedule(id, silent = false) {
+      if (id === DB.schedules.getActiveId()) {
+        if (!silent) {
+          closeModal('m-schedule-switcher');
+          switchNav('sched');
+        }
+        return;
+      }
+      
+      if (silent) {
+        await DB.schedules.setActiveId(id);
+        subjects = [];
+        classes = [];
+        tasks = [];
+        holidays = [];
+        examDays = [];
+        testOverrides = [];
+        await loadData();
+        return;
+      }
+
+      haptic('medium');
+      showToast("Switching schedule...");
+      closeModal('m-schedule-switcher');
+      
+      const scrollCont = document.querySelector('#pg-scheds .scroll');
+      if (scrollCont) {
+        scrollCont.style.transition = 'opacity 0.15s ease';
+        scrollCont.style.opacity = '0';
+      }
+
+      setTimeout(async () => {
+        // Save any pending data, switch the database partition key
+        await DB.schedules.setActiveId(id);
+        
+        // Flush in-memory variables to clear current view
+        subjects = [];
+        classes = [];
+        tasks = [];
+        holidays = [];
+        examDays = [];
+        testOverrides = [];
+        
+        // Reload partitioned data set from DB
+        await loadData();
+        
+        // Trigger haptic response & sync native notifications automatically
+        if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+          await scheduleAllNotifications();
+        }
+        
+        // Full UI Repaint
+        updateProfUI();
+        generateCalendar();
+        renderHome();
+        renderTasks();
+        renderSchedList();
+        buildTimetable();
+        
+        // Auto-navigate to Schedules tab to view the selected schedule instantly
+        switchNav('sched');
+        
+        if (scrollCont) {
+          scrollCont.offsetHeight; // Force layout reflow
+          scrollCont.style.opacity = '1';
+        }
+      }, 150);
+    }
+
+    function promptCreateSchedule() {
+      closeModal('m-schedule-switcher');
+      setTimeout(() => {
+        showPrompt(
+          "Create Schedule",
+          "Enter a name for the new schedule profile:",
+          "e.g. Semester 2",
+          async (name) => {
+            if (!name || !name.trim()) return showToast("Name required");
+            haptic('success');
+            const entry = await DB.schedules.create(name.trim());
+            showToast(`Schedule "${entry.name}" created!`);
+            await switchActiveSchedule(entry.id);
+          }
+        );
+      }, 250);
+    }
+
+    function promptRenameSchedule(id, currentName) {
+      closeModal('m-schedule-switcher');
+      setTimeout(() => {
+        showPrompt(
+          "Rename Schedule",
+          `Enter a new name for "${currentName}":`,
+          currentName,
+          async (newName) => {
+            if (!newName || !newName.trim()) return showToast("Name required");
+            haptic('medium');
+            const success = await DB.schedules.rename(id, newName.trim());
+            if (success) {
+              showToast("Schedule renamed!");
+              updateProfUI();
+              openScheduleSwitcher();
+            } else {
+              showToast("Rename failed.");
+            }
+          }
+        );
+      }, 250);
+    }
+
+    function deleteScheduleConfirm(id, name) {
+      closeModal('m-schedule-switcher');
+      setTimeout(() => {
+        showConfirm(
+          "Delete Schedule?",
+          `This will permanently delete "${name}" and all its classes, subjects, tasks, and holidays. This cannot be undone.`,
+          async () => {
+            haptic('medium');
+            const success = await DB.schedules.delete(id);
+            if (success) {
+              showToast("Schedule deleted!");
+              subjects = []; classes = []; tasks = []; holidays = []; examDays = []; testOverrides = [];
+              await loadData();
+              updateProfUI();
+              generateCalendar();
+              renderHome();
+              renderTasks();
+              renderSchedList();
+              buildTimetable();
+              openScheduleSwitcher();
+            } else {
+              showToast("Deletion failed.");
+            }
+          },
+          'trash-2'
+        );
+      }, 250);
+    }
 
     // Push an initial base state so the first back-press hits our handler
     history.replaceState({ page: 'home' }, '');
@@ -5439,77 +6913,154 @@
     let isScheduling = false;
     async function scheduleAllNotifications() {
       if (isScheduling || !window.Capacitor || !window.Capacitor.isNativePlatform()) return;
-      if (!notifSettings.enabled) { await cancelAllNotifications(); return; }
+      
+      // Fix 1: If disabled, cancel immediately without asking for permissions
+      if (!notifSettings.enabled) {
+        await cancelAllNotifications();
+        return;
+      }
+
       isScheduling = true;
       try {
         const { LocalNotifications } = Capacitor.Plugins;
+        
+        // Request permissions
         const perm = await LocalNotifications.checkPermissions();
         if (perm.display !== 'granted') {
           const res = await LocalNotifications.requestPermissions();
-          if (res.display !== 'granted') return;
+          if (res.display !== 'granted') {
+            isScheduling = false;
+            return;
+          }
         }
+
         await cancelAllNotifications();
-        const toSchedule = []; const now = new Date();
+        const toSchedule = [];
+        const now = new Date();
         const dayMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        // Track generated IDs to prevent any collisions (must fit in 32-bit signed int)
+        const scheduledIds = new Set();
+        const getUniqueId = (timeMs, offset) => {
+          let id = (Math.floor(timeMs / 1000) + offset) % 2000000000;
+          while (scheduledIds.has(id)) {
+            id = (id + 1) % 2000000000;
+          }
+          scheduledIds.add(id);
+          return id;
+        };
 
         for (let i = 0; i < 14; i++) {
-          const targetDay = new Date(); targetDay.setDate(now.getDate() + i);
+          const targetDay = new Date();
+          targetDay.setDate(now.getDate() + i);
           const dIso = targetDay.toISOString().split('T')[0];
           const isHoliday = holidays.includes(dIso);
           const isExamDay = examDays.some(e => e.date === dIso);
 
+          // 1. Exam Day Alerts
           if (isExamDay && notifSettings.examRemind) {
             const entry = examDays.find(e => e.date === dIso);
-            const time = new Date(targetDay); time.setHours(7, 0, 0, 0);
+            const time = new Date(targetDay);
+            time.setHours(7, 0, 0, 0); // 7:00 AM on exam day
             if (time > now) {
-              toSchedule.push({ id: Math.floor(time.getTime() / 1000) + 1, title: "Exam Day Today! 📝", body: `Exam: ${entry.subject || 'Upcoming exam'}. Check timings in the app.`, schedule: { at: time, allowWhileIdle: true }, smallIcon: 'ic_launcher' });
+              toSchedule.push({
+                id: getUniqueId(time.getTime(), 1),
+                title: "Exam Day Today! 📝",
+                body: `Exam: ${entry.subject || 'Upcoming exam'}. Check timings in the app.`,
+                schedule: { at: time, allowWhileIdle: true },
+                smallIcon: 'ic_launcher'
+              });
             }
           }
+
+          // 2. Class Reminders
           if (!isHoliday && !isExamDay && notifSettings.classRemind) {
             const dayName = dayMap[targetDay.getDay()];
             classes.filter(c => c.days.includes(dayName)).forEach(c => {
-              const sub = subjects.find(s => s.id === c.sj); if (!sub) return;
+              const sub = subjects.find(s => s.id === c.sj);
+              if (!sub) return;
               const [h, m] = c.start.split(':').map(Number);
-              const classTime = new Date(targetDay); classTime.setHours(h, m, 0, 0);
+              const classTime = new Date(targetDay);
+              classTime.setHours(h, m, 0, 0);
               const remindTime = new Date(classTime.getTime() - (notifSettings.leadMins || 15) * 60000);
               if (remindTime > now) {
-                toSchedule.push({ id: Math.floor(remindTime.getTime() / 1000) + 2, title: `${sub.name} starts in ${notifSettings.leadMins} min`, body: `Starts at ${c.start} in Room ${c.room || 'N/A'}.`, schedule: { at: remindTime, allowWhileIdle: true }, smallIcon: 'ic_launcher' });
+                toSchedule.push({
+                  id: getUniqueId(remindTime.getTime(), 2),
+                  title: `${sub.name} starts in ${notifSettings.leadMins} min`,
+                  body: `Starts at ${c.start} in Room ${c.room || 'N/A'}.`,
+                  schedule: { at: remindTime, allowWhileIdle: true },
+                  smallIcon: 'ic_launcher'
+                });
               }
             });
           }
+
+          // 3. Class Test Alerts
           const test = testOverrides.find(t => t.date === dIso);
           if (test && notifSettings.testRemind) {
-            const rt = new Date(targetDay); rt.setDate(rt.getDate() - 1); rt.setHours(18, 0, 0, 0);
+            // Remind at 6:00 PM the evening before the test
+            const rt = new Date(targetDay);
+            rt.setDate(rt.getDate() - 1);
+            rt.setHours(18, 0, 0, 0);
             if (rt > now) {
-              const sub = subjects.find(s => s.id === test.classId);
-              toSchedule.push({ id: Math.floor(rt.getTime() / 1000) + 3, title: "Upcoming Class Test 📖", body: `You have a test in ${sub ? sub.name : 'tomorrow\'s class'}.`, schedule: { at: rt, allowWhileIdle: true }, smallIcon: 'ic_launcher' });
+              // Fix 2: Resolve subject name via class lookup correctly
+              const cls = classes.find(c => c.id === test.classId);
+              const sub = cls ? subjects.find(s => s.id === cls.sj) : null;
+              toSchedule.push({
+                id: getUniqueId(rt.getTime(), 3),
+                title: "Upcoming Class Test 📖",
+                body: `You have a test in ${sub ? sub.name : "tomorrow's class"}.`,
+                schedule: { at: rt, allowWhileIdle: true },
+                smallIcon: 'ic_launcher'
+              });
             }
           }
         }
+
+        // 4. Task Reminders
         if (notifSettings.taskRemind) {
           tasks.filter(t => !t.done).forEach(t => {
-            const dl = new Date(t.date); dl.setHours(8, 0, 0, 0);
+            // Fix 3: Map correctly to t.dueDate instead of non-existent t.date
+            if (!t.dueDate) return;
+            const dl = new Date(t.dueDate);
+            dl.setHours(8, 0, 0, 0); // 8:00 AM on due day
             if (dl > now) {
-              toSchedule.push({ id: Math.floor(dl.getTime() / 1000) + 4, title: "Task Due Today! ✅", body: `Assignment due: ${t.name}`, schedule: { at: dl, allowWhileIdle: true }, smallIcon: 'ic_launcher' });
+              toSchedule.push({
+                id: getUniqueId(dl.getTime(), 4),
+                title: "Task Due Today! ✅",
+                body: `Assignment due: ${t.name}`,
+                schedule: { at: dl, allowWhileIdle: true },
+                smallIcon: 'ic_launcher'
+              });
             }
           });
         }
-        if (toSchedule.length > 0) { await LocalNotifications.schedule({ notifications: toSchedule.slice(0, 50) }); }
-      } catch (e) { console.error('Notification scheduling failed', e); }
-      finally { isScheduling = false; }
+
+        if (toSchedule.length > 0) {
+          // Limit to 50 schedules (Capacitor/OS limit safety)
+          await LocalNotifications.schedule({ notifications: toSchedule.slice(0, 50) });
+        }
+      } catch (e) {
+        console.error('Notification scheduling failed', e);
+      } finally {
+        isScheduling = false;
+      }
     }
 
     function openNotifSettings() {
       const setTog = (id, val) => {
         const el = document.getElementById(id);
-        if (val) el.classList.add('on'); else el.classList.remove('on');
+        if (el) {
+          if (val) el.classList.add('on'); else el.classList.remove('on');
+        }
       };
       setTog('ns-all', notifSettings.enabled);
       setTog('ns-class', notifSettings.classRemind);
       setTog('ns-test', notifSettings.testRemind);
       setTog('ns-exam', notifSettings.examRemind);
       setTog('ns-task', notifSettings.taskRemind);
-      document.getElementById('ns-mins').value = notifSettings.leadMins;
+      const minsInput = document.getElementById('ns-mins');
+      if (minsInput) minsInput.value = notifSettings.leadMins || 15;
       openModal('m-notif-settings');
       lucide.createIcons();
     }
@@ -5527,10 +7078,19 @@
       showToast('Notifications Updated!');
       if (notifSettings.enabled) scheduleAllNotifications();
     }
+
     async function testNotification() {
       if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return showToast("Notifications only work on Android/iOS");
       try {
         const { LocalNotifications } = Capacitor.Plugins;
+        
+        // Request permission on test if not already granted
+        const perm = await LocalNotifications.checkPermissions();
+        if (perm.display !== 'granted') {
+          const res = await LocalNotifications.requestPermissions();
+          if (res.display !== 'granted') return showToast("Notification permission denied");
+        }
+
         await LocalNotifications.schedule({
           notifications: [{
             id: 999,
@@ -5565,7 +7125,7 @@
         }
       }
 
-      document.querySelectorAll('.live-pb').forEach(pb => {
+      Array.from(document.getElementsByClassName('live-pb')).forEach(pb => {
         const s = parseFloat(pb.getAttribute('data-start'));
         const e = parseFloat(pb.getAttribute('data-end'));
         if (!isNaN(s) && !isNaN(e) && e > s) {
@@ -5627,29 +7187,28 @@
 
       if (window.Capacitor && window.Capacitor.isNativePlatform()) {
         try {
-          const { Filesystem } = Capacitor.Plugins;
-          const { Share } = Capacitor.Plugins;
-          const { Directory, Encoding } = Capacitor;
-
-          // Write to cache directory to avoid long-term space usage
-          const result = await Filesystem.writeFile({
-            path: fileName,
-            data: json,
-            directory: Directory.Cache,
-            encoding: Encoding.UTF8
-          });
-
-          if (Share) {
-            await Share.share({
-              title: 'My Schedule',
-              text: 'Here is my schedule from MySkedul!',
-              files: [result.uri],
+          const { Filesystem, Share } = Capacitor.Plugins;
+          if (Filesystem) {
+            // Write to cache directory (fully compliant, no permissions needed)
+            const result = await Filesystem.writeFile({
+              path: fileName,
+              data: json,
+              directory: 'CACHE',
+              encoding: 'utf8'
             });
-            return;
+
+            if (Share) {
+              await Share.share({
+                title: 'My Schedule',
+                text: 'Here is my schedule from MySkedul!',
+                files: [result.uri], // Use files array for sharing local file URIs
+              });
+              return;
+            }
           }
         } catch (e) {
           console.error('Sharing failed', e);
-          showToast('Native share failed');
+          showToast('Native share failed: ' + e.message);
         }
       }
 
@@ -5667,9 +7226,15 @@
     async function openShareID() {
       const btn = document.getElementById('share-code-display');
       if (!btn) return;
-      const oldText = btn.textContent;
       btn.textContent = 'GENERATING...';
+      
+      const qrImg = document.getElementById('share-qr-code');
+      const qrLoading = document.getElementById('share-qr-loading');
+      if (qrImg) { qrImg.style.display = 'none'; qrImg.src = ''; }
+      if (qrLoading) qrLoading.style.display = 'flex';
+      
       openModal('mod-share');
+      lucide.createIcons({ root: document.getElementById('mod-share') });
 
       try {
         const data = getExportData(false); // Schedule only
@@ -5693,13 +7258,24 @@
         const json = await res.json();
         if (json.id) {
           btn.textContent = json.id;
+          
+          // Generate and display QR Code dynamically using free secure API
+          if (qrImg && qrLoading) {
+            const qrData = `myskedul://import/${json.id}`;
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&color=6c63ff&data=${encodeURIComponent(qrData)}`;
+            qrImg.onload = () => {
+              qrLoading.style.display = 'none';
+              qrImg.style.display = 'block';
+            };
+          }
+
           document.getElementById('btn-copy-share').onclick = () => {
             navigator.clipboard.writeText(json.id);
             haptic('medium');
             showToast("Code Copied!");
           };
           document.getElementById('btn-whatsapp-id').onclick = () => {
-            const text = `Take my MySkedul schedule! 📅\nCode: ${json.id}\n\nInstructions:\n1. Open MySkedul\n2. Click (+) -> Cloud Import\n3. Enter the code above.`;
+            const text = `Take my MySkedul schedule! 📅\nCode: ${json.id}\n\nInstructions:\n1. Open MySkedul\n2. Click (+) -> Cloud Import\n3. Enter the code or scan the QR Code.`;
             const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
             window.open(url, '_blank');
           };
@@ -5716,39 +7292,65 @@
       const fn = full ? `MySkedul_Backup_${rid}.json` : `MySkedul_Schedule_${rid}.json`;
       const json = JSON.stringify(data, null, 2);
 
-      // Capacitor Native Save (Targeting Download Folder)
+      // Capacitor Native Save
       if (window.Capacitor && window.Capacitor.isNativePlatform()) {
         try {
-          const { Filesystem } = Capacitor.Plugins;
-          const { Directory, Encoding } = Capacitor;
+          const { Filesystem, Share } = Capacitor.Plugins;
           if (Filesystem) {
+            // Request public storage permission before saving publicly
             try {
-              // Attempt to save to Download folder (ExternalStorage)
-              await Filesystem.writeFile({
-                path: `Download/${fn}`,
-                data: json,
-                directory: Directory.ExternalStorage,
-                encoding: Encoding.UTF8,
-                recursive: true
-              });
-              showToast(`Success: Saved to Download/${fn}`);
-            } catch (e) {
-              console.warn('Download folder restricted, falling back to Documents');
-              // Fallback to Documents if Download is restricted by Scoped Storage
-              await Filesystem.writeFile({
+              const perms = await Filesystem.checkPermissions();
+              if (perms.publicStorage !== 'granted') {
+                const req = await Filesystem.requestPermissions();
+                if (req.publicStorage !== 'granted') {
+                  console.warn('Storage permission denied by user');
+                }
+              }
+            } catch (pe) {
+              console.error('Permission check failed', pe);
+            }
+
+            let savedUri = null;
+            let success = false;
+
+            // Try to write to Documents directory (highly accessible)
+            try {
+              const res = await Filesystem.writeFile({
                 path: fn,
                 data: json,
-                directory: Directory.Documents,
-                encoding: Encoding.UTF8,
+                directory: 'DOCUMENTS',
+                encoding: 'utf8',
                 recursive: true
               });
-              showToast(`Saved to Documents/${fn}`);
+              savedUri = res.uri;
+              success = true;
+              showToast(`Backup saved to Documents folder!`);
+            } catch (err) {
+              console.warn('Documents save failed, trying Cache + Share', err);
+              // Fallback: Write to Cache and share so user can save it anywhere
+              const res = await Filesystem.writeFile({
+                path: fn,
+                data: json,
+                directory: 'CACHE',
+                encoding: 'utf8'
+              });
+              savedUri = res.uri;
+            }
+
+            // Open Share sheet as fallback if saving directly to Documents failed
+            if (!success && Share && savedUri) {
+              showToast("Opening share menu to save/send backup...");
+              await Share.share({
+                title: full ? 'MySkedul Backup' : 'MySkedul Schedule',
+                text: 'Here is my MySkedul backup file.',
+                files: [savedUri] // Use files array for sharing local file URIs
+              });
             }
             return;
           }
         } catch (e) {
           console.error('Backup failed', e);
-          showToast('Native save failed');
+          showToast('Native save failed: ' + e.message);
         }
       }
 
@@ -5759,6 +7361,141 @@
       a.href = url; a.download = fn; a.click();
       URL.revokeObjectURL(url);
       showToast(full ? 'Full Backup Exported!' : 'Schedule Exported!');
+    }
+
+    async function parseAndSaveTimetable(timetable) {
+      if (!Array.isArray(timetable)) return false;
+
+      // STEP 1: Prune orphaned subjects (those only linked to classes we are replacing)
+      const existingSubjIds = new Set(classes.map(c => c.sj));
+      subjects = subjects.filter(s => !existingSubjIds.has(s.id));
+      classes = [];
+
+      // STEP 2: Resolve or create subjects and classes
+      for (const cls of timetable) {
+        const sName = (cls.subjectName || cls.name || cls.subject || "").trim();
+        let targetSubjId = null;
+
+        if (sName) {
+          let match = subjects.find(s => s.name.toLowerCase() === sName.toLowerCase());
+          if (!match) {
+            const newId = genId();
+            match = { id: newId, name: sName, color: cls.color || '#6C63FF' };
+            subjects.push(match);
+          }
+          targetSubjId = match.id;
+        }
+
+        if (!targetSubjId) continue;
+
+        let days = [];
+        if (Array.isArray(cls.days) && cls.days.length > 0) days = cls.days;
+        else if (typeof cls.days === 'string' && cls.days) days = [cls.days];
+        else if (cls.day) days = [cls.day];
+        else continue;
+
+        const norm = t => {
+          if (!t) return null;
+          const s = String(t).trim();
+          if (/^\d{2}:\d{2}$/.test(s)) return s;
+          if (/^\d{1}:\d{2}$/.test(s)) return '0' + s;
+          return null;
+        };
+        const start = norm(cls.start || cls.startTime);
+        const end = norm(cls.end || cls.endTime);
+        if (!start || !end) continue;
+
+        classes.push({ id: genId(), sj: targetSubjId, start, end, room: cls.room || '', teacher: cls.teacher || '', days });
+      }
+
+      await saveData();
+      return true;
+    }
+
+    async function subscribeToFCMUpdates(formatId) {
+      if (!formatId) return;
+      if (!window.Capacitor || !window.Capacitor.isNativePlatform()) {
+        console.log("[FCM Mock] Not native. Simulated subscription to updates of:", formatId);
+        return;
+      }
+      try {
+        const { PushNotifications } = Capacitor.Plugins;
+        let perm = await PushNotifications.checkPermissions();
+        if (perm.receive !== 'granted') {
+          perm = await PushNotifications.requestPermissions();
+        }
+        if (perm.receive === 'granted') {
+          PushNotifications.addListener('registration', async (token) => {
+            console.log("[FCM] Registered token:", token.value);
+            await fetch(`${workerURL}/subscribe`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ formatId, token: token.value })
+            }).catch(e => console.error("[FCM Registration upload failed]", e));
+          });
+          await PushNotifications.register();
+        }
+      } catch (e) {
+        console.error("[FCM Permission/Registration Error]", e);
+      }
+    }
+
+    function initFCMListener() {
+      if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+      try {
+        const { PushNotifications } = Capacitor.Plugins;
+        PushNotifications.addListener('pushNotificationReceived', async (notification) => {
+          console.log('[FCM Notification Received]', notification);
+          if (notification.data && notification.data.scheduleJson) {
+            try {
+              const formatId = notification.data.formatId;
+              const newCode = notification.data.code;
+              const timetable = JSON.parse(notification.data.scheduleJson);
+              
+              const list = DB.schedules.getAll();
+              const targetEntry = list.find(s => s.formatId === formatId);
+              if (!targetEntry) return;
+
+              targetEntry.code = newCode;
+              localStorage.setItem('MySkedul_SchedulesList', JSON.stringify(list));
+
+              const activeId = DB.schedules.getActiveId();
+              if (targetEntry.id === activeId) {
+                await parseAndSaveTimetable(timetable);
+                if (curTab === 'sched') {
+                  renderHome();
+                  if (typeof renderSchedList === 'function') renderSchedList();
+                  if (typeof buildTimetable === 'function') buildTimetable();
+                }
+                showToast("Schedule updated in background!");
+              } else {
+                // Background update partition write (silently switch partition, write, and restore)
+                const origActiveId = activeId;
+                const origSubjects = [...subjects];
+                const origClasses = [...classes];
+                const origTasks = [...tasks];
+                const origHolidays = [...holidays];
+                const origTestOverrides = [...testOverrides];
+
+                await switchActiveSchedule(targetEntry.id, true);
+                await parseAndSaveTimetable(timetable);
+
+                // Switch back
+                await switchActiveSchedule(origActiveId, true);
+                subjects = origSubjects;
+                classes = origClasses;
+                tasks = origTasks;
+                holidays = origHolidays;
+                testOverrides = origTestOverrides;
+              }
+            } catch (err) {
+              console.error("[FCM Sync Error]", err);
+            }
+          }
+        });
+      } catch (e) {
+        console.error("[FCM Init Error]", e);
+      }
     }
 
     async function importIDDirect(rawId) {
@@ -5811,54 +7548,21 @@
           throw new Error("This schedule appears to be empty.");
         }
 
-        // STEP 1: Prune orphaned subjects (those only linked to classes we are replacing)
-        // This prevents subject accumulation on repeated imports.
-        const existingSubjIds = new Set(classes.map(c => c.sj));
-        subjects = subjects.filter(s => !existingSubjIds.has(s.id));
-        classes = [];
+        await parseAndSaveTimetable(timetable);
 
-        // STEP 2: Resolve or create subjects in in-memory subjects[]
-        for (const cls of timetable) {
-          const sName = (cls.subjectName || cls.name || cls.subject || "").trim();
-          let targetSubjId = null;
-
-          // Resolve by name to ensure cross-device compatibility
-          if (sName) {
-            let match = subjects.find(s => s.name.toLowerCase() === sName.toLowerCase());
-            if (!match) {
-              const newId = genId();
-              match = { id: newId, name: sName, color: cls.color || '#6C63FF' };
-              subjects.push(match);
-            }
-            targetSubjId = match.id;
+        // Find if this code matches a group schedule to subscribe to live updates
+        const match = groupsManifest.find(g => g.code === code || g.code === 'SCH-' + code);
+        if (match) {
+          const activeId = DB.schedules.getActiveId();
+          const list = DB.schedules.getAll();
+          const entry = list.find(s => s.id === activeId);
+          if (entry) {
+            entry.formatId = match.formatId;
+            entry.code = match.code;
+            localStorage.setItem('MySkedul_SchedulesList', JSON.stringify(list));
           }
-
-          if (!targetSubjId) { console.warn("Skipping — no subject:", cls); continue; }
-
-          // Normalize days
-          let days = [];
-          if (Array.isArray(cls.days) && cls.days.length > 0) days = cls.days;
-          else if (typeof cls.days === 'string' && cls.days) days = [cls.days];
-          else if (cls.day) days = [cls.day];
-          else { console.warn("Skipping — no days:", cls); continue; }
-
-          // Normalize times to HH:MM
-          const norm = t => {
-            if (!t) return null;
-            const s = String(t).trim();
-            if (/^\d{2}:\d{2}$/.test(s)) return s;
-            if (/^\d{1}:\d{2}$/.test(s)) return '0' + s;
-            return null;
-          };
-          const start = norm(cls.start || cls.startTime);
-          const end = norm(cls.end || cls.endTime);
-          if (!start || !end) { console.warn("Skipping — bad time:", cls); continue; }
-
-          classes.push({ id: genId(), sj: targetSubjId, start, end, room: cls.room || '', teacher: cls.teacher || '', days });
+          subscribeToFCMUpdates(match.formatId);
         }
-
-        // STEP 3: Persist via saveData() (same pattern as the whole app)
-        await saveData();
 
         // STEP 4: Re-render all views live — no page reload needed
         renderHome();
@@ -5906,6 +7610,134 @@
       } finally {
         btn.textContent = oldText;
         btn.disabled = false;
+      }
+    }
+
+    // ===== QR CODE CAMERA SCANNING SYSTEM =====
+    let qrScannerStream = null;
+    let qrScannerLoopActive = false;
+    let jsQRLoaded = false;
+
+    async function loadjsQR() {
+      if (jsQRLoaded) return true;
+      return new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
+        script.onload = () => {
+          jsQRLoaded = true;
+          resolve(true);
+        };
+        script.onerror = () => {
+          showToast("Failed to load scanner engine.");
+          resolve(false);
+        };
+        document.body.appendChild(script);
+      });
+    }
+
+    let qrTargetInputId = 'import-id-input';
+
+    async function startQRScanner(targetId = 'import-id-input') {
+      qrTargetInputId = targetId;
+      haptic('light');
+      closeModal('mod-import'); 
+      closeModal('m-add-options'); // Hide both modals
+      
+      const loaded = await loadjsQR();
+      if (!loaded) return;
+
+      openModal('m-scanner');
+      lucide.createIcons({ root: document.getElementById('m-scanner') });
+
+      const video = document.getElementById('scanner-video');
+      if (!video) return;
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" }
+        });
+        qrScannerStream = stream;
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true);
+        video.play();
+        qrScannerLoopActive = true;
+        requestAnimationFrame(tickScanner);
+      } catch (err) {
+        console.error('Camera access failed', err);
+        showToast("Camera access denied or unavailable.");
+        closeModal('m-scanner');
+        if (qrTargetInputId === 'import-id-input') {
+          openModal('mod-import');
+        } else {
+          openModal('m-add-options');
+        }
+      }
+    }
+
+    function stopQRScanner() {
+      qrScannerLoopActive = false;
+      if (qrScannerStream) {
+        qrScannerStream.getTracks().forEach(track => track.stop());
+        qrScannerStream = null;
+      }
+      const video = document.getElementById('scanner-video');
+      if (video) video.srcObject = null;
+      closeModal('m-scanner');
+    }
+
+    function tickScanner() {
+      if (!qrScannerLoopActive) return;
+
+      const video = document.getElementById('scanner-video');
+      if (video && video.readyState === video.HAVE_ENOUGH_DATA) {
+        let canvas = document.getElementById('scanner-canvas');
+        if (!canvas) {
+          canvas = document.createElement('canvas');
+          canvas.id = 'scanner-canvas';
+        }
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+
+        if (code) {
+          haptic('success');
+          let parsedCode = code.data.trim();
+          
+          if (parsedCode.includes('myskedul://import/')) {
+            parsedCode = parsedCode.split('myskedul://import/')[1];
+          }
+          
+          stopQRScanner();
+          
+          setTimeout(() => {
+            if (qrTargetInputId === 'import-id-input') {
+              openModal('mod-import');
+              const inp = document.getElementById('import-id-input');
+              if (inp) {
+                inp.value = parsedCode;
+                importFromID();
+              }
+            } else {
+              openModal('m-add-options');
+              const inp = document.getElementById('direct-import-id');
+              if (inp) {
+                inp.value = parsedCode;
+                importIDDirect(parsedCode);
+              }
+            }
+          }, 300);
+          return;
+        }
+      }
+      
+      if (qrScannerLoopActive) {
+        requestAnimationFrame(tickScanner);
       }
     }
 
@@ -5991,8 +7823,8 @@
       try {
         const cont = document.getElementById('groups-list');
         if (cont && groupsManifest.length === 0) {
-          cont.innerHTML = `<div style="padding:40px 0;text-align:center;opacity:0.5;"><i data-lucide="loader" style="width:24px;animation:spin 1s linear infinite;"></i><p style="font-size:13px;margin-top:8px;font-weight:600;">Loading groups...</p></div>`;
-          lucide.createIcons();
+          // Skeleton loader instead of spinner
+          cont.innerHTML = _skGC(3, 2);
         }
         const res = await fetch(`${workerURL}/groups`, { cache: 'no-store' });
         if (res.ok) {
@@ -6050,8 +7882,7 @@
       }
     }
 
-    async function renderGroups() {
-      const cont = document.getElementById('groups-list');
+    async function renderGroups_cloud(cont) {
       if (!cont) return;
 
       // Toggle Admin FAB
@@ -6430,14 +8261,44 @@
       reader.readAsText(file);
     }
 
-    function confirmImportGroup(code, name) {
-      showConfirm(`Import ${name}?`, "This will replace your current schedule with the imported one.", () => {
-        importIDDirect(code).then(success => {
-          if (success) {
-            switchNav('sched');
-            haptic('medium');
+    async function confirmImportGroup(code, name) {
+      showConfirm(`Import ${name}?`, `This will add "${name}" as a new schedule profile in your app.`, async () => {
+        haptic('medium');
+        try {
+          // 1. Create a new schedule profile using the group's name
+          const newSched = await DB.schedules.create(name);
+          
+          // Link formatId if available in the manifest
+          const match = groupsManifest.find(g => g.code === code || g.code === 'SCH-' + code);
+          if (match) {
+            const list = DB.schedules.getAll();
+            const entry = list.find(s => s.id === newSched.id);
+            if (entry) {
+              entry.formatId = match.formatId;
+              entry.code = match.code;
+              localStorage.setItem('MySkedul_SchedulesList', JSON.stringify(list));
+            }
           }
-        });
+
+          // 2. Switch the active context to this new schedule (clears memory variables & sets prefix)
+          await switchActiveSchedule(newSched.id);
+          
+          // 3. Import data into this new schedule context
+          const success = await importIDDirect(code);
+          if (success) {
+            switchNav('home');
+            haptic('success');
+            showToast(`Imported ${name}!`);
+          } else {
+            // Cleanup on failure: delete the empty schedule profile and revert
+            await DB.schedules.delete(newSched.id);
+            await switchActiveSchedule('default');
+            showToast("Import failed");
+          }
+        } catch (err) {
+          console.error(err);
+          showToast("Failed to create schedule profile");
+        }
       }, 'download-cloud');
     }
 
@@ -6504,7 +8365,12 @@
             style="display:flex; background:var(--bg); border:1px solid var(--border); border-radius:22px; padding:6px; height:60px; align-items:center; margin-top:4px; overflow:hidden;">
             <input id="direct-import-id" type="text" placeholder="SCH-xxxxxx"
               oninput="this.value = this.value.toUpperCase()"
-              style="flex:1; min-width:0; border:none; background:transparent; padding:0 12px; font-size:13px; font-weight:800; text-align:left; color:var(--text); outline:none; text-transform:uppercase;">
+              style="flex:1; min-width:0; border:none; background:transparent; padding:0 4px 0 10px; font-size:12.5px; font-weight:800; text-align:left; color:var(--text); outline:none; text-transform:uppercase;">
+            <!-- Scan QR button inside input container -->
+            <button class="ib" onclick="startQRScanner('direct-import-id')"
+              style="width:36px; height:36px; margin-right:4px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.04); border-radius:10px; flex-shrink:0;">
+              <i data-lucide="scan-line" style="width:16px; height:16px; color:var(--theme); stroke-width:2.5;"></i>
+            </button>
             <button class="btn-p"
               style="flex-shrink:0; margin:0; height:48px; width:85px; border-radius:16px; font-size:12px; font-weight:900; background:var(--theme); box-shadow:none; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center;"
               onclick="importIDDirect(document.getElementById('direct-import-id').value)">IMPORT</button>
@@ -6552,15 +8418,6 @@
           <div>
             <div class="qa-title" style="font-size:14px;">Cloud Share</div>
             <div class="qa-sub" style="font-size:11px;">Generate Share ID</div>
-          </div>
-        </div>
-        <div class="qa-item" style="padding:12px 14px; gap:12px;"
-          onclick="closeModal('m-share-options');shareAsFile();">
-          <div class="qa-icon" style="background:#25D3661A;width:38px;height:38px;"><i data-lucide="message-circle"
-              style="width:18px;height:18px;color:#25D366;"></i></div>
-          <div>
-            <div class="qa-title" style="font-size:14px;">WhatsApp Share</div>
-            <div class="qa-sub" style="font-size:11px;">Send JSON File</div>
           </div>
         </div>
         <div class="qa-item" style="padding:12px 14px; gap:12px;"
@@ -7018,7 +8875,826 @@
       window.open('https://t.me/myskedulapp', '_blank');
       closeModal('m-social-confirm');
     }
+
+    // ===== DYNAMIC ADMIN TOOLS PANEL & FEEDBACK / SUGGESTIONS BOARDS =====
+
+    // User Feedback Submission
+    function openFeedbackModal() {
+      const modalId = 'm-feedback';
+      if (!document.getElementById(modalId)) {
+        const div = document.createElement('div');
+        div.className = 'mo center';
+        div.id = modalId;
+        div.onclick = (e) => { if (e.target === div) closeModal(modalId); };
+        div.innerHTML = `
+          <div class="ms" style="width: 90%; max-width: 400px; border-radius: 24px;">
+            <div class="mtb" style="padding: 16px 20px 8px;">
+              <span class="mt" style="font-size:18px;">Send Feedback</span>
+              <button class="ib" style="width:30px; height:30px; background:var(--border);" onclick="closeModal('${modalId}')"><i data-lucide="x" style="width:14px; height:14px;"></i></button>
+            </div>
+            <div class="mb" style="padding: 0 20px 24px; display:flex; flex-direction:column; gap:14px;">
+              <p style="font-size:12px; color:var(--sub); line-height:1.4;">Help us improve MySkedul! Type your feedback or report a bug below.</p>
+              <div class="fi" style="border: 1.5px solid var(--border); border-radius:14px; padding: 6px 12px; height: 48px; display:flex; align-items:center;">
+                <i data-lucide="user" style="color:var(--sub); width:16px; margin-right:8px;"></i>
+                <input id="f-name" type="text" placeholder="Your Name (Optional)" style="border:none; background:transparent; outline:none; font-size:13px; font-weight:700; color:var(--text); width:100%;">
+              </div>
+              <textarea id="f-text" placeholder="Type your feedback here..." style="width:100%; height:120px; border:1.5px solid var(--border); border-radius:16px; background:var(--bg); color:var(--text); font-family:inherit; font-size:13px; font-weight:700; padding:12px; outline:none; resize:none; box-sizing:border-box;"></textarea>
+              <button class="btn-p" style="margin:0; height:48px; border-radius:14px; font-weight:900;" onclick="submitFeedback()">Submit Feedback</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(div);
+      }
+      
+      // Prepopulate current profile name
+      const nameInp = document.getElementById('f-name');
+      if (nameInp) nameInp.value = globalUserName !== 'Student' ? globalUserName : '';
+      const textInp = document.getElementById('f-text');
+      if (textInp) textInp.value = '';
+      
+      openModal(modalId);
+      lucide.createIcons({ root: document.getElementById(modalId) });
+    }
+
+    async function submitFeedback() {
+      const text = document.getElementById('f-text').value.trim();
+      if (!text) { showToast("Please type some feedback."); return; }
+      
+      const name = document.getElementById('f-name').value.trim() || 'Anonymous';
+      const deviceId = localStorage.getItem('MySkedul_deviceId');
+      
+      showToast("Sending feedback...");
+      try {
+        const res = await fetch(`${workerURL}/feedback/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, text, deviceId })
+        });
+        if (res.status === 429) {
+          showToast("Cooldown: 6 hours per feedback submission.");
+          return;
+        }
+        if (!res.ok) throw new Error("Failed to send");
+        
+        showToast("Feedback posted to server successfully!");
+        closeModal('m-feedback');
+      } catch (e) {
+        showToast("Error sending feedback. Try again.");
+      }
+    }
+
+    async function openSuggestionsModal() {
+      const pg = document.getElementById('pg-suggestions-dash');
+      if (!pg) return;
+      
+      pg.style.transform = 'translateX(0)';
+      lucide.createIcons({ root: pg });
+      
+      // Load suggestions status config
+      try {
+        const res = await fetch(`${workerURL}/suggestions/config`);
+        if (res.ok) {
+          const data = await res.json();
+          const disabled = !!data.suggestionsDisabled;
+          const btn = document.getElementById('btn-post-suggestion');
+          const txt = document.getElementById('sug-text');
+          const alt = document.getElementById('sug-disabled-alternative');
+          if (btn) {
+            if (disabled) {
+              btn.innerText = 'Posting disabled by admin';
+              btn.style.background = 'var(--border)';
+              btn.style.color = 'var(--sub)';
+              btn.style.boxShadow = 'none';
+              btn.style.pointerEvents = 'none';
+              if (txt) {
+                txt.disabled = true;
+                txt.placeholder = 'Suggestions are currently disabled by administrator.';
+              }
+              if (alt) {
+                alt.innerHTML = `Alternatively, you can <span onclick="openFeedbackModal()" style="color:var(--theme); cursor:pointer; text-decoration:underline; font-weight:800;">Send Feedback</span> privately or email <a href="mailto:ianshulyaduvanshi@gmail.com" style="color:var(--theme); text-decoration:underline; font-weight:800;">ianshulyaduvanshi@gmail.com</a>`;
+                alt.style.display = 'block';
+              }
+            } else {
+              btn.innerText = 'Post Suggestion';
+              btn.style.background = 'var(--theme)';
+              btn.style.color = 'white';
+              btn.style.boxShadow = '0 4px 12px rgba(108,99,255,0.2)';
+              btn.style.pointerEvents = 'auto';
+              if (txt) {
+                txt.disabled = false;
+                txt.placeholder = 'I suggest adding...';
+              }
+              if (alt) {
+                alt.style.display = 'none';
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to load suggestions config status");
+      }
+      
+      loadSuggestions();
+    }
+
+    function closeSuggestionsModal() {
+      const pg = document.getElementById('pg-suggestions-dash');
+      if (pg) pg.style.transform = 'translateX(100%)';
+    }
+
+    // ===== LOCAL MOCK DATABASE FOR 100% WORKING THREADS & MOCKS =====
+    let localSuggestions = JSON.parse(localStorage.getItem('myskedul_local_sugs')) || [];
+
+    function saveLocalSuggestions() {
+      localStorage.setItem('myskedul_local_sugs', JSON.stringify(localSuggestions));
+    }
+    // Initially save to local storage
+    saveLocalSuggestions();
+
+    let currentThreadId = null;
+
+    async function loadSuggestions() {
+      const cont = document.getElementById('suggestions-list-container');
+      if (!cont) return;
+      cont.innerHTML = '<div style="text-align:center; padding:20px; font-size:12px; color:var(--sub);">Loading suggestions...</div>';
+      
+      try {
+        const res = await fetch(`${workerURL}/suggestions`);
+        if (!res.ok) throw new Error("Load failed");
+        localSuggestions = await res.json();
+        saveLocalSuggestions();
+      } catch (e) {
+        console.log("Suggestions backend offline, using cached mock store.");
+      }
+
+      // Sort by score (Reddit-like)
+      localSuggestions.sort((a, b) => b.score - a.score);
+
+      if (localSuggestions.length === 0) {
+        cont.innerHTML = `
+          <div style="text-align:center; padding:40px 20px; color:var(--sub); font-size:13px; font-weight:600; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+            <i data-lucide="message-square-dashed" style="width:28px; height:28px; opacity:0.6; color:var(--sub);"></i>
+            <span>No suggestions yet.</span>
+          </div>
+        `;
+        lucide.createIcons({ root: cont });
+        return;
+      }
+
+      cont.innerHTML = localSuggestions.map(s => {
+        const upActive = s.userVote === 1 ? 'color:var(--green);' : 'color:var(--sub);';
+        const downActive = s.userVote === -1 ? 'color:var(--red);' : 'color:var(--sub);';
+        
+        return `
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:24px; padding:16px 20px; display:flex; flex-direction:column; gap:12px; box-shadow:var(--sh);">
+            <div style="display:flex; align-items:flex-start; gap:12px;">
+              <!-- Upvote Downvote Column -->
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px; margin-right:4px;">
+                <button class="ib" style="width:32px; height:32px; border-radius:10px; background:var(--bg); ${upActive}" onclick="voteSuggestion('${s.id}', 1, event)">
+                  <i data-lucide="arrow-up" style="width:18px; height:18px; stroke-width:3;"></i>
+                </button>
+                <span style="font-size:13px; font-weight:900; color:var(--text);">${s.score || 0}</span>
+                <button class="ib" style="width:32px; height:32px; border-radius:10px; background:var(--bg); ${downActive}" onclick="voteSuggestion('${s.id}', -1, event)">
+                  <i data-lucide="arrow-down" style="width:18px; height:18px; stroke-width:3;"></i>
+                </button>
+              </div>
+
+              <!-- Main Post Content -->
+              <div style="flex:1; min-width:0; text-align:left;" onclick="openSuggestionThread('${s.id}')">
+                <div style="font-size:14px; font-weight:800; color:var(--text); line-height:1.45; overflow-wrap:anywhere;">${s.text}</div>
+                <div style="font-size:10px; color:var(--sub); font-weight:700; margin-top:6px; display:flex; align-items:center; gap:6px;">
+                  <span>By ${s.name}</span>
+                  <span style="opacity:0.4;">•</span>
+                  <span>${new Date(s.timestamp).toLocaleDateString()}</span>
+                </div>
+                
+                <!-- Comment pill indicator -->
+                <div style="display:inline-flex; align-items:center; gap:4px; margin-top:10px; background:var(--bg); padding:4px 10px; border-radius:8px; font-size:10.5px; font-weight:800; color:var(--theme);">
+                  <i data-lucide="message-circle" style="width:12px; height:12px;"></i>
+                  <span>${s.comments ? s.comments.length : 0} Comments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons({ root: cont });
+    }
+
+    async function submitSuggestion() {
+      const text = document.getElementById('sug-text').value.trim();
+      if (!text) { showToast("Type something to suggest!"); return; }
+      
+      const name = globalUserName || 'Anonymous';
+      const deviceId = localStorage.getItem('MySkedul_deviceId');
+      
+      showToast("Posting suggestion...");
+      try {
+        const res = await fetch(`${workerURL}/suggestions/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, text, deviceId })
+        });
+        if (res.status === 429) {
+          showToast("Cooldown: 24 hours per suggestion.");
+          return;
+        }
+        if (!res.ok) throw new Error("Failed");
+        
+        showToast("Suggestion posted!");
+        document.getElementById('sug-text').value = '';
+        loadSuggestions();
+      } catch (e) {
+        showToast("Failed to submit suggestion.");
+      }
+    }
+
+    async function voteSuggestion(id, direction, event) {
+      if (event) event.stopPropagation();
+      const s = localSuggestions.find(x => x.id === id);
+      if (!s) return;
+
+      const deviceId = localStorage.getItem('MySkedul_deviceId');
+      const targetVote = s.userVote === direction ? 0 : direction;
+
+      try {
+        const res = await fetch(`${workerURL}/suggestions/vote`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, direction: targetVote, deviceId })
+        });
+        if (!res.ok) throw new Error("Vote failed");
+        
+        s.userVote = targetVote;
+        const data = await res.json();
+        s.score = data.score;
+        saveLocalSuggestions();
+        loadSuggestions();
+        
+        if (currentThreadId === id) {
+          renderThreadOP();
+        }
+        haptic('light');
+      } catch (e) {
+        showToast("Connection issue or already voted.");
+      }
+    }
+
+    // ===== THREAD INTERFACES =====
+    function openSuggestionThread(id) {
+      currentThreadId = id;
+      const pg = document.getElementById('pg-suggestions-thread');
+      if (!pg) return;
+      
+      pg.style.transform = 'translateX(0)';
+      lucide.createIcons({ root: pg });
+      
+      renderThreadOP();
+      renderThreadComments();
+    }
+
+    function closeSuggestionThread() {
+      currentThreadId = null;
+      const pg = document.getElementById('pg-suggestions-thread');
+      if (pg) pg.style.transform = 'translateX(100%)';
+      loadSuggestions();
+    }
+
+    function renderThreadOP() {
+      const s = localSuggestions.find(x => x.id === currentThreadId);
+      const cont = document.getElementById('thread-op-card');
+      if (!s || !cont) return;
+
+      const upActive = s.userVote === 1 ? 'color:var(--green);' : 'color:var(--sub);';
+      const downActive = s.userVote === -1 ? 'color:var(--red);' : 'color:var(--sub);';
+
+      cont.innerHTML = `
+        <div style="display:flex; align-items:flex-start; gap:12px;">
+          <!-- Upvote Downvote Column -->
+          <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+            <button class="ib" style="width:32px; height:32px; border-radius:10px; background:var(--bg); ${upActive}" onclick="voteSuggestion('${s.id}', 1, event)">
+              <i data-lucide="arrow-up" style="width:18px; height:18px; stroke-width:3;"></i>
+            </button>
+            <span style="font-size:13px; font-weight:900; color:var(--text);">${s.score || 0}</span>
+            <button class="ib" style="width:32px; height:32px; border-radius:10px; background:var(--bg); ${downActive}" onclick="voteSuggestion('${s.id}', -1, event)">
+              <i data-lucide="arrow-down" style="width:18px; height:18px; stroke-width:3;"></i>
+            </button>
+          </div>
+
+          <!--OP Info-->
+          <div style="flex:1;">
+            <div style="font-size:15px; font-weight:800; color:var(--text); line-height:1.45; overflow-wrap:anywhere;">${s.text}</div>
+            <div style="font-size:10px; color:var(--sub); font-weight:700; margin-top:8px; display:flex; align-items:center; gap:4px;">
+              <span>Posted by ${s.name}</span>
+              <span style="opacity:0.4;">•</span>
+              <span>${new Date(s.timestamp).toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      lucide.createIcons({ root: cont });
+    }
+
+    function renderThreadComments() {
+      const s = localSuggestions.find(x => x.id === currentThreadId);
+      const cont = document.getElementById('thread-comments-container');
+      if (!s || !cont) return;
+
+      if (!s.comments || !s.comments.length) {
+        cont.innerHTML = '<div style="text-align:center; padding:30px; font-size:12px; color:var(--sub); font-weight:600;">No comments yet. Start the conversation!</div>';
+        return;
+      }
+
+      cont.innerHTML = s.comments.map(c => `
+        <div style="background:var(--card); border:1px solid var(--border); border-radius:20px; padding:14px 16px; box-shadow:var(--sh); display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:13px; font-weight:700; color:var(--text); line-height:1.45; overflow-wrap:anywhere;">${c.text}</div>
+          <div style="font-size:10px; color:var(--sub); font-weight:700; display:flex; align-items:center; gap:4px;">
+            <span>${c.name}</span>
+            <span style="opacity:0.4;">•</span>
+            <span>${new Date(c.timestamp).toLocaleTimeString()}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function submitThreadComment() {
+      const inp = document.getElementById('thread-comment-input');
+      if (!inp) return;
+      const text = inp.value.trim();
+      if (!text) return;
+
+      const s = localSuggestions.find(x => x.id === currentThreadId);
+      if (!s) return;
+
+      const name = globalUserName || 'Anonymous';
+      showToast("Posting comment...");
+      
+      try {
+        const res = await fetch(`${workerURL}/suggestions/comment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: s.id, name, text })
+        });
+        if (!res.ok) throw new Error("Comment failed");
+        
+        const data = await res.json();
+        s.comments = data.comments;
+        saveLocalSuggestions();
+        
+        inp.value = '';
+        renderThreadComments();
+        haptic('light');
+      } catch (e) {
+        showToast("Failed to post comment.");
+      }
+    }
+
+    // Collapsible sections for Admin Panel
+    function toggleAdminPanelSection(id, loadFn) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.style.display === 'none') {
+        el.style.display = 'flex';
+        if (loadFn) loadFn();
+      } else {
+        el.style.display = 'none';
+      }
+    }
+
+    // Admin Panel Readers
+    async function loadAdminFeedbacks() {
+      const cont = document.getElementById('adm-feedbacks-wrap');
+      if (!cont) return;
+      cont.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--sub);">Loading feedbacks...</div>';
+      
+      try {
+        const res = await fetch(`${workerURL}/admin/feedbacks`, {
+          headers: { 'Authorization': `Bearer ${getAdminToken()}` }
+        });
+        if (!res.ok) throw new Error("Auth expired");
+        const list = await res.json();
+        
+        if (!list.length) {
+          cont.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--sub);">No feedback received yet.</div>';
+          return;
+        }
+        
+        cont.innerHTML = list.map(f => {
+          return `
+            <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px; text-align:left;">
+              <div style="font-size:12px; font-weight:800; color:var(--text);">${f.text}</div>
+              <div style="font-size:9.5px; color:var(--sub); font-weight:700; margin-top:4px;">By ${f.name} • ${new Date(f.timestamp).toLocaleString()}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        cont.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--red);">Failed. Check session credentials.</div>';
+      }
+    }
+
+    async function loadAdminSuggestions() {
+      const cont = document.getElementById('adm-sugs-wrap');
+      if (!cont) return;
+      cont.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--sub);">Loading suggestions queue...</div>';
+      
+      try {
+        const list = localSuggestions;
+        if (!list.length) {
+          cont.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--sub);">No active suggestions.</div>';
+          return;
+        }
+        
+        cont.innerHTML = list.map(s => {
+          return `
+            <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;">
+              <div style="flex:1; min-width:0; text-align:left;">
+                <div style="font-size:12px; font-weight:800; color:var(--text);">${s.text}</div>
+                <div style="font-size:9.5px; color:var(--sub); font-weight:700; margin-top:4px;">By ${s.name} • Score: ${s.score} • Comments: ${s.comments ? s.comments.length : 0}</div>
+              </div>
+              <button class="btn-p" style="margin:0; height:32px; padding:0 10px; border-radius:8px; font-size:11px; font-weight:900;" onclick="adminCompleteSuggestion('${s.id}')">Complete</button>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        cont.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--red);">Failed to load suggestions.</div>';
+      }
+    }
+
+    async function adminCompleteSuggestion(id) {
+      const approved = await showCustomConfirm(
+        "Complete Suggestion?",
+        "Mark this suggestion as Completed and publish it in the App Changelog history?"
+      );
+      if (!approved) return;
+      
+      showToast("Completing suggestion...");
+      try {
+        const idx = localSuggestions.findIndex(x => x.id === id);
+        if (idx !== -1) {
+          const sug = localSuggestions[idx];
+          
+          // Add to local changelog / remote changelog mock
+          try {
+            await fetch(`${workerURL}/suggestions/complete`, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAdminToken()}`
+              },
+              body: JSON.stringify({ id })
+            });
+          } catch(err) {}
+
+          // Remove from local list
+          localSuggestions.splice(idx, 1);
+          saveLocalSuggestions();
+          // Refresh views
+          if (typeof loadAdminSuggestionsDB === 'function') loadAdminSuggestionsDB();
+          loadAdminSuggestions();
+        }
+      } catch (e) {
+        showToast("Failed to complete suggestion.");
+      }
+    }
+
+    async function adminDeleteSuggestion(id) {
+      const approved = await showCustomConfirm(
+        "Delete Suggestion?",
+        "Permanently delete this suggestion post from the database and queue? This action cannot be undone."
+      );
+      if (!approved) return;
+
+      showToast("Deleting suggestion...");
+      try {
+        const idx = localSuggestions.findIndex(x => x.id === id);
+        if (idx !== -1) {
+          // Attempt backend delete registry
+          try {
+            await fetch(`${workerURL}/suggestions/delete`, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAdminToken()}`
+              },
+              body: JSON.stringify({ id })
+            });
+          } catch(err) {}
+
+          // Remove locally
+          localSuggestions.splice(idx, 1);
+          saveLocalSuggestions();
+          showToast("Suggestion deleted!");
+
+          // Refresh views
+          if (typeof loadAdminSuggestionsDB === 'function') loadAdminSuggestionsDB();
+          loadAdminSuggestions();
+        }
+      } catch (e) {
+        showToast("Failed to delete suggestion.");
+      }
+    }
+
+    async function loadAdminChangelogs() {
+      const cont = document.getElementById('adm-changelogs-wrap');
+      if (!cont) return;
+      cont.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--sub);">Loading changelogs...</div>';
+      
+      try {
+        const res = await fetch(`${workerURL}/changelogs`);
+        if (!res.ok) throw new Error("Failed");
+        const list = await res.json();
+        
+        if (!list.length) {
+          cont.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--sub);">No changelogs recorded yet.</div>';
+          return;
+        }
+        
+        cont.innerHTML = list.map(c => {
+          return `
+            <div style="background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px; text-align:left;">
+              <div style="font-size:12px; font-weight:800; color:var(--text);">${c.title}</div>
+              <div style="font-size:10px; color:var(--sub); font-weight:700; margin-top:2px;">${c.description}</div>
+              <div style="font-size:8.5px; color:var(--theme); font-weight:800; margin-top:4px;">${new Date(c.timestamp).toLocaleString()}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        cont.innerHTML = '<div style="text-align:center; padding:10px; font-size:11px; color:var(--red);">Failed to load changelogs.</div>';
+      }
+    }
+
+    async function renderDynamicProfileSection() {
+      const section = document.getElementById('profile-dynamic-section');
+      if (!section) return;
+
+      const premTitle = document.getElementById('profile-premium-title');
+      const premDesc = document.getElementById('profile-premium-desc');
+
+      if (isAdmin) {
+        if (premTitle) premTitle.innerText = 'Premium UI Unlocked';
+        if (premDesc) premDesc.innerText = 'Full admin functionality unlocked!';
+
+        section.innerHTML = `
+          <div style="padding:16px 14px 6px;font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Admin</div>
+          <div class="mi" onclick="openAdminDashboard()" style="background:linear-gradient(135deg,rgba(108,99,255,0.08),rgba(159,93,255,0.06));border:1px solid rgba(108,99,255,0.18);">
+            <div style="width:38px;height:38px;border-radius:12px;background:rgba(108,99,255,0.12);border:1px solid rgba(108,99,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i data-lucide="shield" style="width:18px;height:18px;color:var(--theme);stroke-width:2.5;"></i>
+            </div>
+            <span class="mi-lbl" style="font-weight:800;">Admin Dashboard
+              <span style="font-size:11px;color:var(--sub);display:block;font-weight:600;margin-top:1px;">Analytics, Feedback, Suggestions</span>
+            </span>
+            <i data-lucide="chevron-right" style="color:var(--theme);opacity:0.6;"></i>
+          </div>
+          <div class="mi" onclick="adminLogout()" style="margin-top:2px;">
+            <div style="width:38px;height:38px;border-radius:12px;background:rgba(255,59,48,0.08);border:1px solid rgba(255,59,48,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i data-lucide="log-out" style="width:18px;height:18px;color:var(--red);stroke-width:2.5;"></i>
+            </div>
+            <span class="mi-lbl" style="color:var(--red);font-weight:800;">Logout Admin Session</span>
+            <i data-lucide="chevron-right" style="color:var(--sub);"></i>
+          </div>
+        `;
+        lucide.createIcons({ root: section });
+      } else {
+        if (premTitle) premTitle.innerText = 'Premium Access';
+        if (premDesc) premDesc.innerText = 'Full access functionality unlocked!';
+        section.innerHTML = '';
+      }
+    }
+
+    // ===== ADMIN DASHBOARD — FULL SCREEN =====
+    let suggestionsDisabledState = false;
+
+    async function loadSuggestionsConfig() {
+      try {
+        const res = await fetch(`${workerURL}/suggestions/config`);
+        if (res.ok) {
+          const data = await res.json();
+          suggestionsDisabledState = !!data.suggestionsDisabled;
+          const tog = document.getElementById('tog-suggestions-status');
+          if (tog) {
+            if (suggestionsDisabledState) tog.classList.add('on');
+            else tog.classList.remove('on');
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to load suggestions config status");
+      }
+    }
+
+    async function toggleSuggestionsStatus() {
+      const targetState = !suggestionsDisabledState;
+      showToast("Updating configuration...");
+      try {
+        const res = await fetch(`${workerURL}/admin/config`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAdminToken()}`
+          },
+          body: JSON.stringify({ suggestionsDisabled: targetState })
+        });
+        if (!res.ok) throw new Error();
+        
+        suggestionsDisabledState = targetState;
+        const tog = document.getElementById('tog-suggestions-status');
+        if (tog) {
+          if (suggestionsDisabledState) tog.classList.add('on');
+          else tog.classList.remove('on');
+        }
+        showToast(`Suggestions ${targetState ? 'Disabled' : 'Enabled'} successfully!`);
+        haptic('medium');
+      } catch (e) {
+        showToast("Authorization expired or failed to update.");
+      }
+    }
+
+    function openAdminDashboard() {
+      const pg = document.getElementById('pg-admin-dash');
+      if (!pg) return;
+      lucide.createIcons({ root: pg });
+      pg.style.transform = 'translateX(0)';
+      _loadAdminStats();
+      loadSuggestionsConfig();
+    }
+
+    function closeAdminDashboard() {
+      const pg = document.getElementById('pg-admin-dash');
+      if (pg) pg.style.transform = 'translateX(100%)';
+    }
+
+    function openAdminSection(type) {
+      const pg = document.getElementById('pg-admin-section');
+      const title = document.getElementById('adm-section-title');
+      const cont = document.getElementById('adm-section-content');
+      if (!pg || !title || !cont) return;
+
+      const cfg = {
+        feedbacks:   { label: 'User Feedback',        loader: loadAdminFeedbacksDB },
+        suggestions: { label: 'Suggestions Queue',    loader: loadAdminSuggestionsDB },
+        changelog:   { label: 'Completed Changelog',  loader: loadAdminChangelogsDB },
+      };
+      const c = cfg[type];
+      if (!c) return;
+
+      title.textContent = c.label;
+      cont.innerHTML = _admLoading();
+      lucide.createIcons({ root: pg });
+      pg.style.transform = 'translateX(0)';
+      c.loader();
+    }
+
+    function closeAdminSection() {
+      const pg = document.getElementById('pg-admin-section');
+      if (pg) pg.style.transform = 'translateX(100%)';
+    }
+
+    async function _loadAdminStats() {
+      try {
+        const r = await fetch(`${workerURL}/admin/analytics`, {
+          headers: { 'Authorization': `Bearer ${getAdminToken()}` }
+        });
+        const d = await r.json();
+        const u = document.getElementById('adm-stat-users');
+        if (u) { u.textContent = d.activeUsers7Days ?? 0; u.style.color = ''; }
+      } catch(e) {
+        const u = document.getElementById('adm-stat-users');
+        if (u) { u.textContent = '?'; u.style.color = 'var(--red)'; }
+      }
+      try {
+        const r = await fetch(`${workerURL}/admin/feedbacks`, {
+          headers: { 'Authorization': `Bearer ${getAdminToken()}` }
+        });
+        const d = await r.json();
+        const f = document.getElementById('adm-stat-feedbacks');
+        if (f) { f.textContent = Array.isArray(d) ? d.length : '?'; f.style.color = ''; }
+      } catch(e) {
+        const f = document.getElementById('adm-stat-feedbacks');
+        if (f) { f.textContent = '?'; f.style.color = 'var(--red)'; }
+      }
+    }
+
+    async function loadAdminFeedbacksDB() {
+      const cont = document.getElementById('adm-section-content');
+      if (!cont) return;
+      try {
+        const r = await fetch(`${workerURL}/admin/feedbacks`, {
+          headers: { 'Authorization': `Bearer ${getAdminToken()}` }
+        });
+        if (!r.ok) throw new Error();
+        const list = await r.json();
+        if (!list || !list.length) { cont.innerHTML = _admEmpty('No feedback received yet.'); return; }
+        cont.innerHTML = list.map(f => `
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px 18px;box-shadow:var(--sh);">
+            <div style="font-size:13px;font-weight:700;color:var(--text);line-height:1.5;">"${f.text}"</div>
+            <div style="font-size:10.5px;color:var(--sub);font-weight:700;margin-top:8px;display:flex;align-items:center;gap:6px;">
+              <span style="display:inline-flex;align-items:center;gap:3px;"><i data-lucide="user" style="width:11px;height:11px;"></i>${f.name}</span>
+              <span style="opacity:0.35;">•</span>
+              <span>${new Date(f.timestamp).toLocaleString()}</span>
+            </div>
+          </div>
+        `).join('');
+        lucide.createIcons({ root: cont });
+      } catch(e) { 
+        cont.innerHTML = _admError();
+      }
+    }
+
+    async function loadAdminSuggestionsDB() {
+      const cont = document.getElementById('adm-section-content');
+      if (!cont) return;
+      try {
+        const list = [...localSuggestions];
+        // Sort by score descending (highest score first)
+        list.sort((a, b) => b.score - a.score);
+        if (!list || !list.length) { cont.innerHTML = _admEmpty('No suggestions in queue.'); return; }
+        cont.innerHTML = list.map(s => {
+          // Render comments list under each suggestion card
+          let commentsHtml = '';
+          if (s.comments && s.comments.length > 0) {
+            commentsHtml = `
+              <div style="margin-top:12px; border-top:1.5px solid var(--border); padding-top:10px; display:flex; flex-direction:column; gap:8px;">
+                <div style="font-size:10px; font-weight:800; color:var(--theme); text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:4px;">
+                  <i data-lucide="message-square" style="width:11px; height:11px;"></i> Thread Comments
+                </div>
+                ${s.comments.map(c => `
+                  <div style="background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:10px; font-size:12px;">
+                    <div style="font-weight:700; color:var(--text);">${c.text}</div>
+                    <div style="font-size:9.5px; color:var(--sub); font-weight:700; margin-top:4px;">— ${c.name} • ${new Date(c.timestamp).toLocaleTimeString()}</div>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          } else {
+            commentsHtml = `
+              <div style="margin-top:12px; border-top:1.5px solid var(--border); padding-top:10px; font-size:11px; color:var(--sub); font-style:italic;">
+                No comments on this thread yet.
+              </div>
+            `;
+          }
+
+          return `
+            <div style="background:var(--card); border:1px solid var(--border); border-radius:24px; padding:18px 20px; box-shadow:var(--sh); display:flex; flex-direction:column;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                <div style="flex:1; min-width:0;">
+                  <div style="font-size:14.5px; font-weight:800; color:var(--text); line-height:1.45;">${s.text}</div>
+                  <div style="font-size:11px; color:var(--sub); font-weight:700; margin-top:6px; display:flex; align-items:center; gap:6px;">
+                    <span>By ${s.name}</span>
+                    <span style="opacity:0.35;">•</span>
+                    <span style="color:var(--theme); display:inline-flex; align-items:center; gap:3px;"><i data-lucide="arrow-up" style="width:11px; height:11px; stroke-width:3;"></i>${s.score} score</span>
+                  </div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px; flex-shrink:0;">
+                  <button onclick="adminCompleteSuggestion('${s.id}')" style="background:var(--green); color:#fff; border:none; border-radius:12px; padding:8px 16px; font-size:11px; font-weight:900; white-space:nowrap; cursor:pointer;">
+                    Mark Done
+                  </button>
+                  <button onclick="adminDeleteSuggestion('${s.id}')" style="background:rgba(255,59,48,0.08); border:1px solid rgba(255,59,48,0.15); color:var(--red); border-radius:12px; padding:6px 16px; font-size:11px; font-weight:900; white-space:nowrap; cursor:pointer;">
+                    Delete
+                  </button>
+                </div>
+              </div>
+              
+              ${commentsHtml}
+            </div>
+          `;
+        }).join('');
+        lucide.createIcons({ root: cont });
+      } catch(e) { cont.innerHTML = _admError(); }
+    }
+
+    async function loadAdminChangelogsDB() {
+      const cont = document.getElementById('adm-section-content');
+      if (!cont) return;
+      try {
+        const r = await fetch(`${workerURL}/changelogs`);
+        if (!r.ok) throw new Error();
+        const list = await r.json();
+        if (!list.length) { cont.innerHTML = _admEmpty('No changelog entries yet.'); return; }
+        cont.innerHTML = list.map(c => `
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px 18px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <div style="width:8px;height:8px;border-radius:50%;background:var(--theme);flex-shrink:0;"></div>
+              <div style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.2px;">${c.title || c.text}</div>
+            </div>
+            ${c.description ? `<div style="font-size:11.5px;color:var(--sub);font-weight:600;line-height:1.5;padding-left:16px;margin-bottom:6px;">${c.description}</div>` : ''}
+            <div style="font-size:10px;color:var(--sub);font-weight:700;opacity:0.6;padding-left:16px;">${new Date(c.timestamp).toLocaleString()}</div>
+          </div>
+        `).join('');
+      } catch(e) { cont.innerHTML = _admError(); }
+    }
+
+    // Admin UI helpers
+    const _admLoading = () => `<div style="text-align:center;padding:40px 20px;font-size:13px;color:var(--sub);font-weight:700;">Loading…</div>`;
+    const _admEmpty   = (msg) => `<div style="text-align:center;padding:40px 20px;font-size:13px;color:var(--sub);font-weight:700;">${msg}</div>`;
+    const _admError   = () => `<div style="text-align:center;padding:40px 20px;font-size:13px;color:var(--red);font-weight:700;">Failed to load. Check admin session.</div>`;
+
+    // Expose globally
+    window.renderDynamicProfileSection = renderDynamicProfileSection;
   </script>
+  
+  <!-- Hidden File Input Tags for File Restore functionality -->
+  <input type="file" id="restore-input" style="display:none;" accept=".json" onchange="restoreFromFile(this.files[0])">
+  <input type="file" id="import-input" style="display:none;" accept=".json" onchange="importSchedule(this.files[0])">
 </body>
 
+</html>
 </html>

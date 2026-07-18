@@ -237,6 +237,18 @@ export default {
               updatedAt: new Date().toISOString()
             });
 
+            // Trigger push notifications
+            const subKey = `SUB_TOKENS:${formatId}`;
+            const subRaw = await env.SKEDUL_KV.get(subKey);
+            if (subRaw) {
+              try {
+                const tokens = JSON.parse(subRaw);
+                await sendFcmPush(env, tokens, { formatId, code: userVisibleCode, timetable });
+              } catch (e) {
+                console.error("[FCM Trigger Error]", e);
+              }
+            }
+
             newEntries.push({ formatId, code: userVisibleCode });
           }
         }
@@ -357,6 +369,318 @@ export default {
         return json({ success: true });
       }
 
+      // --- NEW ROUTES FOR ADMIN TOOLS, FEEDBACK, SUGGESTIONS & ANALYTICS ---
+
+      // 1. Analytics Ping
+      if (segments[0] === "analytics" && segments[1] === "ping" && request.method === "POST") {
+        const body = await request.json().catch(() => null);
+        if (!body || !body.deviceId) return err("Device ID required", 400);
+        await env.SKEDUL_KV.put(`DEVICE_ACTIVE:${body.deviceId}`, "1", { expirationTtl: 604800 }); // 7 days
+        return json({ success: true });
+      }
+
+      // 2. Get Analytics (Admin Only)
+      if (segments[0] === "admin" && segments[1] === "analytics" && request.method === "GET") {
+        const adminError = await requireAdmin(request, env);
+        if (adminError) return adminError;
+        
+        let keysCount = 0;
+        let list = await env.SKEDUL_KV.list({ prefix: "DEVICE_ACTIVE:" });
+        keysCount += list.keys.length;
+        while (!list.list_complete) {
+          list = await env.SKEDUL_KV.list({ prefix: "DEVICE_ACTIVE:", cursor: list.cursor });
+          keysCount += list.keys.length;
+        }
+        return json({ activeUsers7Days: keysCount });
+      }
+
+      // 3. Subscribe Device FCM Token to formatId
+      if (segments[0] === "subscribe" && request.method === "POST") {
+        const body = await request.json().catch(() => null);
+        if (!body || !body.formatId || !body.token) return err("formatId and token required", 400);
+        
+        const key = `SUB_TOKENS:${body.formatId}`;
+        let tokens = [];
+        const existing = await env.SKEDUL_KV.get(key);
+        if (existing) {
+          try { tokens = JSON.parse(existing); } catch {}
+        }
+        if (!tokens.includes(body.token)) {
+          tokens.push(body.token);
+          await env.SKEDUL_KV.put(key, JSON.stringify(tokens));
+        }
+        return json({ success: true });
+      }
+
+      // 4. Submit User Feedback (with 6-hour cooldown)
+      if (segments[0] === "feedback" && segments[1] === "submit" && request.method === "POST") {
+        const body = await request.json().catch(() => null);
+        if (!body || !body.text || !body.deviceId) return err("Feedback text and deviceId required", 400);
+        
+        // 6-hour cooldown check (21600 seconds)
+        const cooldownKey = `FEEDBACK_COOLDOWN:${body.deviceId}`;
+        const hasCooldown = await env.SKEDUL_KV.get(cooldownKey);
+        if (hasCooldown) {
+          return err("6-hour cooldown active. Please wait before submitting feedback again.", 429);
+        }
+
+        const name = (body.name && body.name.trim()) ? body.name.trim() : "Anonymous";
+        const newFeedback = {
+          id: crypto.randomUUID ? crypto.randomUUID() : genAdminToken(),
+          name,
+          text: body.text,
+          timestamp: new Date().toISOString()
+        };
+        
+        let feedbacks = [];
+        const existing = await env.SKEDUL_KV.get("FEEDBACK_DB");
+        if (existing) {
+          try { feedbacks = JSON.parse(existing); } catch {}
+        }
+        feedbacks.push(newFeedback);
+        await env.SKEDUL_KV.put("FEEDBACK_DB", JSON.stringify(feedbacks));
+        await env.SKEDUL_KV.put(cooldownKey, "1", { expirationTtl: 21600 }); // 6 hours
+        
+        return json({ success: true });
+      }
+
+      // 5. Get Feedbacks (Admin Only)
+      if (segments[0] === "admin" && segments[1] === "feedbacks" && request.method === "GET") {
+        const adminError = await requireAdmin(request, env);
+        if (adminError) return adminError;
+        
+        const existing = await env.SKEDUL_KV.get("FEEDBACK_DB");
+        let feedbacks = [];
+        if (existing) {
+          try { feedbacks = JSON.parse(existing); } catch {}
+        }
+        feedbacks.reverse();
+        return json(feedbacks);
+      }
+
+      // GET Suggestions Config (Abuse prevention toggle status)
+      if (segments[0] === "suggestions" && segments[1] === "config" && request.method === "GET") {
+        const disabled = await env.SKEDUL_KV.get("CONFIG:SUGGESTIONS_DISABLED") === "1";
+        return json({ suggestionsDisabled: disabled });
+      }
+
+      // POST Set Suggestions Config (Admin Only)
+      if (segments[0] === "admin" && segments[1] === "config" && request.method === "POST") {
+        const adminError = await requireAdmin(request, env);
+        if (adminError) return adminError;
+        
+        const body = await request.json().catch(() => null);
+        if (!body || typeof body.suggestionsDisabled !== "boolean") return err("suggestionsDisabled boolean required", 400);
+        
+        await env.SKEDUL_KV.put("CONFIG:SUGGESTIONS_DISABLED", body.suggestionsDisabled ? "1" : "0");
+        return json({ success: true, suggestionsDisabled: body.suggestionsDisabled });
+      }
+
+      // 6. Get Suggestions Board
+      if (segments[0] === "suggestions" && request.method === "GET") {
+        const existing = await env.SKEDUL_KV.get("SUGGESTIONS_DB");
+        let suggestions = [];
+        if (existing) {
+          try { suggestions = JSON.parse(existing); } catch {}
+        }
+        // Score sorting
+        suggestions.sort((a, b) => (b.score || (b.upvotes || 0) - (b.downvotes || 0)) - (a.score || (a.upvotes || 0) - (a.downvotes || 0)));
+        return json(suggestions);
+      }
+
+      // 7. Submit Suggestion (with 6-hour cooldown and admin enable/disable control toggle)
+      if (segments[0] === "suggestions" && segments[1] === "submit" && request.method === "POST") {
+        // Admin toggle check
+        const disabled = await env.SKEDUL_KV.get("CONFIG:SUGGESTIONS_DISABLED") === "1";
+        if (disabled) {
+          return err("Posting suggestions is currently disabled by administrator.", 403);
+        }
+
+        const body = await request.json().catch(() => null);
+        if (!body || !body.text || !body.deviceId) return err("text and deviceId required", 400);
+        
+        // 6-hour cooldown check (21600 seconds)
+        const cooldownKey = `SUGGESTION_COOLDOWN:${body.deviceId}`;
+        const hasCooldown = await env.SKEDUL_KV.get(cooldownKey);
+        if (hasCooldown) {
+          return err("6-hour cooldown active. Please wait before suggesting again.", 429);
+        }
+        
+        const name = (body.name && body.name.trim()) ? body.name.trim() : "Anonymous";
+        const newSuggestion = {
+          id: body.id || (crypto.randomUUID ? crypto.randomUUID() : genAdminToken()),
+          name,
+          text: body.text,
+          upvotes: 1,
+          downvotes: 0,
+          score: 1,
+          timestamp: new Date().toISOString(),
+          comments: []
+        };
+        
+        let suggestions = [];
+        const existing = await env.SKEDUL_KV.get("SUGGESTIONS_DB");
+        if (existing) {
+          try { suggestions = JSON.parse(existing); } catch {}
+        }
+        suggestions.push(newSuggestion);
+        await env.SKEDUL_KV.put("SUGGESTIONS_DB", JSON.stringify(suggestions));
+        await env.SKEDUL_KV.put(cooldownKey, "1", { expirationTtl: 21600 }); // 6 hours
+        await env.SKEDUL_KV.put(`VOTE_LOCKED:${newSuggestion.id}:${body.deviceId}`, "1"); // Locked as upvoted
+        
+        return json({ success: true, suggestion: newSuggestion });
+      }
+
+      // 8. Vote/Upvote/Downvote Suggestion
+      if (segments[0] === "suggestions" && segments[1] === "vote" && request.method === "POST") {
+        const body = await request.json().catch(() => null);
+        if (!body || !body.id || !body.deviceId || typeof body.direction !== "number") return err("id, direction, and deviceId required", 400);
+        
+        const dir = body.direction; // 1, -1, or 0
+        const lockKey = `VOTE_LOCKED:${body.id}:${body.deviceId}`;
+        const previousVote = parseInt(await env.SKEDUL_KV.get(lockKey) || "0", 10);
+        
+        if (previousVote === dir) {
+          return json({ success: true, message: "No change" });
+        }
+        
+        let suggestions = [];
+        const existing = await env.SKEDUL_KV.get("SUGGESTIONS_DB");
+        if (existing) {
+          try { suggestions = JSON.parse(existing); } catch {}
+        }
+        
+        const sug = suggestions.find(s => s.id === body.id);
+        if (!sug) return err("Suggestion not found", 404);
+        
+        sug.upvotes = sug.upvotes || 0;
+        sug.downvotes = sug.downvotes || 0;
+
+        // Undo previous vote
+        if (previousVote === 1) sug.upvotes--;
+        else if (previousVote === -1) sug.downvotes--;
+
+        // Apply new vote
+        if (dir === 1) sug.upvotes++;
+        else if (dir === -1) sug.downvotes++;
+
+        sug.score = sug.upvotes - sug.downvotes;
+        
+        await env.SKEDUL_KV.put("SUGGESTIONS_DB", JSON.stringify(suggestions));
+        if (dir === 0) {
+          await env.SKEDUL_KV.delete(lockKey);
+        } else {
+          await env.SKEDUL_KV.put(lockKey, String(dir));
+        }
+        
+        return json({ success: true, score: sug.score });
+      }
+
+      // Add Comment to Suggestion Thread (with 6-hour cooldown)
+      if (segments[0] === "suggestions" && segments[1] === "comment" && request.method === "POST") {
+        const body = await request.json().catch(() => null);
+        if (!body || !body.id || !body.text || !body.deviceId) return err("id, text, and deviceId required", 400);
+        
+        // 6-hour comment cooldown check
+        const cooldownKey = `COMMENT_COOLDOWN:${body.deviceId}`;
+        const hasCooldown = await env.SKEDUL_KV.get(cooldownKey);
+        if (hasCooldown) {
+          return err("6-hour cooldown active. Please wait before commenting again.", 429);
+        }
+
+        let suggestions = [];
+        const existing = await env.SKEDUL_KV.get("SUGGESTIONS_DB");
+        if (existing) {
+          try { suggestions = JSON.parse(existing); } catch {}
+        }
+        
+        const sug = suggestions.find(s => s.id === body.id);
+        if (!sug) return err("Suggestion not found", 404);
+        
+        if (!sug.comments) sug.comments = [];
+        sug.comments.push({
+          name: (body.name && body.name.trim()) ? body.name.trim() : "Anonymous",
+          text: body.text,
+          timestamp: new Date().toISOString()
+        });
+        
+        await env.SKEDUL_KV.put("SUGGESTIONS_DB", JSON.stringify(suggestions));
+        await env.SKEDUL_KV.put(cooldownKey, "1", { expirationTtl: 21600 }); // 6 hours
+        
+        return json({ success: true, comments: sug.comments });
+      }
+
+      // 9. Complete Suggestion & Move to Changelog (Admin Only)
+      if (segments[0] === "suggestions" && segments[1] === "complete" && request.method === "POST") {
+        const adminError = await requireAdmin(request, env);
+        if (adminError) return adminError;
+        
+        const body = await request.json().catch(() => null);
+        if (!body || !body.id) return err("id required", 400);
+        
+        let suggestions = [];
+        const existingSug = await env.SKEDUL_KV.get("SUGGESTIONS_DB");
+        if (existingSug) {
+          try { suggestions = JSON.parse(existingSug); } catch {}
+        }
+        
+        const sugIdx = suggestions.findIndex(s => s.id === body.id);
+        if (sugIdx === -1) return err("Suggestion not found", 404);
+        const sug = suggestions[sugIdx];
+        
+        suggestions.splice(sugIdx, 1);
+        await env.SKEDUL_KV.put("SUGGESTIONS_DB", JSON.stringify(suggestions));
+        
+        let changelogs = [];
+        const existingCh = await env.SKEDUL_KV.get("CHANGELOG_DB");
+        if (existingCh) {
+          try { changelogs = JSON.parse(existingCh); } catch {}
+        }
+        
+        changelogs.push({
+          id: sug.id,
+          title: sug.text,
+          description: `Completed community suggestion by ${sug.name}`,
+          timestamp: new Date().toISOString()
+        });
+        
+        await env.SKEDUL_KV.put("CHANGELOG_DB", JSON.stringify(changelogs));
+        return json({ success: true });
+      }
+
+      // Delete Suggestion (Admin Only)
+      if (segments[0] === "suggestions" && segments[1] === "delete" && request.method === "POST") {
+        const adminError = await requireAdmin(request, env);
+        if (adminError) return adminError;
+        
+        const body = await request.json().catch(() => null);
+        if (!body || !body.id) return err("id required", 400);
+        
+        let suggestions = [];
+        const existingSug = await env.SKEDUL_KV.get("SUGGESTIONS_DB");
+        if (existingSug) {
+          try { suggestions = JSON.parse(existingSug); } catch {}
+        }
+        
+        const sugIdx = suggestions.findIndex(s => s.id === body.id);
+        if (sugIdx === -1) return err("Suggestion not found", 404);
+        
+        suggestions.splice(sugIdx, 1);
+        await env.SKEDUL_KV.put("SUGGESTIONS_DB", JSON.stringify(suggestions));
+        return json({ success: true });
+      }
+
+      // 10. Get Changelogs List
+      if (segments[0] === "changelogs" && request.method === "GET") {
+        const existing = await env.SKEDUL_KV.get("CHANGELOG_DB");
+        let changelogs = [];
+        if (existing) {
+          try { changelogs = JSON.parse(existing); } catch {}
+        }
+        changelogs.reverse();
+        return json(changelogs);
+      }
+
       return json({ status: "MySkedul AI Worker Online" });
 
     } catch (e) {
@@ -364,3 +688,35 @@ export default {
     }
   },
 };
+
+async function sendFcmPush(env, tokens, payload) {
+  if (!tokens || !tokens.length) return;
+  if (env.FIREBASE_SERVER_KEY) {
+    try {
+      await fetch('https://fcm.googleapis.com/fcm/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `key=${env.FIREBASE_SERVER_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          registration_ids: tokens,
+          notification: {
+            title: "Schedule Updated!",
+            body: `The schedule for ${payload.formatId} has been updated.`
+          },
+          data: {
+            formatId: payload.formatId,
+            code: payload.code,
+            scheduleJson: JSON.stringify(payload.timetable)
+          }
+        })
+      });
+      console.log(`[FCM] Broadcasted updates to ${tokens.length} subscribers.`);
+    } catch (e) {
+      console.error("[FCM] Broadcast failed:", e);
+    }
+  } else {
+    console.log(`[FCM Mock] Push triggered for ${payload.formatId} (${tokens.length} subscribers).`);
+  }
+}
