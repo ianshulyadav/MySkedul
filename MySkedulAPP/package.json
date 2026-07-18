@@ -1,0 +1,37 @@
+{
+  "name": "myskedul-app",
+  "version": "1.3.04",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cap-sync": "npx cap sync android"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/clipboard": "^8.0.1",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/local-notifications": "^8.0.2",
+    "@capacitor/push-notifications": "^8.1.2",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
+    "sharp": "^0.34.5"
+  },
+  "overrides": {
+    "tar": ">=7.5.11",
+    "@xmldom/xmldom": ">=0.8.12",
+    "minimatch": ">=3.1.3"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.3.0"
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MySkedul</string>
+    <string name="title_activity_main">MySkedul</string>
+    <string name="package_name">com.myskedul.app</string>
+    <string name="custom_url_scheme">com.myskedul.app</string>
+</resources>
