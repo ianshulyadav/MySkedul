@@ -1594,6 +1594,10 @@
       }
     }
 
+    .slide-overlay .topbar {
+      padding-top: calc(18px + env(safe-area-inset-top)) !important;
+    }
+
     /* HIDE DEFAULT VIDEO PLAY BUTTON IN ANDROID WEBVIEWS */
     video::-webkit-media-controls-start-playback-button,
     video::-webkit-media-controls-play-button,
@@ -6354,6 +6358,28 @@
     // fires popstate and closes the modal instead of leaving the app.
     let skipNextPopstate = false;
     let exitTap = false;
+    let activeOverlays = [];
+
+    function openOverlay(id) {
+      const pg = document.getElementById(id);
+      if (!pg) return;
+      pg.style.transform = 'translateX(0)';
+      activeOverlays.push(id);
+      history.pushState({ overlay: id }, '');
+    }
+
+    function closeOverlay(id) {
+      const pg = document.getElementById(id);
+      if (pg) pg.style.transform = 'translateX(100%)';
+      const idx = activeOverlays.indexOf(id);
+      if (idx > -1) {
+        activeOverlays.splice(idx, 1);
+        if (history.state && history.state.overlay === id) {
+          skipNextPopstate = true;
+          history.back();
+        }
+      }
+    }
 
     // ===== PREMIUM CUSTOM DIALOG ENGINE (PROMISE-BASED) =====
     let confirmResolver = null;
@@ -6422,6 +6448,20 @@
       // Ignore programmatic history jumps from closeModal
       if (skipNextPopstate) {
         skipNextPopstate = false;
+        return;
+      }
+
+      // If an overlay is open, close the topmost one
+      if (activeOverlays.length > 0) {
+        const topOverlay = activeOverlays.pop();
+        const pg = document.getElementById(topOverlay);
+        if (pg) pg.style.transform = 'translateX(100%)';
+        
+        // Custom cleanup logic for specific overlays
+        if (topOverlay === 'pg-suggestions-thread') {
+          currentThreadId = null;
+          loadSuggestions();
+        }
         return;
       }
 
@@ -8950,7 +8990,7 @@
       const pg = document.getElementById('pg-suggestions-dash');
       if (!pg) return;
       
-      pg.style.transform = 'translateX(0)';
+      openOverlay('pg-suggestions-dash');
       lucide.createIcons({ root: pg });
       
       // Load suggestions status config
@@ -9001,8 +9041,7 @@
     }
 
     function closeSuggestionsModal() {
-      const pg = document.getElementById('pg-suggestions-dash');
-      if (pg) pg.style.transform = 'translateX(100%)';
+      closeOverlay('pg-suggestions-dash');
     }
 
     // ===== LOCAL MOCK DATABASE FOR 100% WORKING THREADS & MOCKS =====
@@ -9149,7 +9188,7 @@
       const pg = document.getElementById('pg-suggestions-thread');
       if (!pg) return;
       
-      pg.style.transform = 'translateX(0)';
+      openOverlay('pg-suggestions-thread');
       lucide.createIcons({ root: pg });
       
       renderThreadOP();
@@ -9158,8 +9197,7 @@
 
     function closeSuggestionThread() {
       currentThreadId = null;
-      const pg = document.getElementById('pg-suggestions-thread');
-      if (pg) pg.style.transform = 'translateX(100%)';
+      closeOverlay('pg-suggestions-thread');
       loadSuggestions();
     }
 
@@ -9515,14 +9553,13 @@
       const pg = document.getElementById('pg-admin-dash');
       if (!pg) return;
       lucide.createIcons({ root: pg });
-      pg.style.transform = 'translateX(0)';
+      openOverlay('pg-admin-dash');
       _loadAdminStats();
       loadSuggestionsConfig();
     }
 
     function closeAdminDashboard() {
-      const pg = document.getElementById('pg-admin-dash');
-      if (pg) pg.style.transform = 'translateX(100%)';
+      closeOverlay('pg-admin-dash');
     }
 
     function openAdminSection(type) {
@@ -9542,13 +9579,12 @@
       title.textContent = c.label;
       cont.innerHTML = _admLoading();
       lucide.createIcons({ root: pg });
-      pg.style.transform = 'translateX(0)';
+      openOverlay('pg-admin-section');
       c.loader();
     }
 
     function closeAdminSection() {
-      const pg = document.getElementById('pg-admin-section');
-      if (pg) pg.style.transform = 'translateX(100%)';
+      closeOverlay('pg-admin-section');
     }
 
     async function _loadAdminStats() {
