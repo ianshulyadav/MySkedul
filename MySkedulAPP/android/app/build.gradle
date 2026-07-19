@@ -33,9 +33,9 @@ android {
     signingConfigs {
         release {
             storeFile file("release.keystore")
-            storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD") ?: "android"
-            keyAlias System.getenv("RELEASE_KEY_ALIAS") ?: "androiddebugkey"
-            keyPassword System.getenv("RELEASE_KEY_PASSWORD") ?: "android"
+            storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD")
+            keyAlias System.getenv("RELEASE_KEY_ALIAS")
+            keyPassword System.getenv("RELEASE_KEY_PASSWORD")
         }
     }
 
@@ -49,13 +49,21 @@ android {
             minifyEnabled true
             shrinkResources true
             matchingFallbacks = ['release']
-            signingConfig signingConfigs.release
+            if (System.getenv("RELEASE_KEYSTORE_PASSWORD") != null) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
         }
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            if (System.getenv("RELEASE_KEYSTORE_PASSWORD") != null) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
         }
     }
 
