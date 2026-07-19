@@ -547,6 +547,121 @@
       font-size: max(16px, 1em);
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       SMOOTH KEYBOARD TRANSITIONS - Eliminates launch glitch
+    ═══════════════════════════════════════════════════════════ */
+    
+    /* Smooth viewport height transition when keyboard opens */
+    html {
+      height: 100%;
+      transition: height 0ms;
+    }
+    
+    body.keyboard-visible {
+      height: 100dvh !important;
+      overflow: hidden;
+    }
+    
+    body.keyboard-visible .scroll {
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Hardware-accelerated keyboard-aware layout */
+    .keyboard-container {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      height: 100vh;
+      /* Fallback for older browsers */
+      height: -webkit-fill-available;
+      contain: strict;
+    }
+    
+    /* Prevent layout shift when keyboard appears */
+    .bnav.keyboard-push {
+      transform: translateY(0) !important;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.25s ease,
+                  bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    
+    .bnav.keyboard-hidden {
+      transform: translateY(100%) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    
+    /* Smooth input focus transitions */
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+    }
+    
+    /* Modal keyboard offset - lift modals when keyboard visible */
+    body.keyboard-visible .mo.center .ms {
+      transform: scale(1) translate3d(0, -10vh, 0) !important;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                  opacity 0.25s ease;
+    }
+    
+    /* Loading screen keyboard protection */
+    #loading-screen {
+      contain: strict;
+      will-change: opacity;
+    }
+    
+    /* Ensure loading screen is fully opaque during transition */
+    body.loading #loading-screen {
+      opacity: 1 !important;
+      visibility: visible !important;
+      z-index: 99999 !important;
+    }
+    
+    /* Disable focus animations during initial load */
+    body.loading *:not(#loading-screen):not(#loading-screen *) {
+      animation-play-state: paused !important;
+      transition-play-state: paused !important;
+    }
+    
+    /* Ultra-smooth page transitions */
+    .page {
+      contain: layout style paint;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+    
+    .page.active {
+      animation: pageIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      will-change: transform, opacity;
+    }
+    
+    @keyframes pageIn {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 20px, 0) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+    }
+    
+    /* GPU acceleration for smoother rendering */
+    .gpu-accelerated {
+      transform: translateZ(0);
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+      perspective: 1000px;
+    }
+    
+    /* Reduce paint areas during animations */
+    .no-paint {
+      paint-order: none;
+      contain: layout style;
+    }
+
     /* ===== GROUP CARDS ===== */
     .gc-section-header {
       display: flex;
@@ -3613,7 +3728,7 @@
     Contains all functional pages (Home, Schedules, Tasks, etc.)
   -->
 
-<body class="loading">
+<body class="loading keyboard-container">
   <!-- Edge Progress Bar -->
   <div id="pub-bar" class="pub-bar-wrapper">
     <div class="pub-bar"></div>
@@ -5436,6 +5551,11 @@
           setTimeout(() => {
             loader.remove();
             document.body.classList.remove('loading');
+            // Mark app as ready after loading screen is fully gone
+            // This prevents keyboard glitches during launch
+            requestAnimationFrame(() => {
+              markAppReady();
+            });
           }, isHighEnd ? 1200 : 800);
         }, 600);
 
@@ -6522,10 +6642,11 @@
       lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
       history.pushState({ modal: id }, '');
       if (id === 'm-onboarding') {
+        // Use safe focus to prevent keyboard glitch on launch
         setTimeout(() => {
           const inp = document.getElementById('ob-name');
-          if (inp) inp.focus();
-        }, 550);
+          if (inp) safeFocus(inp, 100);
+        }, 600); // Slightly increased delay for smoother transition
       }
     }
     function closeModal(id) {
@@ -8609,6 +8730,166 @@
         });
         const nav = document.getElementById('bnav-main');
         if (nav) ro.observe(nav);
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // SMOOTH KEYBOARD HANDLING - Eliminates launch glitch
+      // ═══════════════════════════════════════════════════════════
+      
+      let isKeyboardVisible = false;
+      let keyboardHeight = 0;
+      let focusDebounceTimer = null;
+      let isAppReady = false;
+      
+      // Mark app as ready after loading screen is gone
+      function markAppReady() {
+        isAppReady = true;
+      }
+      
+      // Safe focus with debounce to prevent glitchy keyboard behavior
+      function safeFocus(element, delay = 100) {
+        if (focusDebounceTimer) {
+          clearTimeout(focusDebounceTimer);
+        }
+        focusDebounceTimer = setTimeout(() => {
+          if (element && isAppReady && !document.body.classList.contains('loading')) {
+            element.focus();
+          }
+        }, delay);
+      }
+      
+      // Keyboard visibility detection using visualViewport API (Chrome 61+)
+      function setupKeyboardHandling() {
+        // Use visualViewport API for accurate keyboard detection
+        if (window.visualViewport) {
+          const viewport = window.visualViewport;
+          
+          viewport.addEventListener('resize', () => {
+            const viewportHeight = viewport.height;
+            const windowHeight = window.innerHeight;
+            const keyboardThreshold = windowHeight * 0.5; // If visible height is less than 50%, keyboard is likely open
+            
+            if (viewportHeight < keyboardThreshold) {
+              // Keyboard is visible
+              if (!isKeyboardVisible) {
+                isKeyboardVisible = true;
+                keyboardHeight = windowHeight - viewportHeight;
+                document.body.classList.add('keyboard-visible');
+                
+                // Adjust bottom navigation
+                const bnav = document.querySelector('.bnav');
+                if (bnav) {
+                  bnav.classList.add('keyboard-push');
+                  bnav.classList.remove('keyboard-hidden');
+                }
+              }
+            } else {
+              // Keyboard is hidden
+              if (isKeyboardVisible) {
+                isKeyboardVisible = false;
+                document.body.classList.remove('keyboard-visible');
+                
+                const bnav = document.querySelector('.bnav');
+                if (bnav) {
+                  bnav.classList.remove('keyboard-push');
+                }
+              }
+            }
+          });
+          
+          viewport.addEventListener('scroll', () => {
+            // Sync scroll position when keyboard scrolls
+            if (isKeyboardVisible) {
+              const scrollTop = viewport.offsetTop;
+              document.documentElement.style.setProperty('--keyboard-scroll-y', scrollTop + 'px');
+            }
+          });
+        }
+        
+        // Fallback: Listen to window resize for browsers without visualViewport
+        let lastWindowHeight = window.innerHeight;
+        window.addEventListener('resize', () => {
+          const currentHeight = window.innerHeight;
+          const heightDiff = lastWindowHeight - currentHeight;
+          
+          // Only trigger if significant height change (keyboard typically > 100px)
+          if (Math.abs(heightDiff) > 100) {
+            if (heightDiff > 0) {
+              // Keyboard opened
+              isKeyboardVisible = true;
+              document.body.classList.add('keyboard-visible');
+            } else {
+              // Keyboard closed
+              isKeyboardVisible = false;
+              document.body.classList.remove('keyboard-visible');
+            }
+          }
+          lastWindowHeight = currentHeight;
+        });
+        
+        // Detect focus on inputs to prepare for keyboard
+        document.addEventListener('focusin', (e) => {
+          if (e.target.matches('input, textarea, select')) {
+            // Small delay to let the keyboard animation start
+            setTimeout(() => {
+              if (isKeyboardVisible || window.innerHeight < window.outerHeight * 0.7) {
+                document.body.classList.add('keyboard-visible');
+              }
+            }, 50);
+          }
+        });
+        
+        // Detect blur to handle keyboard close
+        document.addEventListener('focusout', (e) => {
+          if (e.target.matches('input, textarea, select')) {
+            // Delay keyboard hide to prevent visual glitch
+            setTimeout(() => {
+              const stillHasFocus = document.querySelector('input:focus, textarea:focus, select:focus');
+              if (!stillHasFocus) {
+                isKeyboardVisible = false;
+                document.body.classList.remove('keyboard-visible');
+              }
+            }, 150);
+          }
+        });
+      }
+      
+      // Initialize keyboard handling
+      setupKeyboardHandling();
+      
+      // Capacitor Keyboard Plugin handling
+      if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        try {
+          if (Capacitor.Plugins.Keyboard) {
+            // Listen for keyboard show
+            Capacitor.Plugins.Keyboard.addListener('keyboardWillShow', (info) => {
+              document.body.classList.add('keyboard-visible');
+              isKeyboardVisible = true;
+              
+              // Animate bottom nav out of the way
+              const bnav = document.querySelector('.bnav');
+              if (bnav) {
+                bnav.classList.add('keyboard-push');
+              }
+            });
+            
+            // Listen for keyboard hide
+            Capacitor.Plugins.Keyboard.addListener('keyboardWillHide', () => {
+              document.body.classList.remove('keyboard-visible');
+              isKeyboardVisible = false;
+              
+              const bnav = document.querySelector('.bnav');
+              if (bnav) {
+                bnav.classList.remove('keyboard-push');
+              }
+            });
+            
+            // Disable keyboard accessory bar for cleaner look
+            Capacitor.Plugins.Keyboard.setAccessoryBarVisible({ isVisible: false });
+          }
+        } catch (e) {
+          console.warn('Keyboard plugin not available:', e);
+        }
       }
     });
   </script>

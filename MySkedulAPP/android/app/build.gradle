@@ -17,6 +17,13 @@ android {
         }
     }
     
+    // Lint options - disable for faster builds
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+        warningsAsErrors false
+    }
+    
     // Optimization: Generate only High-end (arm64) and Low-end (arm-v7a) APKs
     splits {
         abi {

@@ -3,10 +3,13 @@
   "appName": "MySkedul",
   "webDir": "www",
   "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 0,
-      "launchAutoHide": false,
+      "launchShowDuration": 1500,
+      "launchAutoHide": true,
       "backgroundColor": "#6C63FF",
       "androidSplashResourceName": "splash",
       "androidScaleType": "CENTER_CROP",
@@ -25,9 +28,13 @@
       "sound": "beep.wav"
     },
     "Keyboard": {
-      "resize": "body",
+      "resize": "none",
       "style": "dark",
-      "resizeOnFullScreen": true
+      "resizeOnFullScreen": false,
+      "hidingKeyboard": {
+        "enableScrolling": true,
+        "enableViewportMeta": true
+      }
     }
   }
 }
