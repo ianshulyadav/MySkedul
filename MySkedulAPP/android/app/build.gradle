@@ -42,7 +42,7 @@ android {
                 propertiesFile.withInputStream { localProperties.load(it) }
             }
 
-            if (System.getenv("RELEASE_KEYSTORE_DECODED") != null) {
+            if (System.getenv("RELEASE_KEYSTORE_DECODED")?.trim()) {
                 storeFile localKeystore
                 storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD")
                 keyAlias System.getenv("RELEASE_KEY_ALIAS")
@@ -66,7 +66,7 @@ android {
             minifyEnabled true
             shrinkResources true
             matchingFallbacks = ['release']
-            if (System.getenv("RELEASE_KEYSTORE_DECODED") != null || file("C:/Users/offic/Documents/myskedulkey/my-releasekey.jks").exists()) {
+            if (System.getenv("RELEASE_KEYSTORE_DECODED")?.trim() || file("C:/Users/offic/Documents/myskedulkey/my-releasekey.jks").exists()) {
                 signingConfig signingConfigs.release
             } else {
                 signingConfig signingConfigs.debug
@@ -76,7 +76,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            if (System.getenv("RELEASE_KEYSTORE_DECODED") != null || file("C:/Users/offic/Documents/myskedulkey/my-releasekey.jks").exists()) {
+            if (System.getenv("RELEASE_KEYSTORE_DECODED")?.trim() || file("C:/Users/offic/Documents/myskedulkey/my-releasekey.jks").exists()) {
                 signingConfig signingConfigs.release
             } else {
                 signingConfig signingConfigs.debug
