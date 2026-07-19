@@ -132,6 +132,7 @@ function isLowEndDevice() {
 }
 
 function showUpdatePopup(config, autoStart = false) {
+  if (localStorage.getItem('MySkedul_updateNotificationsEnabled') === 'false') return;
   const isForce = config.forceUpdate === true || config.force === true;
   if (!isForce && !autoStart && sessionStorage.getItem('update_dismissed_' + config.version)) return;
 
