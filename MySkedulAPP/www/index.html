@@ -5319,7 +5319,7 @@
               }
               try { haptic('selection'); } catch(e) {}
               resolve();
-            }, 450);
+            }, 80);
           });
         };
 
@@ -5329,7 +5329,7 @@
         await updateSync(70, "Linking system plugins...");
         await updateSync(90, "Configuring app layout...");
         await updateSync(100, "Workspace ready!");
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 100));
       } else {
         await loadData();
       }
@@ -7451,64 +7451,107 @@
 
       // Capacitor Native Save
       if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-        try {
-          const { Filesystem, Share } = Capacitor.Plugins;
-          if (Filesystem) {
-            // Request public storage permission before saving publicly
-            try {
-              const perms = await Filesystem.checkPermissions();
-              if (perms.publicStorage !== 'granted') {
-                const req = await Filesystem.requestPermissions();
-                if (req.publicStorage !== 'granted') {
-                  console.warn('Storage permission denied by user');
+        const performSave = async () => {
+          try {
+            const { Filesystem, Share } = Capacitor.Plugins;
+            if (Filesystem) {
+              // Request public storage permission before saving publicly
+              try {
+                const perms = await Filesystem.checkPermissions();
+                if (perms.publicStorage !== 'granted') {
+                  const req = await Filesystem.requestPermissions();
+                  if (req.publicStorage !== 'granted') {
+                    console.warn('Storage permission denied by user');
+                  }
+                }
+              } catch (pe) {
+                console.error('Permission check failed', pe);
+              }
+
+              let savedUri = null;
+              let success = false;
+
+              // Try to write to Downloads directory under MySkedulAPP folder
+              try {
+                try {
+                  await Filesystem.mkdir({
+                    path: 'Download/MySkedulAPP',
+                    directory: 'EXTERNAL',
+                    recursive: true
+                  });
+                } catch (mkdirErr) {
+                  console.warn('EXTERNAL mkdir failed (folder may already exist)', mkdirErr);
+                }
+
+                const res = await Filesystem.writeFile({
+                  path: `Download/MySkedulAPP/${fn}`,
+                  data: json,
+                  directory: 'EXTERNAL',
+                  encoding: 'utf8',
+                  recursive: true
+                });
+                savedUri = res.uri;
+                success = true;
+                showToast(`Backup saved to Downloads/MySkedulAPP!`);
+              } catch (err) {
+                console.warn('EXTERNAL Download save failed, trying Documents', err);
+                try {
+                  try {
+                    await Filesystem.mkdir({
+                      path: 'MySkedulAPP',
+                      directory: 'DOCUMENTS',
+                      recursive: true
+                    });
+                  } catch (mkdirErr2) {
+                    console.warn('DOCUMENTS mkdir failed (folder may already exist)', mkdirErr2);
+                  }
+
+                  const res = await Filesystem.writeFile({
+                    path: `MySkedulAPP/${fn}`,
+                    data: json,
+                    directory: 'DOCUMENTS',
+                    encoding: 'utf8',
+                    recursive: true
+                  });
+                  savedUri = res.uri;
+                  success = true;
+                  showToast(`Backup saved to Documents/MySkedulAPP!`);
+                } catch (err2) {
+                  console.warn('Documents save failed, trying Cache + Share', err2);
+                  // Fallback: Write to Cache and share so user can save it anywhere
+                  const res = await Filesystem.writeFile({
+                    path: fn,
+                    data: json,
+                    directory: 'CACHE',
+                    encoding: 'utf8'
+                  });
+                  savedUri = res.uri;
                 }
               }
-            } catch (pe) {
-              console.error('Permission check failed', pe);
-            }
 
-            let savedUri = null;
-            let success = false;
-
-            // Try to write to Documents directory (highly accessible)
-            try {
-              const res = await Filesystem.writeFile({
-                path: fn,
-                data: json,
-                directory: 'DOCUMENTS',
-                encoding: 'utf8',
-                recursive: true
-              });
-              savedUri = res.uri;
-              success = true;
-              showToast(`Backup saved to Documents folder!`);
-            } catch (err) {
-              console.warn('Documents save failed, trying Cache + Share', err);
-              // Fallback: Write to Cache and share so user can save it anywhere
-              const res = await Filesystem.writeFile({
-                path: fn,
-                data: json,
-                directory: 'CACHE',
-                encoding: 'utf8'
-              });
-              savedUri = res.uri;
+              // Open Share sheet as fallback if saving directly to Downloads or Documents failed
+              if (!success && Share && savedUri) {
+                showToast("Opening share menu to save/send backup...");
+                await Share.share({
+                  title: full ? 'MySkedul Backup' : 'MySkedul Schedule',
+                  text: 'Here is my MySkedul backup file.',
+                  files: [savedUri]
+                });
+              }
             }
-
-            // Open Share sheet as fallback if saving directly to Documents failed
-            if (!success && Share && savedUri) {
-              showToast("Opening share menu to save/send backup...");
-              await Share.share({
-                title: full ? 'MySkedul Backup' : 'MySkedul Schedule',
-                text: 'Here is my MySkedul backup file.',
-                files: [savedUri] // Use files array for sharing local file URIs
-              });
-            }
-            return;
+          } catch (e) {
+            console.error('Backup failed', e);
+            showToast('Native save failed: ' + e.message);
           }
-        } catch (e) {
-          console.error('Backup failed', e);
-          showToast('Native save failed: ' + e.message);
-        }
+        };
+
+        showConfirm(
+          "Storage Permission",
+          "MySkedul requires storage access to save the backup file into your Downloads folder under the 'MySkedulAPP' directory.",
+          performSave,
+          "download-cloud"
+        );
+        return;
       }
 
       // Browser Fallback
@@ -8981,6 +9024,7 @@
 
     async function verifyAdminLogin() {
       const pass = document.getElementById('i-admin-pass').value.trim();
+      const btn = document.querySelector('#m-admin-login .btn-p');
 
       // Dismiss keyboard
       document.activeElement?.blur();
@@ -8989,6 +9033,12 @@
       }
 
       if (!pass) { showToast('Enter your admin password'); return; }
+
+      // Set Loading state
+      const originalText = btn.innerText;
+      btn.innerText = "VERIFYING...";
+      btn.disabled = true;
+      btn.style.opacity = "0.7";
 
       try {
         const res = await fetch(`${workerURL}/admin/login`, {
@@ -9015,6 +9065,11 @@
       } catch (e) {
         showToast('Connection error. Check network.');
         haptic('error');
+      } finally {
+        // Reset loading state
+        btn.innerText = originalText;
+        btn.disabled = false;
+        btn.style.opacity = "";
       }
 
       document.getElementById('i-admin-pass').value = '';
@@ -9853,10 +9908,5 @@
     window.renderDynamicProfileSection = renderDynamicProfileSection;
   </script>
   
-  <!-- Hidden File Input Tags for File Restore functionality -->
-  <input type="file" id="restore-input" style="display:none;" accept=".json" onchange="restoreFromFile(this.files[0])">
-  <input type="file" id="import-input" style="display:none;" accept=".json" onchange="importSchedule(this.files[0])">
 </body>
-
-</html>
 </html>

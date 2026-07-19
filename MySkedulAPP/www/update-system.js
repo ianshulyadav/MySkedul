@@ -237,7 +237,12 @@ async function handleWhatsNew() {
     if (CURRENT_APP_VERSION === '1.3.04' && changelog.length === 0) {
       changelog = DEFAULT_CHANGELOG_LIST;
     }
-    showWhatsNewPopup(CURRENT_APP_VERSION, changelog, DEFAULT_CHANGELOG_TEXT);
+    
+    // Only show What's New if the user is upgrading (already onboarded)
+    const hasOnboarded = localStorage.getItem('MySkedul_onboarded');
+    if (hasOnboarded) {
+      showWhatsNewPopup(CURRENT_APP_VERSION, changelog, DEFAULT_CHANGELOG_TEXT);
+    }
   }
 }
 
