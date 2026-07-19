@@ -3625,9 +3625,9 @@
     <!-- Dynamic Sync Progress Indicator -->
     <div id="sync-progress-container" style="display:none; width:200px; margin-top:40px; flex-direction:column; align-items:center; gap:10px;">
       <div style="width:100%; height:6px; background:var(--border); border-radius:10px; overflow:hidden; position:relative;">
-        <div id="sync-progress-bar" style="width:0%; height:100%; background:var(--theme); border-radius:10px; transition:width 0.4s cubic-bezier(0.1, 1, 0.1, 1);"></div>
+        <div id="sync-progress-bar" style="width:0%; height:100%; background:var(--theme); border-radius:10px; transition:width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
       </div>
-      <div id="sync-progress-text" style="font-size:11px; font-weight:800; color:var(--sub); text-align:center; text-transform:uppercase; letter-spacing:1px;">Preparing Workspace...</div>
+      <div id="sync-progress-text" style="font-size:10px; font-weight:800; color:var(--sub); text-align:center; text-transform:uppercase; letter-spacing:1px; transition: opacity 0.3s cubic-bezier(0.2, 1, 0.2, 1), transform 0.3s cubic-bezier(0.2, 1, 0.2, 1); transform: translateY(0); opacity: 1;">Preparing Workspace...</div>
     </div>
   </div>
 
@@ -5296,11 +5296,20 @@
 
         const updateSync = (pct, text) => {
           return new Promise(resolve => {
+            if (syncText) {
+              syncText.style.opacity = '0';
+              syncText.style.transform = 'translateY(4px)';
+            }
             setTimeout(() => {
               if (syncBar) syncBar.style.width = pct + '%';
-              if (syncText) syncText.textContent = text;
+              if (syncText) {
+                syncText.textContent = text;
+                syncText.style.opacity = '1';
+                syncText.style.transform = 'translateY(0)';
+              }
+              try { haptic('selection'); } catch(e) {}
               resolve();
-            }, 550);
+            }, 450);
           });
         };
 
@@ -6459,6 +6468,12 @@
       el.classList.add('active'); uMS();
       lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
       history.pushState({ modal: id }, '');
+      if (id === 'm-onboarding') {
+        setTimeout(() => {
+          const inp = document.getElementById('ob-name');
+          if (inp) inp.focus();
+        }, 550);
+      }
     }
     function closeModal(id) {
       const el = document.getElementById(id);
