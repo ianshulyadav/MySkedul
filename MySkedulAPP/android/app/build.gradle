@@ -32,27 +32,10 @@ android {
 
     signingConfigs {
         release {
-            def localKeystore = file("release.keystore")
-            def customKeystore = file("C:/Users/offic/Documents/myskedulkey/my-releasekey.jks")
-            
-            // Load local.properties for local machine build credentials
-            def propertiesFile = file("../local.properties")
-            def localProperties = new Properties()
-            if (propertiesFile.exists()) {
-                propertiesFile.withInputStream { localProperties.load(it) }
-            }
-
-            if (System.getenv("RELEASE_KEYSTORE_DECODED")?.trim()) {
-                storeFile localKeystore
-                storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD")
-                keyAlias System.getenv("RELEASE_KEY_ALIAS")
-                keyPassword System.getenv("RELEASE_KEY_PASSWORD")
-            } else if (customKeystore.exists()) {
-                storeFile customKeystore
-                storePassword localProperties.getProperty("release.keystore.password")
-                keyAlias localProperties.getProperty("release.key.alias")
-                keyPassword localProperties.getProperty("release.key.password")
-            }
+            storeFile file("release.keystore")
+            storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD") ?: "MySkedul@Release2026"
+            keyAlias System.getenv("RELEASE_KEY_ALIAS") ?: "my-release-key"
+            keyPassword System.getenv("RELEASE_KEY_PASSWORD") ?: "MySkedul@Release2026"
         }
     }
 
@@ -66,21 +49,13 @@ android {
             minifyEnabled true
             shrinkResources true
             matchingFallbacks = ['release']
-            if (System.getenv("RELEASE_KEYSTORE_DECODED")?.trim() || file("C:/Users/offic/Documents/myskedulkey/my-releasekey.jks").exists()) {
-                signingConfig signingConfigs.release
-            } else {
-                signingConfig signingConfigs.debug
-            }
+            signingConfig signingConfigs.release
         }
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            if (System.getenv("RELEASE_KEYSTORE_DECODED")?.trim() || file("C:/Users/offic/Documents/myskedulkey/my-releasekey.jks").exists()) {
-                signingConfig signingConfigs.release
-            } else {
-                signingConfig signingConfigs.debug
-            }
+            signingConfig signingConfigs.release
         }
     }
 
