@@ -81,13 +81,13 @@ async def publish():
 
     if is_release:
         apks = [
-            (f"MySkedulAPP/android/app/build/outputs/apk/release/MySkedul-v{version}-high.apk", "MySkedul-v{version}-high.apk", f"📱 <b>MySkedul High-end (ARM64) — v{version}</b>"),
-            (f"MySkedulAPP/android/app/build/outputs/apk/release/MySkedul-v{version}-low.apk", "MySkedul-v{version}-low.apk", f"📱 <b>MySkedul Low-end (ARMv7) — v{version}</b>")
+            (f"MySkedulAPP/android/app/build/outputs/apk/release/MySkedul-v{version}-high.apk", f"MySkedul-v{version}-high.apk", f"📱 <b>MySkedul High-end (ARM64) — v{version}</b>"),
+            (f"MySkedulAPP/android/app/build/outputs/apk/release/MySkedul-v{version}-low.apk", f"MySkedul-v{version}-low.apk", f"📱 <b>MySkedul Low-end (ARMv7) — v{version}</b>")
         ]
     else:
         apks = [
-            (f"MySkedulAPP/android/app/build/outputs/apk/nightly/MySkedul-v{version}-nightly-high.apk", "MySkedul-v{version}-nightly-high.apk", f"📱 <b>MySkedul Nightly High-end (ARM64) — v{version}</b>"),
-            (f"MySkedulAPP/android/app/build/outputs/apk/nightly/MySkedul-v{version}-nightly-low.apk", "MySkedul-v{version}-nightly-low.apk", f"📱 <b>MySkedul Nightly Low-end (ARMv7) — v{version}</b>")
+            (f"MySkedulAPP/android/app/build/outputs/apk/nightly/MySkedul-v{version}-nightly-high.apk", f"MySkedul-v{version}-nightly-high.apk", f"📱 <b>MySkedul Nightly High-end (ARM64) — v{version}</b>"),
+            (f"MySkedulAPP/android/app/build/outputs/apk/nightly/MySkedul-v{version}-nightly-low.apk", f"MySkedul-v{version}-nightly-low.apk", f"📱 <b>MySkedul Nightly Low-end (ARMv7) — v{version}</b>")
         ]
 
     # Filter to files that actually exist
