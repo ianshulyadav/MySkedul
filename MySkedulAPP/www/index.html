@@ -3669,9 +3669,14 @@
           <i data-lucide="chevron-down" style="width:14px; height:14px; color:var(--theme); stroke-width:3; flex-shrink:0;"></i>
         </div>
       </div>
-      <button class="ib header-edit-btn" onclick="openQuickActions()" title="Quick Actions">
-        <i data-lucide="edit-3" style="width:20px;height:20px;"></i>
-      </button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="ib header-share-btn" onclick="openModal('m-share-options')" title="Share Schedule">
+          <i data-lucide="share-2" style="width:20px;height:20px;"></i>
+        </button>
+        <button class="ib header-edit-btn" onclick="openQuickActions()" title="Quick Actions">
+          <i data-lucide="edit-3" style="width:20px;height:20px;"></i>
+        </button>
+      </div>
     </div>
     <div class="scroll">
       <div class="hd" style="align-items: center;">
@@ -7329,6 +7334,50 @@
       backupToFile(false);
     }
 
+    async function shareToWhatsApp() {
+      const data = getExportData(false);
+      const fileName = 'MySkedul_Schedule.json';
+      const json = JSON.stringify(data);
+      haptic('medium');
+      showToast("Sharing to WhatsApp...");
+
+      if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        try {
+          const { Filesystem, Share } = Capacitor.Plugins;
+          if (Filesystem) {
+            const result = await Filesystem.writeFile({
+              path: fileName,
+              data: json,
+              directory: 'CACHE',
+              encoding: 'utf8'
+            });
+            if (Share) {
+              await Share.share({
+                title: 'My Schedule',
+                text: 'Here is my schedule from MySkedul!',
+                files: [result.uri],
+                dialogTitle: 'Share to WhatsApp'
+              });
+              return;
+            }
+          }
+        } catch (e) {
+          console.error('Sharing failed', e);
+          showToast('Native share failed: ' + e.message);
+        }
+      }
+
+      try {
+        const file = new File([json], fileName, { type: 'application/json' });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ title: 'My Schedule', files: [file] });
+          return;
+        }
+      } catch (e) { }
+
+      backupToFile(false);
+    }
+
     async function openShareID() {
       const btn = document.getElementById('share-code-display');
       if (!btn) return;
@@ -8524,6 +8573,15 @@
           <div>
             <div class="qa-title" style="font-size:14px;">Cloud Share</div>
             <div class="qa-sub" style="font-size:11px;">Generate Share ID</div>
+          </div>
+        </div>
+        <div class="qa-item" style="padding:12px 14px; gap:12px;"
+          onclick="closeModal('m-share-options');shareToWhatsApp();">
+          <div class="qa-icon" style="background:rgba(37,211,102,.12);width:38px;height:38px;"><i data-lucide="message-circle"
+              style="width:18px;height:18px;color:#25D366;"></i></div>
+          <div>
+            <div class="qa-title" style="font-size:14px;">WhatsApp Share</div>
+            <div class="qa-sub" style="font-size:11px;">Send JSON File</div>
           </div>
         </div>
         <div class="qa-item" style="padding:12px 14px; gap:12px;"
