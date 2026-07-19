@@ -1565,7 +1565,42 @@
       border-bottom: 1px solid var(--border);
       border-radius: 0 0 32px 32px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-      transition: all 0.4s var(--ease);
+       transition: all 0.4s var(--ease);
+    }
+
+    /* RESPONSIVE FULL SCREEN OVERLAYS FOR MOBILE SIZES */
+    .slide-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2900;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+      width: 100%;
+      max-width: 480px;
+      left: 50%;
+      margin-left: -240px;
+    }
+
+    @media (max-width: 480px) {
+      .slide-overlay {
+        left: 0 !important;
+        margin-left: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+    }
+
+    /* HIDE DEFAULT VIDEO PLAY BUTTON IN ANDROID WEBVIEWS */
+    video::-webkit-media-controls-start-playback-button,
+    video::-webkit-media-controls-play-button,
+    video::-webkit-media-controls-overlay-play-button,
+    video::-webkit-media-controls {
+      display: none !important;
+      -webkit-appearance: none !important;
     }
 
     .topbar-title {
@@ -3724,15 +3759,7 @@
   </div>
 
   <!-- SUGGESTIONS BOARD FULL-SCREEN OVERLAY -->
-  <div id="pg-suggestions-dash" style="
-    position:fixed; inset:0; z-index:2900;
-    background:var(--bg);
-    display:flex; flex-direction:column;
-    transform:translateX(100%);
-    transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
-    will-change:transform;
-    max-width:480px; left:50%; margin-left:-240px;
-  ">
+  <div id="pg-suggestions-dash" class="slide-overlay">
     <!-- Topbar -->
     <div class="topbar" style="background:var(--bg);border-bottom:1px solid var(--border);">
       <button class="ib" onclick="closeSuggestionsModal()"><i data-lucide="arrow-left"></i></button>
@@ -3761,15 +3788,7 @@
   </div>
 
   <!-- SUGGESTIONS BOARD DETAIL THREAD OVERLAY -->
-  <div id="pg-suggestions-thread" style="
-    position:fixed; inset:0; z-index:2950;
-    background:var(--bg);
-    display:flex; flex-direction:column;
-    transform:translateX(100%);
-    transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
-    will-change:transform;
-    max-width:480px; left:50%; margin-left:-240px;
-  ">
+  <div id="pg-suggestions-thread" class="slide-overlay" style="z-index: 2950;">
     <!-- Topbar -->
     <div class="topbar" style="background:var(--bg);border-bottom:1px solid var(--border);">
       <button class="ib" onclick="closeSuggestionThread()"><i data-lucide="arrow-left"></i></button>
@@ -3802,15 +3821,7 @@
   </div>
 
   <!-- ADMIN DASHBOARD FULL-SCREEN OVERLAY -->
-  <div id="pg-admin-dash" style="
-    position:fixed; inset:0; z-index:3000;
-    background:var(--bg);
-    display:flex; flex-direction:column;
-    transform:translateX(100%);
-    transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
-    will-change:transform;
-    max-width:480px; left:50%; margin-left:-240px;
-  ">
+  <div id="pg-admin-dash" class="slide-overlay" style="z-index: 3000;">
     <!-- Topbar -->
     <div class="topbar" style="background:var(--bg);border-bottom:1px solid var(--border);">
       <button class="ib" onclick="closeAdminDashboard()"><i data-lucide="arrow-left"></i></button>
@@ -3945,15 +3956,7 @@
   </div>
 
   <!-- ADMIN SECTION DETAIL FULL-SCREEN -->
-  <div id="pg-admin-section" style="
-    position:fixed; inset:0; z-index:3100;
-    background:var(--bg);
-    display:flex; flex-direction:column;
-    transform:translateX(100%);
-    transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
-    will-change:transform;
-    max-width:480px; left:50%; margin-left:-240px;
-  ">
+  <div id="pg-admin-section" class="slide-overlay" style="z-index: 3100;">
     <div class="topbar" style="background:var(--bg);border-bottom:1px solid var(--border);">
       <button class="ib" onclick="closeAdminSection()"><i data-lucide="arrow-left"></i></button>
       <span class="topbar-title" id="adm-section-title">Feedback</span>
