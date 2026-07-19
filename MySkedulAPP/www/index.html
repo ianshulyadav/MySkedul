@@ -3747,7 +3747,7 @@
         if (d) document.getElementById('loading-screen').style.background = '#16161D';
       })();
     </script>
-    <div
+    <div id="loader-logo-wrap"
       style="background:var(--text);border-radius:32px;padding:3px;box-shadow:var(--sh);animation:lp-pulse 1.2s ease infinite; overflow:hidden;">
       <div
         style="width:120px;height:120px;border-radius:29px;background:var(--card);display:flex;align-items:center;justify-content:center;overflow:hidden;">
@@ -5589,7 +5589,7 @@
       setTimeout(() => {
         const loader = document.getElementById('loading-screen');
         if (!loader) return;
-        const logo = loader.querySelector('img, i, .logo') || loader.querySelector('div[style*="animation:lp-pulse"]');
+        const logo = loader.querySelector('#loader-logo-wrap') || loader.querySelector('img, i, .logo');
 
         loader.style.pointerEvents = 'none'; // Instant-Touch Demand Met
 
