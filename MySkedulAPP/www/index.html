@@ -5282,17 +5282,19 @@
     }
 
     window.onload = async () => {
-      // Analytics ping & unique device id tracking
-      let deviceId = localStorage.getItem('MySkedul_deviceId');
-      if (!deviceId) {
-        deviceId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : (Math.random().toString(36).substring(2) + Date.now().toString(36));
-        localStorage.setItem('MySkedul_deviceId', deviceId);
-      }
-      fetch(workerURL + '/analytics/ping', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deviceId })
-      }).catch(e => console.warn("Analytics ping error:", e));
+      // Analytics ping & unique device id tracking (Deferred for startup calmness)
+      setTimeout(() => {
+        let deviceId = localStorage.getItem('MySkedul_deviceId');
+        if (!deviceId) {
+          deviceId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : (Math.random().toString(36).substring(2) + Date.now().toString(36));
+          localStorage.setItem('MySkedul_deviceId', deviceId);
+        }
+        fetch(workerURL + '/analytics/ping', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ deviceId })
+        }).catch(e => console.warn("Analytics ping error:", e));
+      }, 4000);
 
       let hasOnboarded = localStorage.getItem('MySkedul_onboarded');
       
@@ -5348,18 +5350,15 @@
       });
       // Sync status bar with initial theme
       syncStatusBar();
-      initFCMListener();
+      setTimeout(initFCMListener, 3000);
 
-      // PRE-POSITION CALENDAR (Smooth Reveal)
+      // PRE-POSITION CALENDAR (Instant Positioning - No laggy animations)
       const ds = document.getElementById('home-ds');
       if (ds) {
         ds.addEventListener('scroll', checkTodayBtn);
         const t = ds.querySelector('.tod');
         if (t) {
-          // Smooth glide to today instead of native jump
-          setTimeout(() => {
-            smoothScrollTo(ds, t.offsetLeft - ds.offsetWidth / 2 + 33, 150); // High-Speed launch scroll
-          }, 150);
+          ds.scrollLeft = t.offsetLeft - ds.offsetWidth / 2 + 33;
         }
       }
 
