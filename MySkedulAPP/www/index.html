@@ -5597,6 +5597,7 @@
         setTimeout(() => {
           // Elastic Logo Pulse
           if (logo) {
+            logo.style.animation = 'none'; // Stop active pulse animation to allow transform
             logo.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
             logo.style.transform = 'scale(1.2) rotate(-3deg)';
           }
@@ -5608,11 +5609,6 @@
           loader.style.transition = `all ${duration} cubic-bezier(0.2, 1, 0.2, 1)`;
           loader.style.opacity = '0';
           loader.style.transform = 'scale(1.1)';
-
-          if (logo) {
-            logo.style.transition = `opacity 0.4s ease-out`;
-            logo.style.opacity = '0';
-          }
 
           // Staggered Content Materialization
           const activePage = document.querySelector('.page.active');
