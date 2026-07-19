@@ -5020,7 +5020,15 @@
 
         if (data.notifSettings) notifSettings = data.notifSettings;
 
-        isAdmin = localStorage.getItem('MySkedul_isAdmin') === 'true';
+        const expiresVal = localStorage.getItem('MySkedul_adminExpires');
+        if (expiresVal && Date.now() > parseInt(expiresVal, 10)) {
+          isAdmin = false;
+          localStorage.setItem('MySkedul_isAdmin', 'false');
+          localStorage.removeItem('MySkedul_adminToken');
+          localStorage.removeItem('MySkedul_adminExpires');
+        } else {
+          isAdmin = localStorage.getItem('MySkedul_isAdmin') === 'true';
+        }
 
       } catch (e) {
         console.error('[MySkedul] Database load failed', e);
@@ -9375,11 +9383,11 @@
 
     // ── Admin Auth ─────────────────────────────────────
     // Password verified server-side via Cloudflare secret (ADMIN_PASSWORD).
-    // A Bearer token is returned and stored only in sessionStorage (cleared on tab close).
+    // A Bearer token is returned and stored in localStorage (persists across app restarts).
     // NO password or hash is ever stored in this file.
 
     function getAdminToken() {
-      return sessionStorage.getItem('MySkedul_adminToken') || '';
+      return localStorage.getItem('MySkedul_adminToken') || '';
     }
 
     function getAuthHeader() {
@@ -9415,8 +9423,8 @@
         if (res.ok) {
           const data = await res.json();
           isAdmin = true;
-          sessionStorage.setItem('MySkedul_adminToken', data.token);
-          sessionStorage.setItem('MySkedul_adminExpires', data.expiresAt);
+          localStorage.setItem('MySkedul_adminToken', data.token);
+          localStorage.setItem('MySkedul_adminExpires', data.expiresAt);
           localStorage.setItem('MySkedul_isAdmin', 'true');
           showToast('Logged in as Administrator');
           closeModal('m-admin-login');
@@ -9450,8 +9458,8 @@
         }).catch(() => {});
       }
       isAdmin = false;
-      sessionStorage.removeItem('MySkedul_adminToken');
-      sessionStorage.removeItem('MySkedul_adminExpires');
+      localStorage.removeItem('MySkedul_adminToken');
+      localStorage.removeItem('MySkedul_adminExpires');
       localStorage.setItem('MySkedul_isAdmin', 'false');
       showToast('Admin session ended');
       updateProfUI();

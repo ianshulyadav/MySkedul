@@ -11,7 +11,7 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-const ADMIN_SESSION_TTL_SECONDS = 12 * 60 * 60;
+const ADMIN_SESSION_TTL_SECONDS = 48 * 60 * 60;
 const DAY_SET = new Set(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
 const TIME_RE = /^\d{2}:\d{2}$/;
 
