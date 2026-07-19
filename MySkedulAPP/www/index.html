@@ -27,6 +27,20 @@
       src: url(dmsans.woff2) format('woff2');
       unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
     }
+
+    /* Performance pass: keep scrolling on the compositor and avoid expensive
+       per-card entrance animations while the user is moving a list. */
+    .ds, .sched-pills-wrap, #timetable-view {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      touch-action: pan-x;
+    }
+    .ds { scroll-behavior: auto; contain: layout paint; }
+    .db { content-visibility: auto; contain-intrinsic-size: 66px 88px; animation: none; }
+    #scheds-list .cc, #scheds-list .pdiv { content-visibility: auto; contain-intrinsic-size: 76px; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
   </style>
   <link rel="icon" type="image/png" href="icon.png">
   <script src="lucide.min.js"></script>
@@ -1739,9 +1753,16 @@
       opacity: 0.7;
     }
 
-    .nb.active i {
-      transform: translateY(-1px);
+    /* Bottom nav: a deliberately tiny compositor-only zoom on a real tab
+       change. It never shifts the icon vertically or bounces the whole item. */
+    .nb.active i { transform: scale(1.06); }
+    .nb.nav-zoom i { animation: nav-icon-zoom 160ms cubic-bezier(.2, .8, .2, 1) both; }
+    @keyframes nav-icon-zoom {
+      from { transform: scale(.94); }
+      to { transform: scale(1.06); }
     }
+    [data-tier="high"] .nb.active i { animation: none; }
+    [data-tier="high"] .nb:active { animation: none; transform: scale(.98); }
 
     .nb.active span {
       opacity: 1;
@@ -4728,7 +4749,12 @@
         App.exitApp();
       });
 
-      App.addListener('appStateChange', ({ isActive }) => { if (!isActive) saveData(); });
+      App.addListener('appStateChange', ({ isActive }) => {
+        if (!isActive) { saveData(); return; }
+        // Refresh the rolling reminder window whenever the app returns to life.
+        // This keeps reminders current after a date/time-zone change or a long pause.
+        if (notifSettings.enabled) scheduleAllNotifications();
+      });
     }
 
     function lp(el, cb) {
@@ -4833,8 +4859,8 @@
           notifSettings
         });
         // Native notification sync
-        if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-          if (notifSettings.enabled) await scheduleAllNotifications();
+        if (window.Capacitor && window.Capacitor.isNativePlatform() && notifSettings.enabled) {
+          queueNotificationSync();
         }
       } catch (e) {
         console.error('[MySkedul] Save failed', e);
@@ -4932,6 +4958,16 @@
     let viewingHistoryTitle = '';
 
     // Global Nav
+    function playNavZoom(tab) {
+      const btn = document.getElementById('bnav-' + tab);
+      if (!btn || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      // Restart only the clicked destination icon animation. Avoiding a forced
+      // layout read keeps taps responsive and preserves same-tab behaviour.
+      btn.classList.remove('nav-zoom');
+      requestAnimationFrame(() => btn.classList.add('nav-zoom'));
+      setTimeout(() => btn.classList.remove('nav-zoom'), 190);
+    }
+
     function switchNav(tab, useHaptic = true) {
       if (curTab === tab) {
         const pg = document.getElementById('pg-' + (tab === 'sched' ? 'scheds' : tab));
@@ -5002,6 +5038,7 @@
         }
       }
 
+      if (targetTab) playNavZoom(tab);
       if (useHaptic) haptic('light');
 
       // Update FAB visibility immediately
@@ -5121,7 +5158,7 @@
 
       ds.innerHTML = '';
       const frag = document.createDocumentFragment();
-      for (let i = 0; i < 120; i++) {
+      for (let i = 0; i < 91; i++) {
         const d = new Date(base); d.setDate(base.getDate() + i);
         const dn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
         const dm = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()];
@@ -5171,24 +5208,10 @@
     // HIGH-REFRESH RATE SMOOTH SCROLL (120Hz/90Hz Optimized)
     function smoothScrollTo(el, target, duration = 450) {
       if (!el) return;
-      const start = el.scrollLeft;
-      const change = target - start;
-      const startTime = performance.now();
-
-      function animate(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        // Quad-Out Velocity (Snappier initial speed for high-refresh feel)
-        const ease = progress * (2 - progress);
-
-        el.scrollLeft = start + change * ease;
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        }
-      }
-      requestAnimationFrame(animate);
+      // Native scrolling runs on WebView's compositor. The previous JavaScript
+      // rAF loop wrote scrollLeft every frame and caused dropped frames on APKs.
+      const max = Math.max(0, el.scrollWidth - el.clientWidth);
+      el.scrollTo({ left: Math.max(0, Math.min(target, max)), behavior: duration ? 'smooth' : 'auto' });
     }
 
     function checkTodayBtn() {
@@ -5341,6 +5364,12 @@
       renderHome(); // Single render pass
       updateProfUI();
       applyTheme(localStorage.getItem('MySkedul_theme') || 'system');
+
+      // The native splash was configured not to auto-hide. Release it after the
+      // first real render rather than holding it behind scripted intro delays.
+      if (window.Capacitor && Capacitor.isNativePlatform() && Capacitor.Plugins.SplashScreen) {
+        requestAnimationFrame(() => Capacitor.Plugins.SplashScreen.hide().catch(() => {}));
+      }
 
       // Init liquid blob at Home tab
       requestAnimationFrame(() => {
@@ -5717,9 +5746,9 @@
       if (!classes.length) { cont.innerHTML = '<div class="empty">No schedules</div>'; return; }
       cont.innerHTML = '';
       let cardIdxTotal = 0;
-      void cont.offsetWidth; // Force reflow
-      cont.classList.add('sync-reveal');
-      const isLow = document.body.classList.contains('low-end');
+      // Do not force layout or stagger every card: it makes long schedules jank.
+      cont.classList.remove('sync-reveal');
+      const isLow = true;
       ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach(d => {
         let x = classes.filter(c => c.days.includes(d));
         x.sort((a, b) => t2m(a.start) - t2m(b.start));
@@ -7041,6 +7070,12 @@
     }
 
     let isScheduling = false;
+    let notificationSyncTimer = null;
+    function queueNotificationSync() {
+      clearTimeout(notificationSyncTimer);
+      // Multiple edits can save in a burst; schedule once after the UI settles.
+      notificationSyncTimer = setTimeout(() => scheduleAllNotifications(), 700);
+    }
     async function scheduleAllNotifications() {
       if (isScheduling || !window.Capacitor || !window.Capacitor.isNativePlatform()) return;
       
@@ -7068,6 +7103,9 @@
         const toSchedule = [];
         const now = new Date();
         const dayMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        // Do not use toISOString here: it converts Indian local midnight to
+        // the previous UTC date and can schedule the wrong day's reminder.
+        const localDateKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         
         // Track generated IDs to prevent any collisions (must fit in 32-bit signed int)
         const scheduledIds = new Set();
@@ -7083,7 +7121,7 @@
         for (let i = 0; i < 14; i++) {
           const targetDay = new Date();
           targetDay.setDate(now.getDate() + i);
-          const dIso = targetDay.toISOString().split('T')[0];
+          const dIso = localDateKey(targetDay);
           const isHoliday = holidays.includes(dIso);
           const isExamDay = examDays.some(e => e.date === dIso);
 
@@ -7152,7 +7190,8 @@
           tasks.filter(t => !t.done).forEach(t => {
             // Fix 3: Map correctly to t.dueDate instead of non-existent t.date
             if (!t.dueDate) return;
-            const dl = new Date(t.dueDate);
+            const parts = String(t.dueDate).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            const dl = parts ? new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3])) : new Date(t.dueDate);
             dl.setHours(8, 0, 0, 0); // 8:00 AM on due day
             if (dl > now) {
               toSchedule.push({
@@ -7468,6 +7507,22 @@
 
       // Capacitor Native Save
       if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        // Android 10+ blocks direct shared-storage paths used by Filesystem.
+        // MediaStore creates a real, user-visible Downloads file with no broad
+        // storage permission prompt.
+        const publicDownloads = Capacitor.Plugins.PublicDownloads;
+        if (publicDownloads && publicDownloads.saveBackup) {
+          try {
+            const utf8 = new TextEncoder().encode(json);
+            let binary = '';
+            for (let i = 0; i < utf8.length; i += 0x8000) binary += String.fromCharCode(...utf8.subarray(i, i + 0x8000));
+            await publicDownloads.saveBackup({ filename: fn, data: btoa(binary) });
+            showToast(`Backup saved to Downloads/MySkedulAPP/${fn}`);
+            return;
+          } catch (error) {
+            console.warn('MediaStore backup failed; opening save/share fallback', error);
+          }
+        }
         const performSave = async () => {
           try {
             const { Filesystem, Share } = Capacitor.Plugins;
