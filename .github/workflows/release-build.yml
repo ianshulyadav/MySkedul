@@ -9,6 +9,9 @@ on:
       - 'MySkedulAPP/www/update-system.js'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Release APK
@@ -37,7 +40,7 @@ jobs:
       - name: Sync Capacitor Web Assets
         run: |
           cd MySkedulAPP
-          npx cap copy android
+          npx cap sync android
 
       - name: Setup Gradle Cache
         uses: gradle/actions/setup-gradle@v4
@@ -57,3 +60,27 @@ jobs:
         with:
           name: MySkedul-Release-APKs
           path: MySkedulAPP/android/app/build/outputs/apk/release/*.apk
+
+      - name: Extract Version and Changelog
+        id: parse_version
+        run: |
+          VERSION=$(jq -r '.version' version.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          
+          # Extract changelog and strip HTML tags to make it clean markdown for GitHub Release
+          echo "### 🚀 What's Changed in v$VERSION" > body.txt
+          echo "" >> body.txt
+          jq -r '.changelog[]' version.json | sed -e 's/<[^>]*>//g' | sed -e 's/^/ - /' >> body.txt
+          echo "" >> body.txt
+          echo "*(Automated build from GitHub Action)*" >> body.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ env.VERSION }}"
+          name: "MySkedul v${{ env.VERSION }}"
+          body_path: body.txt
+          draft: false
+          prerelease: false
+          files: |
+            MySkedulAPP/android/app/build/outputs/apk/release/*.apk

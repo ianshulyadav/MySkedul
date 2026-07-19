@@ -43,7 +43,7 @@ jobs:
       - name: Sync Capacitor Web Assets
         run: |
           cd MySkedulAPP
-          npx cap copy android
+          npx cap sync android
 
       - name: Setup Gradle Cache
         uses: gradle/actions/setup-gradle@v4
