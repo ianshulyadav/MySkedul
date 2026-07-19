@@ -6,6 +6,10 @@ const CURRENT_APP_VERSION = '1.3.04';
 
 // Initialize update system
 async function initUpdateSystem() {
+  if (CURRENT_APP_VERSION.includes('nightly')) {
+    console.log("[MySkedul] Nightly build detected. Skipping update checks.");
+    return;
+  }
   await handleWhatsNew();
   await checkForUpdates();
   attachClickListeners();
@@ -215,7 +219,16 @@ function closeUpdateModal(modalId, version) {
   const modal = document.getElementById(modalId);
   if (modal) {
     modal.classList.remove('active');
-    setTimeout(() => modal.remove(), 400);
+    setTimeout(() => {
+      modal.remove();
+      // Ensure body blur is cleared if no other modals are open
+      if (window.uMS) {
+        window.uMS();
+      } else {
+        const active = document.querySelectorAll('.mo.active').length > 0;
+        document.body.classList.toggle('modal-open', active);
+      }
+    }, 400);
   }
 }
 

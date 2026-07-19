@@ -5319,7 +5319,7 @@
               }
               try { haptic('selection'); } catch(e) {}
               resolve();
-            }, 80);
+            }, 150);
           });
         };
 
@@ -5329,7 +5329,7 @@
         await updateSync(70, "Linking system plugins...");
         await updateSync(90, "Configuring app layout...");
         await updateSync(100, "Workspace ready!");
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 200));
       } else {
         await loadData();
       }
