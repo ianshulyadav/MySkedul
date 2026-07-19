@@ -61,51 +61,51 @@ jobs:
           name: MySkedul-Release-APKs
           path: MySkedulAPP/android/app/build/outputs/apk/release/*.apk
 
-       - name: Set up Python
-         uses: actions/setup-python@v5
-         with:
-           python-version: '3.10'
- 
-       - name: Install Python Dependencies
-         run: |
-           pip install pyrogram tgcrypto
- 
-       - name: Generate Changelog
-         id: changelog
-         run: |
-           python .github/scripts/generate_changelog.py
- 
-       - name: Extract Version
-         run: |
-           VERSION=$(jq -r '.version' version.json)
-           echo "VERSION=$VERSION" >> $GITHUB_ENV
- 
-       - name: Create GitHub Release
-         uses: softprops/action-gh-release@v2
-         with:
-           tag_name: "v${{ env.VERSION }}"
-           name: "MySkedul v${{ env.VERSION }}"
-           body: |
-             ### 🚀 What's Changed in v${{ env.VERSION }}
- 
-             ${{ steps.changelog.outputs.changelog_md }}
- 
-             *(Automated build from GitHub Action)*
-           draft: false
-           prerelease: false
-           files: |
-             MySkedulAPP/android/app/build/outputs/apk/release/*.apk
- 
-       - name: Publish to Telegram Channel Thread
-         env:
-           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
-           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
-           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-           TELEGRAM_CHAT_ID: "@myskedulapp"
-           TELEGRAM_THREAD_ID: "6"
-           VERSION_NAME: ${{ env.VERSION }}
-           COMMIT_SHA: ${{ github.sha }}
-           IS_RELEASE: "true"
-           CHANGELOG: ${{ steps.changelog.outputs.changelog_html }}
-         run: |
-           python .github/scripts/publish_telegram.py
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Python Dependencies
+        run: |
+          pip install pyrogram tgcrypto
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          python .github/scripts/generate_changelog.py
+
+      - name: Extract Version
+        run: |
+          VERSION=$(jq -r '.version' version.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ env.VERSION }}"
+          name: "MySkedul v${{ env.VERSION }}"
+          body: |
+            ### 🚀 What's Changed in v${{ env.VERSION }}
+
+            ${{ steps.changelog.outputs.changelog_md }}
+
+            *(Automated build from GitHub Action)*
+          draft: false
+          prerelease: false
+          files: |
+            MySkedulAPP/android/app/build/outputs/apk/release/*.apk
+
+      - name: Publish to Telegram Channel Thread
+        env:
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: "@myskedulapp"
+          TELEGRAM_THREAD_ID: "6"
+          VERSION_NAME: ${{ env.VERSION }}
+          COMMIT_SHA: ${{ github.sha }}
+          IS_RELEASE: "true"
+          CHANGELOG: ${{ steps.changelog.outputs.changelog_html }}
+        run: |
+          python .github/scripts/publish_telegram.py
