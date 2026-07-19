@@ -48,18 +48,46 @@ jobs:
       - name: Setup Gradle Cache
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build Nightly APK
-        env:
-          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-        run: |
-          cd MySkedulAPP/android
-          chmod +x gradlew
-          ./gradlew assembleNightly
-
-      - name: Upload Nightly APKs
-        uses: actions/upload-artifact@v4
-        with:
-          name: MySkedul-Nightly-APKs
-          path: MySkedulAPP/android/app/build/outputs/apk/nightly/*.apk
+       - name: Build Nightly APK
+         env:
+           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+         run: |
+           cd MySkedulAPP/android
+           chmod +x gradlew
+           ./gradlew assembleNightly
+ 
+       - name: Upload Nightly APKs
+         uses: actions/upload-artifact@v4
+         with:
+           name: MySkedul-Nightly-APKs
+           path: MySkedulAPP/android/app/build/outputs/apk/nightly/*.apk
+ 
+       - name: Extract Version
+         id: parse_version
+         run: |
+           VERSION=$(jq -r '.version' version.json)
+           echo "VERSION=$VERSION" >> $GITHUB_ENV
+ 
+       - name: Set up Python
+         uses: actions/setup-python@v5
+         with:
+           python-version: '3.10'
+ 
+       - name: Install Python Dependencies
+         run: |
+           pip install pyrogram tgcrypto
+ 
+       - name: Publish to Telegram Channel Thread
+         env:
+           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+           TELEGRAM_CHAT_ID: "@myskedulapp"
+           TELEGRAM_THREAD_ID: "49"
+           VERSION_NAME: ${{ env.VERSION }}
+           COMMIT_SHA: ${{ github.sha }}
+           IS_RELEASE: "false"
+         run: |
+           python .github/scripts/publish_telegram.py
