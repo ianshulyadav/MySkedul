@@ -2,7 +2,7 @@ let isUpdateAvailableValue = false;
 let latestUpdateData = null;
 
 const UPDATE_CONFIG_URL = 'https://raw.githubusercontent.com/ianshulyadav/MySkedul/main/version.json';
-const CURRENT_APP_VERSION = '1.3.04';
+const CURRENT_APP_VERSION = '1.4.07';
 
 // Initialize update system
 async function initUpdateSystem() {
@@ -246,7 +246,7 @@ async function handleWhatsNew() {
       localStorage.removeItem(savedChangelogKey);
     }
 
-    if (CURRENT_APP_VERSION === '1.3.04' && changelog.length === 0) {
+    if (CURRENT_APP_VERSION === '1.4.07' && changelog.length === 0) {
       changelog = DEFAULT_CHANGELOG_LIST;
     }
     
@@ -258,12 +258,14 @@ async function handleWhatsNew() {
   }
 }
 
-const DEFAULT_CHANGELOG_TEXT = "New Update v1.3.04! Group Sharing & import Schedules ";
+const DEFAULT_CHANGELOG_TEXT = "New Update v1.4.07! QR Scanner, Multi-Schedule support, and Direct Group Imports.";
 const DEFAULT_CHANGELOG_LIST = [
-  "<i data-lucide='rocket' style='color:#FF6B6B; width:18px; margin-right:4px; vertical-align:middle;'></i> <b>Whats new</b>: Major upgrade to the Academic OS experience.",
-  "<i data-lucide='users' style='color:#6C63FF; width:18px; margin-right:4px; vertical-align:middle;'></i> <b>Group Tab</b>: Find and import schedules based on your section.",
-  "<i data-lucide='cloud-download' style='color:#4FACFE; width:18px; margin-right:4px; vertical-align:middle;'></i> <b>Cloud Save</b>: View cloud snapshots and export schedules as premium PDFs.",
-  "<i data-lucide='hammer' style='color:#A8A8A8; width:18px; margin-right:4px; vertical-align:middle;'></i> <b>Bug fixes</b>: Optimized performance and UI fixes."
+  "<i data-lucide='qr-code' style='color:#FF6B6B; width:18px; margin-right:4px; vertical-align:middle;'></i> <b>QR Scanning</b>: Share and scan schedule QR codes instantly.",
+  "<i data-lucide='copy' style='color:#6C63FF; width:18px; margin-right:4px; vertical-align:middle;'></i> <b>Multi-Schedule</b>: Save and switch between multiple schedules.",
+  "<i data-lucide='users' style='color:#4FACFE; width:18px; margin-right:4px; vertical-align:middle;'></i> <b>Direct Group Import</b>: Fast import from Group tabs for ABESIT.",
+  "<i data-lucide='message-square' style='color:#FF9F43; width:18px; margin-right:4px; vertical-align:middle;'></i> <b>Feedback & Upvoting</b>: Upvote ideas and send app feedback.",
+  "<i data-lucide='calendar' style='color:#10AC84; width:18px; margin-right:4px; vertical-align:middle;'></i> <b>Overhauled Week View</b>: Completely redesigned weekly planner view.",
+  "<i data-lucide='hammer' style='color:#A8A8A8; width:18px; margin-right:4px; vertical-align:middle;'></i> <b>Bug Fixes</b>: Restored local backup functionality and fixed minor issues."
 ];
 
 function openAppChangelog() {

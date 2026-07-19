@@ -8,8 +8,8 @@ android {
         applicationId "com.myskedul.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 6
-        versionName "1.3.04"
+        versionCode 7
+        versionName "1.4.07"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -51,17 +51,17 @@ android {
             minifyEnabled false
             shrinkResources false
         }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
         nightly {
             initWith release
             minifyEnabled true
             shrinkResources true
             matchingFallbacks = ['release']
-            signingConfig signingConfigs.release
-        }
-        release {
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
     }

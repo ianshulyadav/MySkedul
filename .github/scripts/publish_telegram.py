@@ -81,22 +81,22 @@ async def publish():
 
     if is_release:
         apks = [
-            (f"MySkedulAPP/android/app/build/outputs/apk/release/MySkedul-v{version}-high.apk", f"MySkedul-v{version}-high.apk", f"📱 <b>MySkedul High-end (ARM64) — v{version}</b>"),
-            (f"MySkedulAPP/android/app/build/outputs/apk/release/MySkedul-v{version}-low.apk", f"MySkedul-v{version}-low.apk", f"📱 <b>MySkedul Low-end (ARMv7) — v{version}</b>")
+            (f"MySkedulAPP/android/app/build/outputs/apk/release/MySkedul-v{version}-high.apk", f"MySkedul-v{version}-high.apk"),
+            (f"MySkedulAPP/android/app/build/outputs/apk/release/MySkedul-v{version}-low.apk", f"MySkedul-v{version}-low.apk")
         ]
     else:
         apks = [
-            (f"MySkedulAPP/android/app/build/outputs/apk/nightly/MySkedul-v{version}-nightly-high.apk", f"MySkedul-v{version}-nightly-high.apk", f"📱 <b>MySkedul Nightly High-end (ARM64) — v{version}</b>"),
-            (f"MySkedulAPP/android/app/build/outputs/apk/nightly/MySkedul-v{version}-nightly-low.apk", f"MySkedul-v{version}-nightly-low.apk", f"📱 <b>MySkedul Nightly Low-end (ARMv7) — v{version}</b>")
+            (f"MySkedulAPP/android/app/build/outputs/apk/nightly/MySkedul-v{version}-nightly-high.apk", f"MySkedul-v{version}-nightly-high.apk"),
+            (f"MySkedulAPP/android/app/build/outputs/apk/nightly/MySkedul-v{version}-nightly-low.apk", f"MySkedul-v{version}-nightly-low.apk")
         ]
 
     # Filter to files that actually exist
     existing_apks = []
-    for apk_path, display_name, caption in apks:
+    for apk_path, display_name in apks:
         if os.path.exists(apk_path):
             size_mb = os.path.getsize(apk_path) / (1024 * 1024)
             print(f"  Found: {apk_path} ({size_mb:.1f} MB)", flush=True)
-            existing_apks.append((apk_path, display_name, caption))
+            existing_apks.append((apk_path, display_name))
         else:
             print(f"  Skipped (not found): {apk_path}", flush=True)
 
@@ -168,7 +168,7 @@ async def publish():
             )
             print(f"Changelog message sent. ID: {changelog_msg.id}", flush=True)
 
-            for apk_path, display_name, cap in apks:
+            for apk_path, display_name in apks:
                 size_mb = os.path.getsize(apk_path) / (1024 * 1024)
                 print(f"Uploading {display_name} ({size_mb:.1f} MB)...", flush=True)
 
@@ -179,8 +179,6 @@ async def publish():
                             chat_id=chat_id,
                             document=apk_path,
                             file_name=display_name,
-                            caption=cap,
-                            parse_mode=ParseMode.HTML,
                             reply_to_message_id=reply_to,
                             force_document=True,
                         )
@@ -214,7 +212,7 @@ async def publish():
                 disable_web_page_preview=True,
             )
 
-            for apk_path, display_name, cap in apks:
+            for apk_path, display_name in apks:
                 size_mb = os.path.getsize(apk_path) / (1024 * 1024)
                 print(f"Uploading nightly build {display_name} ({size_mb:.1f} MB)...", flush=True)
 
@@ -225,8 +223,6 @@ async def publish():
                             chat_id=chat_id,
                             document=apk_path,
                             file_name=display_name,
-                            caption=cap,
-                            parse_mode=ParseMode.HTML,
                             reply_to_message_id=reply_to,
                             force_document=True,
                         )
