@@ -30,24 +30,50 @@ android {
         }
     }
 
-    buildTypes {
+    signingConfigs {
         release {
-            minifyEnabled false
-            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            storeFile file("release.keystore")
+            storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD") ?: "android"
+            keyAlias System.getenv("RELEASE_KEY_ALIAS") ?: "androiddebugkey"
+            keyPassword System.getenv("RELEASE_KEY_PASSWORD") ?: "android"
         }
     }
 
-    // Professional Renaming Engine: Naming files dynamically based on version and ABI
+    buildTypes {
+        debug {
+            minifyEnabled false
+            shrinkResources false
+        }
+        nightly {
+            initWith release
+            minifyEnabled true
+            shrinkResources true
+            matchingFallbacks = ['release']
+            signingConfig signingConfigs.release
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    // Professional Renaming Engine: Naming files dynamically based on version, buildType, and ABI
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
             def abi = output.getFilter(com.android.build.OutputFile.ABI)
             def version = variant.versionName
+            def buildType = variant.buildType.name
+            def nameSuffix = ""
+            if (buildType == 'nightly') {
+                nameSuffix = "-nightly"
+            }
             if (abi == 'arm64-v8a') {
-                outputFileName = "MySkedul-v${version}-high.apk"
+                outputFileName = "MySkedul-v${version}${nameSuffix}-high.apk"
                 output.versionCodeOverride = variant.versionCode * 10 + 2
             } else if (abi == 'armeabi-v7a') {
-                outputFileName = "MySkedul-v${version}-low.apk"
+                outputFileName = "MySkedul-v${version}${nameSuffix}-low.apk"
                 output.versionCodeOverride = variant.versionCode * 10 + 1
             }
         }

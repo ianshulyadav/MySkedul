@@ -1,0 +1,61 @@
+name: Build Debug APK
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - 'v*'
+    paths-ignore:
+      - 'version.json'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: |
+          cd MySkedulAPP
+          npm install
+
+      - name: Patch Debug Version String
+        run: |
+          sed -i "s/const CURRENT_APP_VERSION = '1.3.04';/const CURRENT_APP_VERSION = '1.3.04-debug';/g" MySkedulAPP/www/update-system.js
+          sed -i "s/v1.3.04<\/span>/v1.3.04 (Debug)<\/span>/g" MySkedulAPP/www/index.html
+
+      - name: Sync Capacitor Web Assets
+        run: |
+          cd MySkedulAPP
+          npx cap copy android
+
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Debug APK
+        run: |
+          cd MySkedulAPP/android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Debug APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: MySkedul-Debug-APKs
+          path: MySkedulAPP/android/app/build/outputs/apk/debug/*.apk
