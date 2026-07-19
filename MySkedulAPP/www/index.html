@@ -8779,8 +8779,8 @@
                 // Adjust bottom navigation
                 const bnav = document.querySelector('.bnav');
                 if (bnav) {
-                  bnav.classList.add('keyboard-push');
-                  bnav.classList.remove('keyboard-hidden');
+                  bnav.classList.add('keyboard-hidden');
+                  bnav.classList.remove('keyboard-push');
                 }
               }
             } else {
@@ -8791,7 +8791,7 @@
                 
                 const bnav = document.querySelector('.bnav');
                 if (bnav) {
-                  bnav.classList.remove('keyboard-push');
+                  bnav.classList.remove('keyboard-hidden');
                 }
               }
             }
@@ -8818,10 +8818,21 @@
               // Keyboard opened
               isKeyboardVisible = true;
               document.body.classList.add('keyboard-visible');
+              
+              const bnav = document.querySelector('.bnav');
+              if (bnav) {
+                bnav.classList.add('keyboard-hidden');
+                bnav.classList.remove('keyboard-push');
+              }
             } else {
               // Keyboard closed
               isKeyboardVisible = false;
               document.body.classList.remove('keyboard-visible');
+              
+              const bnav = document.querySelector('.bnav');
+              if (bnav) {
+                bnav.classList.remove('keyboard-hidden');
+              }
             }
           }
           lastWindowHeight = currentHeight;
@@ -8869,7 +8880,8 @@
               // Animate bottom nav out of the way
               const bnav = document.querySelector('.bnav');
               if (bnav) {
-                bnav.classList.add('keyboard-push');
+                bnav.classList.add('keyboard-hidden');
+                bnav.classList.remove('keyboard-push');
               }
             });
             
@@ -8880,7 +8892,7 @@
               
               const bnav = document.querySelector('.bnav');
               if (bnav) {
-                bnav.classList.remove('keyboard-push');
+                bnav.classList.remove('keyboard-hidden');
               }
             });
             
