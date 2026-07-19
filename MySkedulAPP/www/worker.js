@@ -689,9 +689,116 @@ export default {
   },
 };
 
+async function getAccessToken(env) {
+  const privateKeyPem = env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+  const clientEmail = env.FIREBASE_CLIENT_EMAIL;
+
+  const header = {
+    alg: "RS256",
+    typ: "JWT"
+  };
+
+  const now = Math.floor(Date.now() / 1000);
+  const claimSet = {
+    iss: clientEmail,
+    scope: "https://www.googleapis.com/auth/firebase.messaging",
+    aud: "https://oauth2.googleapis.com/token",
+    exp: now + 3600,
+    iat: now
+  };
+
+  const base64UrlEncode = (str) => {
+    const base64 = btoa(str);
+    return base64.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+  };
+
+  const headerStr = base64UrlEncode(JSON.stringify(header));
+  const claimSetStr = base64UrlEncode(JSON.stringify(claimSet));
+  const signatureInput = `${headerStr}.${claimSetStr}`;
+
+  const pemHeader = "-----BEGIN PRIVATE KEY-----";
+  const pemFooter = "-----END PRIVATE KEY-----";
+  const pemContents = privateKeyPem
+    .substring(privateKeyPem.indexOf(pemHeader) + pemHeader.length, privateKeyPem.indexOf(pemFooter))
+    .replace(/\s/g, "");
+  
+  const binaryDerString = atob(pemContents);
+  const binaryDer = new Uint8Array(binaryDerString.length);
+  for (let i = 0; i < binaryDerString.length; i++) {
+    binaryDer[i] = binaryDerString.charCodeAt(i);
+  }
+
+  const key = await crypto.subtle.importKey(
+    "pkcs8",
+    binaryDer.buffer,
+    {
+      name: "RSASSA-PKCS1-v1_5",
+      hash: { name: "SHA-256" }
+    },
+    false,
+    ["sign"]
+  );
+
+  const enc = new TextEncoder();
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    enc.encode(signatureInput)
+  );
+
+  const signatureStr = base64UrlEncode(String.fromCharCode(...new Uint8Array(signature)));
+  const jwt = `${signatureInput}.${signatureStr}`;
+
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
+  });
+
+  const data = await response.json();
+  return data.access_token;
+}
+
 async function sendFcmPush(env, tokens, payload) {
   if (!tokens || !tokens.length) return;
-  if (env.FIREBASE_SERVER_KEY) {
+  
+  // Use modern FCM HTTP v1 API if Service Account keys are present
+  if (env.FIREBASE_PRIVATE_KEY && env.FIREBASE_CLIENT_EMAIL) {
+    try {
+      const accessToken = await getAccessToken(env);
+      const projectId = env.FIREBASE_PROJECT_ID || "myskedulapp";
+      
+      const promises = tokens.map(token => {
+        return fetch(`https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: {
+              token: token,
+              notification: {
+                title: "Schedule Updated!",
+                body: `The schedule for ${payload.formatId} has been updated.`
+              },
+              data: {
+                formatId: payload.formatId,
+                code: payload.code,
+                scheduleJson: JSON.stringify(payload.timetable)
+              }
+            }
+          })
+        });
+      });
+      
+      await Promise.all(promises);
+      console.log(`[FCM v1] Broadcasted updates to ${tokens.length} subscribers.`);
+    } catch (e) {
+      console.error("[FCM v1] Broadcast failed:", e);
+    }
+  } else if (env.FIREBASE_SERVER_KEY) {
+    // Fallback to legacy Cloud Messaging endpoint
     try {
       await fetch('https://fcm.googleapis.com/fcm/send', {
         method: 'POST',
@@ -712,9 +819,9 @@ async function sendFcmPush(env, tokens, payload) {
           }
         })
       });
-      console.log(`[FCM] Broadcasted updates to ${tokens.length} subscribers.`);
+      console.log(`[FCM Legacy] Broadcasted updates to ${tokens.length} subscribers.`);
     } catch (e) {
-      console.error("[FCM] Broadcast failed:", e);
+      console.error("[FCM Legacy] Broadcast failed:", e);
     }
   } else {
     console.log(`[FCM Mock] Push triggered for ${payload.formatId} (${tokens.length} subscribers).`);
