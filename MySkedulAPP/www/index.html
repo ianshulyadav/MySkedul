@@ -3755,10 +3755,10 @@
           onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'font-size:40px;font-weight:900;color:var(--theme)\'>M</div>'">
       </div>
     </div>
-    <div
+    <div id="loader-title"
       style="margin-top:32px;font-size:26px;font-weight:900;letter-spacing:-0.8px;color:var(--text);animation:pulse 2.5s infinite;">
       MySkedul</div>
-    <div
+    <div id="loader-subtitle"
       style="margin-top:8px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:1.5px;">
       Academy OS</div>
     <!-- Dynamic Sync Progress Indicator -->
@@ -5595,6 +5595,14 @@
 
         // Wait 600ms before visual fade to prevent "glitchy" flash
         setTimeout(() => {
+          // Stop active pulse animations to allow smooth, unified transition
+          const logoWrap = loader.querySelector('#loader-logo-wrap');
+          const title = loader.querySelector('#loader-title');
+          const subtitle = loader.querySelector('#loader-subtitle');
+          if (logoWrap) logoWrap.style.animation = 'none';
+          if (title) title.style.animation = 'none';
+          if (subtitle) subtitle.style.animation = 'none';
+
           // Elastic Logo Pulse
           if (logo) {
             logo.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
