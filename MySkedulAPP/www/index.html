@@ -3622,6 +3622,13 @@
     <div
       style="margin-top:8px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:1.5px;">
       Academy OS</div>
+    <!-- Dynamic Sync Progress Indicator -->
+    <div id="sync-progress-container" style="display:none; width:200px; margin-top:40px; flex-direction:column; align-items:center; gap:10px;">
+      <div style="width:100%; height:6px; background:var(--border); border-radius:10px; overflow:hidden; position:relative;">
+        <div id="sync-progress-bar" style="width:0%; height:100%; background:var(--theme); border-radius:10px; transition:width 0.4s cubic-bezier(0.1, 1, 0.1, 1);"></div>
+      </div>
+      <div id="sync-progress-text" style="font-size:11px; font-weight:800; color:var(--sub); text-align:center; text-transform:uppercase; letter-spacing:1px;">Preparing Workspace...</div>
+    </div>
   </div>
 
   <!-- THEME SYNC ENGINE (Instant Application) -->
@@ -5267,8 +5274,6 @@
     }
 
     window.onload = async () => {
-      await loadData();
-
       // Analytics ping & unique device id tracking
       let deviceId = localStorage.getItem('MySkedul_deviceId');
       if (!deviceId) {
@@ -5280,6 +5285,35 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ deviceId })
       }).catch(e => console.warn("Analytics ping error:", e));
+
+      let hasOnboarded = localStorage.getItem('MySkedul_onboarded');
+      
+      if (!hasOnboarded) {
+        const syncCont = document.getElementById('sync-progress-container');
+        const syncBar = document.getElementById('sync-progress-bar');
+        const syncText = document.getElementById('sync-progress-text');
+        if (syncCont) syncCont.style.display = 'flex';
+
+        const updateSync = (pct, text) => {
+          return new Promise(resolve => {
+            setTimeout(() => {
+              if (syncBar) syncBar.style.width = pct + '%';
+              if (syncText) syncText.textContent = text;
+              resolve();
+            }, 550);
+          });
+        };
+
+        await updateSync(20, "Initializing database...");
+        await loadData();
+        await updateSync(45, "Caching offline workspace...");
+        await updateSync(70, "Linking system plugins...");
+        await updateSync(90, "Configuring app layout...");
+        await updateSync(100, "Workspace ready!");
+        await new Promise(r => setTimeout(r, 300));
+      } else {
+        await loadData();
+      }
 
       // INITIAL SINGLE-PASS RENDER (Consolidated to prevent double-refresh)
       n = new Date(); // Hard reset to today
@@ -5361,7 +5395,6 @@
           }, isHighEnd ? 1200 : 800);
         }, 600);
 
-        let hasOnboarded = localStorage.getItem('MySkedul_onboarded');
         if (!hasOnboarded) openModal('m-onboarding');
       }, 0);
 
