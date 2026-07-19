@@ -5603,19 +5603,19 @@
           if (title) title.style.animation = 'none';
           if (subtitle) subtitle.style.animation = 'none';
 
-          // Deep Mist Atmospheric Dissolve & Unified Logo Motion
+          // Deep Mist Atmospheric Dissolve
           const isHighEnd = document.body.classList.contains('ultra-mode');
           const duration = isHighEnd ? '1.2s' : '0.8s';
-          const easing = 'cubic-bezier(0.2, 1, 0.2, 1)';
 
+          // Elastic Logo Pulse
           if (logo) {
-            logo.style.transition = `transform ${duration} ${easing}`;
-            logo.style.transform = 'scale(1.08) rotate(-2.5deg)';
+            logo.style.transition = `transform ${duration} cubic-bezier(0.2, 1, 0.2, 1)`;
+            logo.style.transform = 'scale(1.12) rotate(-4deg)';
           }
 
-          loader.style.transition = `all ${duration} ${easing}`;
+          loader.style.transition = `all ${duration} cubic-bezier(0.2, 1, 0.2, 1)`;
           loader.style.opacity = '0';
-          loader.style.transform = 'scale(1.03)';
+          loader.style.transform = 'scale(1.1)';
 
           // Staggered Content Materialization
           const activePage = document.querySelector('.page.active');
