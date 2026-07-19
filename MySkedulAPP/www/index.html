@@ -415,8 +415,7 @@
 
     .mo.center {
       align-items: center;
-      padding: 10px 20px 10vh;
-      /* Lifting the hit-box up for keyboard safety */
+      padding: 10px 20px;
     }
 
     .mo.center .ms {
@@ -425,8 +424,10 @@
       background: var(--card-glass);
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
-      transform: scale(0.88) translate3d(0, 24px, 0);
+      transform: scale(0.85) translate3d(0, 30px, 0);
       opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+      will-change: transform, opacity;
     }
 
     .mo.active.center .ms {
@@ -441,16 +442,18 @@
     }
 
     .mo.popup .ms {
-      width: min(300px, 90vw);
+      width: min(340px, 92vw);
       position: absolute;
       top: calc(12px + env(safe-area-inset-top));
       right: 16px;
       border-radius: 28px;
-      transform: scale(0.85) translate3d(0, -16px, 0);
+      transform: scale(0.8) translate3d(0, -20px, 0);
       transform-origin: top right;
       margin: 0;
       opacity: 0;
       padding-bottom: 0;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+      will-change: transform, opacity;
     }
 
     .mo.active.popup .ms {
@@ -579,17 +582,14 @@
     }
     
     /* Prevent layout shift when keyboard appears */
-    .bnav.keyboard-push {
-      transform: translateY(0) !important;
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-                  opacity 0.25s ease,
-                  bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    }
-    
-    .bnav.keyboard-hidden {
-      transform: translateY(100%) !important;
+    .bnav.keyboard-push,
+    .bnav.keyboard-hidden,
+    body.keyboard-visible .bnav {
+      transform: translateY(120%) !important;
       opacity: 0 !important;
       pointer-events: none !important;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.2s ease !important;
     }
     
     /* Smooth input focus transitions */
@@ -4514,6 +4514,40 @@
             <div class="qa-sub" id="qa-exam-sub" style="font-size:11px;">Mark Today</div>
           </div>
         </div>
+
+        <!-- Import Timetable via Cloud ID -->
+        <div class="qa-item"
+          style="padding:12px 14px; gap:12px; flex-direction:column; align-items:stretch; cursor:default; background:rgba(0,217,126,0.03); border-radius:18px; border:1px dashed rgba(0,217,126,0.2); margin-top:4px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="qa-icon" style="background:rgba(0,217,126,.12);width:38px;height:38px;"><i
+                data-lucide="cloud-download" style="width:18px;height:18px;color:var(--green);"></i></div>
+            <div class="qa-title" style="font-size:14px; font-weight:800; letter-spacing:-0.5px;">Cloud Import via ID</div>
+          </div>
+          <div
+            style="display:flex; background:var(--bg); border:1px solid var(--border); border-radius:18px; padding:4px; height:50px; align-items:center; margin-top:4px; overflow:hidden;">
+            <input id="quick-import-id" type="text" placeholder="SCH-xxxxxx"
+              oninput="this.value = this.value.toUpperCase()"
+              style="flex:1; min-width:0; border:none; background:transparent; padding:0 4px 0 10px; font-size:12px; font-weight:800; text-align:left; color:var(--text); outline:none; text-transform:uppercase;">
+            <button class="ib" onclick="startQRScanner('quick-import-id')"
+              style="width:30px; height:30px; margin-right:4px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.04); border-radius:8px; flex-shrink:0;">
+              <i data-lucide="scan-line" style="width:14px; height:14px; color:var(--theme); stroke-width:2.5;"></i>
+            </button>
+            <button class="btn-p"
+              style="flex-shrink:0; margin:0; height:38px; width:75px; border-radius:12px; font-size:11px; font-weight:900; background:var(--theme); box-shadow:none; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center;"
+              onclick="importIDDirect(document.getElementById('quick-import-id').value)">IMPORT</button>
+          </div>
+        </div>
+
+        <!-- Import Timetable via Files -->
+        <div class="qa-item" style="padding:12px 14px; gap:12px;"
+          onclick="closeModal('m-quick-actions');document.getElementById('import-input').click();">
+          <div class="qa-icon" style="background:rgba(255,159,10,.12);width:38px;height:38px;"><i
+              data-lucide="file-down" style="width:18px;height:18px;color:#FF9F0A;"></i></div>
+          <div>
+            <div class="qa-title" style="font-size:14px;">Import Timetable File</div>
+            <div class="qa-sub" style="font-size:11px;">From local backup</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -4958,6 +4992,7 @@
       testRemind: true,
       examRemind: true,
       taskRemind: true,
+      exactAlarms: true,
       leadMins: 15
     };
 
@@ -5516,24 +5551,24 @@
 
         loader.style.pointerEvents = 'none'; // Instant-Touch Demand Met
 
-        // Wait 600ms before visual fade to prevent "glitchy" flash
+        // Snack-sized delays for premium fast responsiveness
         setTimeout(() => {
-          // Elastic Logo Pulse
+          // Elastic Logo Pulse (Little tilted at final)
           if (logo) {
-            logo.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            logo.style.transform = 'scale(1.2) rotate(-3deg)';
+            logo.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            logo.style.transform = 'scale(1.15) rotate(-5deg)';
           }
 
-          // Deep Mist Atmospheric Dissolve
+          // Snappy Atmospheric Dissolve
           const isHighEnd = document.body.classList.contains('ultra-mode');
-          const duration = isHighEnd ? '1.2s' : '0.8s';
+          const duration = isHighEnd ? '0.5s' : '0.35s';
 
-          loader.style.transition = `all ${duration} cubic-bezier(0.2, 1, 0.2, 1)`;
+          loader.style.transition = `all ${duration} cubic-bezier(0.25, 1, 0.5, 1)`;
           loader.style.opacity = '0';
-          loader.style.transform = 'scale(1.1)';
+          loader.style.transform = 'scale(1.05)';
 
           if (logo) {
-            logo.style.transition = `opacity 0.4s ease-out`;
+            logo.style.transition = `opacity 0.25s ease-out`;
             logo.style.opacity = '0';
           }
 
@@ -5541,9 +5576,9 @@
           const activePage = document.querySelector('.page.active');
           if (activePage) {
             activePage.style.opacity = '0';
-            activePage.style.transform = 'scale(0.96)';
+            activePage.style.transform = 'scale(0.98)';
             void activePage.offsetHeight;
-            activePage.style.transition = `opacity ${isHighEnd ? '1.4s' : '0.8s'} cubic-bezier(0.2, 1, 0.2, 1), transform ${isHighEnd ? '1.4s' : '0.8s'} cubic-bezier(0.2, 1, 0.2, 1)`;
+            activePage.style.transition = `opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)`;
             activePage.style.opacity = '1';
             activePage.style.transform = 'scale(1)';
           }
@@ -5551,13 +5586,11 @@
           setTimeout(() => {
             loader.remove();
             document.body.classList.remove('loading');
-            // Mark app as ready after loading screen is fully gone
-            // This prevents keyboard glitches during launch
             requestAnimationFrame(() => {
               markAppReady();
             });
-          }, isHighEnd ? 1200 : 800);
-        }, 600);
+          }, isHighEnd ? 500 : 350);
+        }, 150); // Snappy start
 
         if (!hasOnboarded) openModal('m-onboarding');
       }, 0);
@@ -7256,7 +7289,7 @@
                 id: getUniqueId(time.getTime(), 1),
                 title: "Exam Day Today! 📝",
                 body: `Exam: ${entry.subject || 'Upcoming exam'}. Check timings in the app.`,
-                schedule: { at: time, allowWhileIdle: true },
+                schedule: { at: time, allowWhileIdle: true, exact: notifSettings.exactAlarms },
                 smallIcon: 'ic_launcher'
               });
             }
@@ -7277,7 +7310,7 @@
                   id: getUniqueId(remindTime.getTime(), 2),
                   title: `${sub.name} starts in ${notifSettings.leadMins} min`,
                   body: `Starts at ${c.start} in Room ${c.room || 'N/A'}.`,
-                  schedule: { at: remindTime, allowWhileIdle: true },
+                  schedule: { at: remindTime, allowWhileIdle: true, exact: notifSettings.exactAlarms },
                   smallIcon: 'ic_launcher'
                 });
               }
@@ -7299,7 +7332,7 @@
                 id: getUniqueId(rt.getTime(), 3),
                 title: "Upcoming Class Test 📖",
                 body: `You have a test in ${sub ? sub.name : "tomorrow's class"}.`,
-                schedule: { at: rt, allowWhileIdle: true },
+                schedule: { at: rt, allowWhileIdle: true, exact: notifSettings.exactAlarms },
                 smallIcon: 'ic_launcher'
               });
             }
@@ -7319,7 +7352,7 @@
                 id: getUniqueId(dl.getTime(), 4),
                 title: "Task Due Today! ✅",
                 body: `Assignment due: ${t.name}`,
-                schedule: { at: dl, allowWhileIdle: true },
+                schedule: { at: dl, allowWhileIdle: true, exact: notifSettings.exactAlarms },
                 smallIcon: 'ic_launcher'
               });
             }
@@ -7349,6 +7382,7 @@
       setTog('ns-test', notifSettings.testRemind);
       setTog('ns-exam', notifSettings.examRemind);
       setTog('ns-task', notifSettings.taskRemind);
+      setTog('ns-exact', notifSettings.exactAlarms !== false); // Default to true if not set
       const minsInput = document.getElementById('ns-mins');
       if (minsInput) minsInput.value = notifSettings.leadMins || 15;
       openModal('m-notif-settings');
@@ -7361,6 +7395,7 @@
       notifSettings.testRemind = document.getElementById('ns-test').classList.contains('on');
       notifSettings.examRemind = document.getElementById('ns-exam').classList.contains('on');
       notifSettings.taskRemind = document.getElementById('ns-task').classList.contains('on');
+      notifSettings.exactAlarms = document.getElementById('ns-exact').classList.contains('on');
       notifSettings.leadMins = parseInt(document.getElementById('ns-mins').value) || 15;
       saveData();
       closeModal('m-notif-settings');
@@ -7386,12 +7421,12 @@
             id: 999,
             title: "MySkedul Test 🚀",
             body: "The notification system is alive! You'll receive class reminders automatically.",
-            schedule: { at: new Date(Date.now() + 2000) }, // 2s later
+            schedule: { at: new Date() }, // Instant trigger
             smallIcon: 'ic_launcher'
           }]
         });
         haptic('success');
-        showToast("Setting up test... wait 2s");
+        showToast("Test notification sent instantly!");
       } catch (e) { showToast("Test failed: " + e.message); }
     }
 
@@ -8779,8 +8814,7 @@
                 // Adjust bottom navigation
                 const bnav = document.querySelector('.bnav');
                 if (bnav) {
-                  bnav.classList.add('keyboard-push');
-                  bnav.classList.remove('keyboard-hidden');
+                  bnav.classList.add('keyboard-hidden');
                 }
               }
             } else {
@@ -8791,7 +8825,7 @@
                 
                 const bnav = document.querySelector('.bnav');
                 if (bnav) {
-                  bnav.classList.remove('keyboard-push');
+                  bnav.classList.remove('keyboard-hidden');
                 }
               }
             }
@@ -8869,7 +8903,7 @@
               // Animate bottom nav out of the way
               const bnav = document.querySelector('.bnav');
               if (bnav) {
-                bnav.classList.add('keyboard-push');
+                bnav.classList.add('keyboard-hidden');
               }
             });
             
@@ -8880,7 +8914,7 @@
               
               const bnav = document.querySelector('.bnav');
               if (bnav) {
-                bnav.classList.remove('keyboard-push');
+                bnav.classList.remove('keyboard-hidden');
               }
             });
             
@@ -9038,6 +9072,12 @@
             <i data-lucide="check-square" style="color:var(--theme);"></i>
             <span class="mi-lbl" style="font-weight:700;">Task Reminders</span>
             <div class="toggle" id="ns-task" onclick="event.stopPropagation(); this.classList.toggle('on')"></div>
+          </div>
+          <div class="mi" style="margin:0; border:1px solid var(--border); border-radius:20px;"
+            onclick="this.querySelector('.toggle').classList.toggle('on')">
+            <i data-lucide="wifi-off" style="color:var(--red);"></i>
+            <span class="mi-lbl" style="font-weight:700;">Offline / Exact Alarms</span>
+            <div class="toggle" id="ns-exact" onclick="event.stopPropagation(); this.classList.toggle('on')"></div>
           </div>
         </div>
 

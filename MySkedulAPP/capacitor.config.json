@@ -8,8 +8,8 @@
   },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 1500,
-      "launchAutoHide": true,
+      "launchShowDuration": 0,
+      "launchAutoHide": false,
       "backgroundColor": "#6C63FF",
       "androidSplashResourceName": "splash",
       "androidScaleType": "CENTER_CROP",
@@ -23,6 +23,7 @@
       "useDialog": false
     },
     "LocalNotifications": {
+      "useExactAlarm": true,
       "smallIcon": "ic_stat_icon",
       "iconColor": "#6C63FF",
       "sound": "beep.wav"
