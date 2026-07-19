@@ -15,3 +15,6 @@ local.properties
 *.part
 *.lck
 *.log
+
+# Firebase configuration
+google-services.json
