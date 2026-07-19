@@ -5593,29 +5593,29 @@
 
         loader.style.pointerEvents = 'none'; // Instant-Touch Demand Met
 
-        // Stop active pulse animations immediately to allow smooth, unified transition
-        const logoWrap = loader.querySelector('#loader-logo-wrap');
-        const title = loader.querySelector('#loader-title');
-        const subtitle = loader.querySelector('#loader-subtitle');
-        if (logoWrap) logoWrap.style.animation = 'none';
-        if (title) title.style.animation = 'none';
-        if (subtitle) subtitle.style.animation = 'none';
-
-        // Play the Elastic Logo Pulse immediately
-        if (logo) {
-          logo.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-          logo.style.transform = 'scale(1.2) rotate(-3deg)';
-        }
-
-        // Wait 500ms for the tilt/zoom animation to start, then fade out the loader and materialize the page
+        // Wait 600ms before visual fade to prevent "glitchy" flash
         setTimeout(() => {
+          // Stop active pulse animations to allow smooth, unified transition
+          const logoWrap = loader.querySelector('#loader-logo-wrap');
+          const title = loader.querySelector('#loader-title');
+          const subtitle = loader.querySelector('#loader-subtitle');
+          if (logoWrap) logoWrap.style.animation = 'none';
+          if (title) title.style.animation = 'none';
+          if (subtitle) subtitle.style.animation = 'none';
+
+          // Elastic Logo Pulse
+          if (logo) {
+            logo.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            logo.style.transform = 'scale(1.1) rotate(-3deg)';
+          }
+
           // Deep Mist Atmospheric Dissolve
           const isHighEnd = document.body.classList.contains('ultra-mode');
           const duration = isHighEnd ? '1.2s' : '0.8s';
 
           loader.style.transition = `all ${duration} cubic-bezier(0.2, 1, 0.2, 1)`;
           loader.style.opacity = '0';
-          loader.style.transform = 'scale(1.1)';
+          loader.style.transform = 'scale(1.03)';
 
           // Staggered Content Materialization
           const activePage = document.querySelector('.page.active');
@@ -5637,7 +5637,7 @@
               markAppReady();
             });
           }, isHighEnd ? 1200 : 800);
-        }, 500);
+        }, 600);
 
         if (!hasOnboarded) openModal('m-onboarding');
       }, 0);
