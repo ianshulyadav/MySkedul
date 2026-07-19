@@ -150,24 +150,19 @@ function showUpdatePopup(config, autoStart = false) {
   const dismissBtnHtml = isForce ? '' :
     `<button class="btn-s" style="flex:1; background:var(--border); color:var(--text); border-radius:20px; font-weight:800; padding:16px; border:none;" onclick="closeUpdateModal('${modalId}', '${config.version}')">Dismiss</button>`;
 
-  let buttonsHtml = '';
-  if (config.apk && config.apk.low && config.apk.high) {
-    buttonsHtml = `
-      <div id="update-actions" style="display:flex; flex-direction:column; gap:12px; margin-top:24px; width:100%;">
-        <button class="btn-p" style="margin:0; border-radius:15px; font-weight:800; padding:16px; background:var(--theme); color:#fff; border:none;" onclick="startInAppDownload('${config.apk.high}', 'Full')">Download Update</button>
-        <button class="btn-p" style="margin:0; border-radius:15px; font-weight:800; padding:12px; background:rgba(108,99,255,0.05); color:var(--theme); border:1.5px solid var(--theme); font-size:13px;" onclick="startInAppDownload('${config.apk.low}', 'Lite')">Download Lite (Older Phones)</button>
-        <div style="display:flex; gap:12px; margin-top:4px;">${dismissBtnHtml}</div>
-      </div>
-    `;
-  } else {
-    const dUrl = config.apk ? config.apk.high : (config.downloadUrl || '');
-    buttonsHtml = `
-      <div id="update-actions" style="display:flex; gap:12px; margin-top:24px; width:100%;">
-        ${dismissBtnHtml}
-        <button class="btn-p" style="flex:2; margin:0; background:var(--theme); border-radius:18px; font-weight:800; padding:16px; color:#fff; border:none;" onclick="startInAppDownload('${dUrl}')">Download Now</button>
-      </div>
-    `;
-  }
+  // Dynamically resolve release APK build links
+  const versionTag = config.version.startsWith('v') ? config.version : 'v' + config.version;
+  const cleanVer = config.version.replace(/^v/, '');
+  const apkHigh = (config.apk && config.apk.high) ? config.apk.high : `https://github.com/ianshulyadav/MySkedul/releases/download/${versionTag}/MySkedul-v${cleanVer}-high.apk`;
+  const apkLow = (config.apk && config.apk.low) ? config.apk.low : `https://github.com/ianshulyadav/MySkedul/releases/download/${versionTag}/MySkedul-v${cleanVer}-low.apk`;
+
+  let buttonsHtml = `
+    <div id="update-actions" style="display:flex; flex-direction:column; gap:12px; margin-top:24px; width:100%;">
+      <button class="btn-p" style="margin:0; border-radius:15px; font-weight:800; padding:16px; background:var(--theme); color:#fff; border:none;" onclick="startInAppDownload('${apkHigh}', 'Full')">Download Update</button>
+      <button class="btn-p" style="margin:0; border-radius:15px; font-weight:800; padding:12px; background:rgba(108,99,255,0.05); color:var(--theme); border:1.5px solid var(--theme); font-size:13px;" onclick="startInAppDownload('${apkLow}', 'Lite')">Download Lite (Older Phones)</button>
+      <div style="display:flex; gap:12px; margin-top:4px;">${dismissBtnHtml}</div>
+    </div>
+  `;
 
   modal.innerHTML = `
     <div class="ms" style="padding:32px 24px; text-align:center; border-radius:32px; box-shadow:0 30px 90px rgba(0,0,0,0.2); max-width: 380px; background:var(--bg);">
@@ -191,7 +186,7 @@ function showUpdatePopup(config, autoStart = false) {
 
   if (autoStart) {
     setTimeout(() => {
-      const url = (isLowEndDevice() && config.apk?.low) ? config.apk.low : (config.apk?.high || config.downloadUrl);
+      const url = isLowEndDevice() ? apkLow : apkHigh;
       if (url) startInAppDownload(url);
     }, 400);
   }
