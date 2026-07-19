@@ -32,10 +32,19 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("release.keystore")
-            storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD")
-            keyAlias System.getenv("RELEASE_KEY_ALIAS")
-            keyPassword System.getenv("RELEASE_KEY_PASSWORD")
+            def localKeystore = file("release.keystore")
+            def customKeystore = file("C:/Users/offic/Documents/myskedulkey/my-releasekey.jks")
+            if (System.getenv("RELEASE_KEYSTORE_PASSWORD") != null) {
+                storeFile localKeystore
+                storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword System.getenv("RELEASE_KEY_PASSWORD")
+            } else if (customKeystore.exists()) {
+                storeFile customKeystore
+                storePassword "MySkedul@Release2026"
+                keyAlias "my-release-key"
+                keyPassword "MySkedul@Release2026"
+            }
         }
     }
 
@@ -49,7 +58,7 @@ android {
             minifyEnabled true
             shrinkResources true
             matchingFallbacks = ['release']
-            if (System.getenv("RELEASE_KEYSTORE_PASSWORD") != null) {
+            if (System.getenv("RELEASE_KEYSTORE_PASSWORD") != null || file("C:/Users/offic/Documents/myskedulkey/my-releasekey.jks").exists()) {
                 signingConfig signingConfigs.release
             } else {
                 signingConfig signingConfigs.debug
@@ -59,7 +68,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            if (System.getenv("RELEASE_KEYSTORE_PASSWORD") != null) {
+            if (System.getenv("RELEASE_KEYSTORE_PASSWORD") != null || file("C:/Users/offic/Documents/myskedulkey/my-releasekey.jks").exists()) {
                 signingConfig signingConfigs.release
             } else {
                 signingConfig signingConfigs.debug
