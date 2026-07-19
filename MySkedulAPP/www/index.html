@@ -1835,13 +1835,12 @@
       align-items: center;
       box-shadow: var(--sh);
       cursor: pointer;
-      transition: transform .2s, background .2s;
       position: relative;
       overflow: hidden;
       border: 1px solid rgba(0, 0, 0, 0.04);
       background-clip: padding-box;
-      will-change: transform, opacity;
-      transition: transform .3s cubic-bezier(0.175, 0.885, 0.32, 1.15), background .2s;
+      will-change: transform;
+      transition: transform 0.2s var(--ease), background-color 0.2s var(--ease), border-color 0.2s var(--ease);
       contain: content;
       content-visibility: auto;
       contain-intrinsic-size: 100px 120px;
@@ -2133,8 +2132,7 @@
       min-width: 66px;
       background: var(--card);
       border: 1px solid var(--border);
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.15);
-      will-change: transform;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease;
       flex-shrink: 0;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
       scroll-snap-align: center;
@@ -6318,8 +6316,26 @@
 
     function openInstitution(name) {
       haptic('light');
-      syncGroupsManifest();
       _showGroupsInnerView(name);
+      // Run background sync without causing a double-render glitch
+      if (groupsManifest.length === 0) {
+        syncGroupsManifest();
+      } else {
+        fetch(`${workerURL}/groups`, { cache: 'no-store' })
+          .then(res => { if (res.ok) return res.json(); })
+          .then(freshManifest => {
+            if (Array.isArray(freshManifest) && freshManifest.length > 0) {
+              const oldStr = JSON.stringify(groupsManifest);
+              const newStr = JSON.stringify(freshManifest);
+              if (oldStr !== newStr) {
+                groupsManifest = freshManifest;
+                localStorage.setItem('MySkedul_groups_manifest', JSON.stringify(groupsManifest));
+                renderGroups();
+              }
+            }
+          })
+          .catch(() => {});
+      }
     }
 
     function backToInstitutions() {
