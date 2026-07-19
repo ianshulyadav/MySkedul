@@ -5603,17 +5603,17 @@
           if (title) title.style.animation = 'none';
           if (subtitle) subtitle.style.animation = 'none';
 
-          // Elastic Logo Pulse
-          if (logo) {
-            logo.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            logo.style.transform = 'scale(1.1) rotate(-3deg)';
-          }
-
-          // Deep Mist Atmospheric Dissolve
+          // Deep Mist Atmospheric Dissolve & Unified Logo Motion
           const isHighEnd = document.body.classList.contains('ultra-mode');
           const duration = isHighEnd ? '1.2s' : '0.8s';
+          const easing = 'cubic-bezier(0.2, 1, 0.2, 1)';
 
-          loader.style.transition = `all ${duration} cubic-bezier(0.2, 1, 0.2, 1)`;
+          if (logo) {
+            logo.style.transition = `transform ${duration} ${easing}`;
+            logo.style.transform = 'scale(1.08) rotate(-2.5deg)';
+          }
+
+          loader.style.transition = `all ${duration} ${easing}`;
           loader.style.opacity = '0';
           loader.style.transform = 'scale(1.03)';
 
