@@ -5589,7 +5589,7 @@
       setTimeout(() => {
         const loader = document.getElementById('loading-screen');
         if (!loader) return;
-        const logo = loader.querySelector('#loader-logo-wrap') || loader.querySelector('img, i, .logo');
+        const logo = loader.querySelector('img, i, .logo');
 
         loader.style.pointerEvents = 'none'; // Instant-Touch Demand Met
 
@@ -5597,7 +5597,6 @@
         setTimeout(() => {
           // Elastic Logo Pulse
           if (logo) {
-            logo.style.animation = 'none'; // Stop active pulse animation to allow transform
             logo.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
             logo.style.transform = 'scale(1.2) rotate(-3deg)';
           }
