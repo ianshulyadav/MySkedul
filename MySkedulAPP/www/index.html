@@ -415,8 +415,7 @@
 
     .mo.center {
       align-items: center;
-      padding: 10px 20px 10vh;
-      /* Lifting the hit-box up for keyboard safety */
+      padding: 20px;
     }
 
     .mo.center .ms {
@@ -600,8 +599,13 @@
     }
     
     /* Modal keyboard offset - lift modals when keyboard visible */
+    body.keyboard-visible .mo {
+      bottom: var(--keyboard-height, 0px) !important;
+      height: calc(100% - var(--keyboard-height, 0px)) !important;
+    }
+    
     body.keyboard-visible .mo.center .ms {
-      transform: scale(1) translate3d(0, -10vh, 0) !important;
+      transform: scale(1) translate3d(0, 0, 0) !important;
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
                   opacity 0.25s ease;
     }
@@ -4282,6 +4286,10 @@
         <i data-lucide="bell" style="color:var(--sub);"></i><span class="mi-lbl">Notifications</span>
         <i data-lucide="chevron-right" style="color:var(--sub)"></i>
       </div>
+      <div class="mi" onclick="toggleUpdateNotifications(this)">
+        <i data-lucide="refresh-cw" style="color:var(--sub);"></i><span class="mi-lbl">Update Notifications</span>
+        <div class="toggle" id="update-notif-tog"></div>
+      </div>
       <div class="mi" onclick="openFeedbackModal()">
         <i data-lucide="message-square" style="color:var(--sub);"></i><span class="mi-lbl">Send Feedback</span>
         <i data-lucide="chevron-right" style="color:var(--sub)"></i>
@@ -4512,6 +4520,56 @@
           <div>
             <div class="qa-title" id="qa-exam-title" style="font-size:14px;">Exam Day</div>
             <div class="qa-sub" id="qa-exam-sub" style="font-size:11px;">Mark Today</div>
+          </div>
+        </div>
+        
+        <!-- Cloud Import via ID -->
+        <div class="qa-item"
+          style="padding:16px; gap:14px; flex-direction:column; align-items:stretch; cursor:default; background:rgba(0,217,126,0.03); border-radius:20px; border:1px dashed rgba(0,217,126,0.2); margin:12px 0 8px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="qa-icon" style="background:rgba(0,217,126,.12);width:40px;height:40px;"><i
+                data-lucide="cloud-download" style="width:20px;height:20px;color:var(--green);"></i></div>
+            <div class="qa-title" style="font-size:15px; font-weight:800; letter-spacing:-0.5px;">Cloud Import via ID</div>
+          </div>
+          <div
+            style="display:flex; background:var(--bg); border:1px solid var(--border); border-radius:22px; padding:6px; height:60px; align-items:center; margin-top:4px; overflow:hidden;">
+            <input id="qa-direct-import-id" type="text" placeholder="SCH-xxxxxx"
+              oninput="this.value = this.value.toUpperCase()"
+              style="flex:1; min-width:0; border:none; background:transparent; padding:0 4px 0 10px; font-size:12.5px; font-weight:800; text-align:left; color:var(--text); outline:none; text-transform:uppercase;">
+            <button class="ib" onclick="startQRScanner('qa-direct-import-id')"
+              style="width:36px; height:36px; margin-right:4px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.04); border-radius:10px; flex-shrink:0;">
+              <i data-lucide="scan-line" style="width:16px; height:16px; color:var(--theme); stroke-width:2.5;"></i>
+            </button>
+            <button class="btn-p"
+              style="flex-shrink:0; margin:0; height:48px; width:85px; border-radius:16px; font-size:12px; font-weight:900; background:var(--theme); box-shadow:none; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center;"
+              onclick="importIDDirect(document.getElementById('qa-direct-import-id').value)">IMPORT</button>
+          </div>
+        </div>
+
+        <!-- File Options Grid -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px;">
+          <!-- Import File -->
+          <div class="qa-item" style="padding: 12px 8px; gap: 6px; flex-direction: column; align-items: center; text-align: center; margin-bottom: 0;"
+            onclick="closeModal('m-quick-actions');document.getElementById('import-input').click();">
+            <div class="qa-icon" style="background:rgba(255,159,10,.12); width:32px; height:32px; margin:0;"><i
+                data-lucide="file-down" style="width:16px; height:16px; color:#FF9F0A;"></i></div>
+            <div class="qa-title" style="font-size:12px; font-weight:800; letter-spacing:-0.2px;">Import File</div>
+          </div>
+          
+          <!-- Backup File -->
+          <div class="qa-item" style="padding: 12px 8px; gap: 6px; flex-direction: column; align-items: center; text-align: center; margin-bottom: 0;"
+            onclick="closeModal('m-quick-actions');backupToFile();">
+            <div class="qa-icon" style="background:rgba(0,217,126,.12); width:32px; height:32px; margin:0;"><i
+                data-lucide="download" style="width:16px; height:16px; color:var(--green);"></i></div>
+            <div class="qa-title" style="font-size:12px; font-weight:800; letter-spacing:-0.2px;">Backup File</div>
+          </div>
+
+          <!-- Restore Backup -->
+          <div class="qa-item" style="padding: 12px 8px; gap: 6px; flex-direction: column; align-items: center; text-align: center; margin-bottom: 0;"
+            onclick="closeModal('m-quick-actions');document.getElementById('restore-input').click();">
+            <div class="qa-icon" style="background:rgba(244,67,54,.12); width:32px; height:32px; margin:0;"><i
+                data-lucide="rotate-ccw" style="width:16px; height:16px; color:var(--red);"></i></div>
+            <div class="qa-title" style="font-size:12px; font-weight:800; letter-spacing:-0.2px;">Restore File</div>
           </div>
         </div>
       </div>
@@ -5487,6 +5545,17 @@
       renderHome(); // Single render pass
       updateProfUI();
       applyTheme(localStorage.getItem('MySkedul_theme') || 'system');
+
+      // Initialize update notifications toggle state
+      const updateNotifTog = document.getElementById('update-notif-tog');
+      if (updateNotifTog) {
+        const enabled = localStorage.getItem('MySkedul_updateNotificationsEnabled') !== 'false';
+        if (enabled) {
+          updateNotifTog.classList.add('on');
+        } else {
+          updateNotifTog.classList.remove('on');
+        }
+      }
 
       // The native splash was configured not to auto-hide. Release it after the
       // first real render rather than holding it behind scripted intro delays.
@@ -6590,6 +6659,21 @@
       setTimeout(() => html.classList.remove('theme-transitioning'), 500);
     }
     function toggleSet(el, id) { el.querySelector('.toggle').classList.toggle('on'); }
+    function toggleUpdateNotifications(el) {
+      const toggle = el.querySelector('.toggle');
+      toggle.classList.toggle('on');
+      const isEnabled = toggle.classList.contains('on');
+      localStorage.setItem('MySkedul_updateNotificationsEnabled', isEnabled ? 'true' : 'false');
+      if (!isEnabled) {
+        if (typeof cancelUpdateNotifications === 'function') {
+          cancelUpdateNotifications();
+        }
+      } else {
+        if (typeof checkForUpdates === 'function') {
+          checkForUpdates();
+        }
+      }
+    }
 
     // UTILS — with History API back-gesture support
     // Each modal open pushes a history state so the Android back gesture
@@ -8783,6 +8867,7 @@
                 isKeyboardVisible = true;
                 keyboardHeight = windowHeight - viewportHeight;
                 document.body.classList.add('keyboard-visible');
+                document.documentElement.style.setProperty('--keyboard-height', keyboardHeight + 'px');
                 
                 // Adjust bottom navigation
                 const bnav = document.querySelector('.bnav');
@@ -8796,6 +8881,7 @@
               if (isKeyboardVisible) {
                 isKeyboardVisible = false;
                 document.body.classList.remove('keyboard-visible');
+                document.documentElement.style.setProperty('--keyboard-height', '0px');
                 
                 const bnav = document.querySelector('.bnav');
                 if (bnav) {
@@ -8826,6 +8912,7 @@
               // Keyboard opened
               isKeyboardVisible = true;
               document.body.classList.add('keyboard-visible');
+              document.documentElement.style.setProperty('--keyboard-height', heightDiff + 'px');
               
               const bnav = document.querySelector('.bnav');
               if (bnav) {
@@ -8836,6 +8923,7 @@
               // Keyboard closed
               isKeyboardVisible = false;
               document.body.classList.remove('keyboard-visible');
+              document.documentElement.style.setProperty('--keyboard-height', '0px');
               
               const bnav = document.querySelector('.bnav');
               if (bnav) {
@@ -8867,6 +8955,7 @@
               if (!stillHasFocus) {
                 isKeyboardVisible = false;
                 document.body.classList.remove('keyboard-visible');
+                document.documentElement.style.setProperty('--keyboard-height', '0px');
               }
             }, 150);
           }
@@ -8884,6 +8973,9 @@
             Capacitor.Plugins.Keyboard.addListener('keyboardWillShow', (info) => {
               document.body.classList.add('keyboard-visible');
               isKeyboardVisible = true;
+              if (info && info.keyboardHeight) {
+                document.documentElement.style.setProperty('--keyboard-height', info.keyboardHeight + 'px');
+              }
               
               // Animate bottom nav out of the way
               const bnav = document.querySelector('.bnav');
@@ -8897,6 +8989,7 @@
             Capacitor.Plugins.Keyboard.addListener('keyboardWillHide', () => {
               document.body.classList.remove('keyboard-visible');
               isKeyboardVisible = false;
+              document.documentElement.style.setProperty('--keyboard-height', '0px');
               
               const bnav = document.querySelector('.bnav');
               if (bnav) {

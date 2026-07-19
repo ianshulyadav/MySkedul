@@ -58,6 +58,9 @@ function isNewerVersion(local, remote) {
 }
 
 async function checkForUpdates() {
+  if (localStorage.getItem('MySkedul_updateNotificationsEnabled') === 'false') {
+    return;
+  }
   try {
     const response = await fetch(UPDATE_CONFIG_URL, { cache: 'no-store' });
     if (!response.ok) return;
