@@ -34,6 +34,14 @@ android {
         release {
             def localKeystore = file("release.keystore")
             def customKeystore = file("C:/Users/offic/Documents/myskedulkey/my-releasekey.jks")
+            
+            // Load local.properties for local machine build credentials
+            def propertiesFile = file("../local.properties")
+            def localProperties = new Properties()
+            if (propertiesFile.exists()) {
+                propertiesFile.withInputStream { localProperties.load(it) }
+            }
+
             if (System.getenv("RELEASE_KEYSTORE_DECODED") != null) {
                 storeFile localKeystore
                 storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD")
@@ -41,9 +49,9 @@ android {
                 keyPassword System.getenv("RELEASE_KEY_PASSWORD")
             } else if (customKeystore.exists()) {
                 storeFile customKeystore
-                storePassword "MySkedul@Release2026"
-                keyAlias "my-release-key"
-                keyPassword "MySkedul@Release2026"
+                storePassword localProperties.getProperty("release.keystore.password")
+                keyAlias localProperties.getProperty("release.key.alias")
+                keyPassword localProperties.getProperty("release.key.password")
             }
         }
     }
